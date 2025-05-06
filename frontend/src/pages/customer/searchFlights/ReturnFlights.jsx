@@ -137,6 +137,32 @@ const ReturnFlights = () => {
 					</div>
 				) : (
 					<div id="sampleFlights">
+						<div className="row border border-subtle rounded m-0 mb-3 py-2 align-items-center bg-white fw-bold">
+							<div className="col-12 col-md-1">
+								<p className="mb-0">Flight No</p>
+							</div>
+							<div className="col-12 col-md-1">
+								<p className="mb-0">Airline</p>
+							</div>
+							<div className="col-12 col-md-1">
+								<p className="mb-0">Aircraft</p>
+							</div>
+							<div className="col-12 col-md-3 d-flex justify-content-evenly align-items-center">
+								<div className="align-items-center">
+									<p className="mb-0">From</p>
+								</div>
+								<p className="mb-0"></p>
+								<div className="align-items-center">
+									<p className="mb-0">To</p>
+								</div>
+							</div>
+							<div className="col-12 col-md-2">
+								<p className="mb-0">Duration</p>
+							</div>
+							<div className="col-12 col-md-2">
+								<p className="mb-0">Price</p>
+							</div>
+						</div>
 						{returnFlightsList.map((flight, index) => (
 							<FlightCard
 								key={index}

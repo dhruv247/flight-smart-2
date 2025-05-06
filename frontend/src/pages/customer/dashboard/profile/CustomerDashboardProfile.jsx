@@ -48,7 +48,7 @@ const CustomerDashboardProfile = () => {
 					<p className="my-3">
 						<span className="fw-bold">Email:</span> {user.email}
 					</p>
-					<button className="btn btn-primary">Change Password</button>
+					{/* <button className="btn btn-primary">Change Password</button> */}
 				</div>
 				<div className="col-1 col-md-4"></div>
 			</div>

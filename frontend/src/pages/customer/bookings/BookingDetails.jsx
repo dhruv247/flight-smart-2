@@ -57,7 +57,7 @@ const BookingDetails = () => {
 				});
 				setPassengerDetails(initialPassengerDetails);
 			} catch (error) {
-				console.error('Error fetching booking details:', error);
+				// console.error('Error fetching booking details:', error);
 				setError(error.message);
 			} finally {
 				setLoading(false);

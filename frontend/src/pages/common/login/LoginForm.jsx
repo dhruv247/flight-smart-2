@@ -27,7 +27,7 @@ const LoginForm = () => {
 					}
 				);
 				showSuccessToast('Login successful!');
-				console.log('User Login Successful!', userRes.data);
+				// console.log('User Login Successful!', userRes.data);
 				if (userRes.data.userType === 'customer') {
 					navigate('/');
 				} else {
@@ -44,16 +44,16 @@ const LoginForm = () => {
 					}
 				);
 				showSuccessToast('Login successful!');
-				console.log('Airline Login Successful!', airlineRes.data);
+				// console.log('Airline Login Successful!', airlineRes.data);
 				navigate('/airline/dashboard');
 			}
 		} catch (error) {
 			if (error.response) {
 				showErrorToast('Error: ' + error.response.data.message);
-				console.log('Error Message', error.response.data.message);
+				// console.log('Error Message', error.response.data.message);
 			} else {
 				showErrorToast(error.message);
-				console.log('Error Message', error.message);
+				// console.log('Error Message', error.message);
 			}
 		}
 	};

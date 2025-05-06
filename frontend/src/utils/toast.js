@@ -59,29 +59,3 @@ export const showErrorToast = (message) => {
 		theme: 'light',
 	});
 };
-
-export const showInfoToast = (message) => {
-	toast.info(message, {
-		position: 'top-right',
-		autoClose: 2000,
-		hideProgressBar: false,
-		closeOnClick: true,
-		pauseOnHover: true,
-		draggable: true,
-		progress: undefined,
-		theme: 'light',
-	});
-};
-
-export const showWarningToast = (message) => {
-	toast.warning(message, {
-		position: 'top-right',
-		autoClose: 2000,
-		hideProgressBar: false,
-		closeOnClick: true,
-		pauseOnHover: true,
-		draggable: true,
-		progress: undefined,
-		theme: 'light',
-	});
-};

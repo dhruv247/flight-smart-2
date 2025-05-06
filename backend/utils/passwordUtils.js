@@ -3,7 +3,7 @@
  * @param {*} length - lenght of required password
  * @returns 
  */
-const generateRandomPassword = (length = 12) => {
+const generateRandomPassword = (length = 10) => {
 	const charset =
 		'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
 	let password = '';

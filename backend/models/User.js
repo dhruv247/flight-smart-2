@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema(
 			required: true,
 			default: 'customer',
 		},
-		profilePicture: { type: String, default: 'https://flight-smart-1-images.s3.amazonaws.com/1746185447757-defaultProfilePicture.jpeg' },
+		profilePicture: { type: String, default: 'https://flight-smart-1-images.s3.amazonaws.com/1746506363869-download%20%281%29.jpeg' },
 	},
 	{
 		timestamps: true,

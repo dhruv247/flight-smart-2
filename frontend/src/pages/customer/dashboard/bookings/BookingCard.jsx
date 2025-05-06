@@ -5,6 +5,14 @@ import axios from 'axios';
 import TicketsModal from './TicketsModal';
 import { showSuccessToast, showErrorToast } from '../../../../utils/toast';
 
+const formatHHMM = (time) => {
+	if (typeof time !== 'number' && typeof time !== 'string') return '';
+	const str = time.toString().padStart(4, '0');
+	const hours = str.slice(0, 2);
+	const minutes = str.slice(2, 4);
+	return `${hours}:${minutes}`;
+};
+
 const BookingCard = ({ booking }) => {
 	const bookingState = booking.confirmed ? 'Confirmed' : 'Cancelled';
 	const [tickets, setTickets] = useState([]);
@@ -153,7 +161,7 @@ const BookingCard = ({ booking }) => {
 							<div className="d-flex flex-column align-items-center">
 								<p>{departureFlight?.departurePlace}</p>
 								<p>{departureFlight?.departureDate}</p>
-								<p>{departureFlight?.departureTime}</p>
+								<p>{formatHHMM(departureFlight?.departureTime)}</p>
 							</div>
 							<div className="d-flex flex-column align-items-center">
 								<p>-</p>
@@ -161,14 +169,14 @@ const BookingCard = ({ booking }) => {
 							<div className="d-flex flex-column align-items-center">
 								<p>{departureFlight?.arrivalPlace}</p>
 								<p>{departureFlight?.arrivalDate}</p>
-								<p>{departureFlight?.arrivalTime}</p>
+								<p>{formatHHMM(departureFlight?.arrivalTime)}</p>
 							</div>
 						</div>
 						<div className="d-flex justify-content-between align-items-center">
 							<div className="d-flex flex-column align-items-center">
 								<p>{returnFlight?.departurePlace}</p>
 								<p>{returnFlight?.departureDate}</p>
-								<p>{returnFlight?.departureTime}</p>
+								<p>{formatHHMM(returnFlight?.departureTime)}</p>
 							</div>
 							<div className="d-flex flex-column align-items-center">
 								<p>-</p>
@@ -176,12 +184,12 @@ const BookingCard = ({ booking }) => {
 							<div className="d-flex flex-column align-items-center">
 								<p>{returnFlight?.arrivalPlace}</p>
 								<p>{returnFlight?.arrivalDate}</p>
-								<p>{returnFlight?.arrivalTime}</p>
+								<p>{formatHHMM(returnFlight?.arrivalTime)}</p>
 							</div>
 						</div>
 					</div>
 
-					<div className="col-4 col-md-2 d-flex justify-content-center align-items-center ">
+					<div className="col-6 col-md-2 d-flex justify-content-center align-items-center ">
 						<button
 							className="btn btn-success px-3 py-2"
 							onClick={() => setIsTicketsModalOpen(true)}
@@ -189,7 +197,7 @@ const BookingCard = ({ booking }) => {
 							Tickets
 						</button>
 					</div>
-					<div className="col-4 col-md-2 d-flex justify-content-center align-items-center">
+					<div className="col-6 col-md-2 d-flex justify-content-center align-items-center">
 						{bookingState === 'Confirmed' ? (
 							<button
 								className="btn btn-danger px-3 py-2"
@@ -206,6 +214,9 @@ const BookingCard = ({ booking }) => {
 					isOpen={isTicketsModalOpen}
 					onClose={() => setIsTicketsModalOpen(false)}
 					booking={booking}
+					tickets={tickets}
+					departureFlight={departureFlight}
+					returnFlight={returnFlight}
 				/>
 			</div>
 		);
@@ -223,7 +234,7 @@ const BookingCard = ({ booking }) => {
 					<div className="d-flex flex-column align-items-center">
 						<p>{departureFlight?.departurePlace}</p>
 						<p>{departureFlight?.departureDate}</p>
-						<p>{departureFlight?.departureTime}</p>
+						<p>{formatHHMM(departureFlight?.departureTime)}</p>
 					</div>
 					<div className="d-flex flex-column align-items-center">
 						<p>-</p>
@@ -231,11 +242,11 @@ const BookingCard = ({ booking }) => {
 					<div className="d-flex flex-column align-items-center">
 						<p>{departureFlight?.arrivalPlace}</p>
 						<p>{departureFlight?.arrivalDate}</p>
-						<p>{departureFlight?.arrivalTime}</p>
+						<p>{formatHHMM(departureFlight?.arrivalTime)}</p>
 					</div>
 				</div>
 
-				<div className="col-4 col-md-2 d-flex justify-content-center align-items-center ">
+				<div className="col-6 col-md-2 d-flex justify-content-center align-items-center ">
 					<button
 						className="btn btn-success px-3 py-2"
 						onClick={() => setIsTicketsModalOpen(true)}
@@ -243,7 +254,7 @@ const BookingCard = ({ booking }) => {
 						Tickets
 					</button>
 				</div>
-				<div className="col-4 col-md-2 d-flex justify-content-center align-items-center">
+				<div className="col-6 col-md-2 d-flex justify-content-center align-items-center">
 					{bookingState === 'Confirmed' ? (
 						<button
 							className="btn btn-danger px-3 py-2"
@@ -260,6 +271,9 @@ const BookingCard = ({ booking }) => {
 				isOpen={isTicketsModalOpen}
 				onClose={() => setIsTicketsModalOpen(false)}
 				booking={booking}
+				tickets={tickets}
+				departureFlight={departureFlight}
+				returnFlight={returnFlight}
 			/>
 		</div>
 	);

@@ -380,6 +380,12 @@ exports.search = async (req, res) => {
 			});
 		}
 
+		if (flightFrom === flightTo) {
+			return res.status(400).json({
+				message: 'Departure and arrival cities must be different',
+			});
+		}
+
 		// Validate passenger count
 		const passengerCount = parseInt(passengers);
 		if (isNaN(passengerCount) || passengerCount < 1 || passengerCount > 5) {
@@ -477,40 +483,16 @@ exports.search = async (req, res) => {
 				new Date(departureDate + 'T00:00:00')
 			); // Start with the departure date at midnight
 
-			// Add 4 hours to the latest arrival time
-			const minReturnTime = new Date(
-				latestDepartureArrival.getTime() + 4 * 60 * 60 * 1000
-			);
-
-			// Format the minimum return time for comparison
-			const minReturnDate = minReturnTime.toISOString().split('T')[0];
-			const minReturnHours = minReturnTime
-				.getHours()
-				.toString()
-				.padStart(2, '0');
-			const minReturnMinutes = minReturnTime
-				.getMinutes()
-				.toString()
-				.padStart(2, '0');
-			const minReturnTimeStr = `${minReturnHours}${minReturnMinutes}`;
+			// Calculate minimum return date (next day)
+			const minReturnDate = new Date(departureDate);
+			minReturnDate.setDate(minReturnDate.getDate() + 1);
+			const minReturnDateStr = minReturnDate.toISOString().split('T')[0];
 
 			const returnMatchStage = {
 				$match: {
 					departurePlace: flightTo,
 					arrivalPlace: flightFrom,
-					$or: [
-						// Case 1: Return date is after the minimum return date
-						{
-							departureDate: { $gt: minReturnDate },
-						},
-						// Case 2: Return date is the same as minimum return date, but time is after
-						{
-							$and: [
-								{ departureDate: minReturnDate },
-								{ departureTime: { $gte: minReturnTimeStr } },
-							],
-						},
-					],
+					departureDate: { $gte: minReturnDateStr },
 					$expr: {
 						$cond: {
 							if: { $eq: [travelClass, '1'] }, // Economy class
@@ -545,10 +527,9 @@ exports.search = async (req, res) => {
 
 			if (returnFlights.length === 0) {
 				return res.status(400).json({
-					message:
-						'No return flights available that are at least 4 hours after your departure flight lands',
+					message: 'No return flights available for the next day or later',
 					details: {
-						earliestReturnTime: minReturnTime.toISOString(),
+						earliestReturnDate: minReturnDateStr,
 					},
 				});
 			}
@@ -653,7 +634,11 @@ exports.getFlightById = async (req, res) => {
 exports.getAllFlightsForAirline = async (req, res) => {
 	try {
 		const airlineId = req.airline._id;
-		const flights = await Flight.find({ 'airlineDetails._id': airlineId });
+		const page = parseInt(req.query.page) || 0;
+		const size = parseInt(req.query.size) || 10;
+		const flights = await Flight.find({ 'airlineDetails._id': airlineId })
+			.skip(page * size)
+			.limit(size);
 		res.json({
 			message: 'Flights retrieved successfully',
 			flights,

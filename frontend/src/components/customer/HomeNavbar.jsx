@@ -58,7 +58,7 @@ const Navbar = () => {
 						</Link>
 					)}
 					{/* Admin Dashboard Button */}
-					{!isLoading && userDetails && userDetails.userType === 'admin' && (
+					{/* {!isLoading && userDetails && userDetails.userType === 'admin' && (
 						<Link to="/admin/dashboard">
 							<button
 								className="btn px-4 py-2"
@@ -70,7 +70,7 @@ const Navbar = () => {
 								Dashboard
 							</button>
 						</Link>
-					)}
+					)} */}
 					{/* Customer Dashboard Button */}
 					{!isLoading && userDetails && userDetails.userType === 'customer' && (
 						<Link to="/customer/dashboard">
@@ -86,7 +86,7 @@ const Navbar = () => {
 						</Link>
 					)}
 					{/* User Dashboard Button */}
-					{!isLoading && userDetails && userDetails.userType === 'airline' && (
+					{/* {!isLoading && userDetails && userDetails.userType === 'airline' && (
 						<Link to="/airline/dashboard">
 							<button
 								className="btn px-4 py-2"
@@ -98,7 +98,7 @@ const Navbar = () => {
 								Dashboard
 							</button>
 						</Link>
-					)}
+					)} */}
 				</div>
 			</div>
 		</nav>

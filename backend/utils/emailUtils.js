@@ -71,7 +71,7 @@ const sendAirlineDeletionEmail = async (airline) => {
 const sendBookingConfirmationEmail = async (user, booking) => {
 	const subject = 'Flight Smart - Booking Confirmation';
 
-	// Format date and time
+	// Format date and time (to look formal in email)
 	const formatDateTime = (date) => {
 		return new Date(date).toLocaleString('en-US', {
 			weekday: 'long',

@@ -14,6 +14,7 @@ const getUserDetails = async () => {
 					.then((response) => response.data)
 					.catch((error) => {
 						// console.log(`Error fetching ${endpoint}:`, error.message);
+
 						return null;
 					})
 			)
@@ -28,7 +29,8 @@ const getUserDetails = async () => {
 
 		throw new Error('Not logged in');
 	} catch (error) {
-		console.error('Error in getUserDetails:', error.message);
+		// console.error('Error in getUserDetails:', error.message);
+		// Propogate the error
 		throw error;
 	}
 };

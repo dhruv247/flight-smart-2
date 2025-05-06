@@ -16,7 +16,7 @@ const createToken = (airline) => {
 	return jwt.sign(
 		{ _id: airline._id, userType: airline.userType },
 		process.env.JWT_SECRET,
-		{ expiresIn: '1h' }
+		{ expiresIn: '2h' }
 	);
 };
 

@@ -23,6 +23,13 @@ exports.create = async (req, res) => {
     
 		const { name, image } = req.body;
 
+		if (!image) {
+			return res.status(400).json({
+				success: false,
+				message: 'Image is required',
+			});
+		}
+
 		// Create new city
 		const city = new City({ name, image });
 		await city.save();

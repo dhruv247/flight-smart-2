@@ -37,7 +37,7 @@ const DepartureFlights = () => {
 			const updatedFormData = {
 				...formData,
 				// If it's a round trip but no return date is set,
-				// default it to a date one day after departure
+				// default it to a date one day after departure (to prevent errors)
 				returnDate:
 					formData.tripType === 'roundTrip' && !formData.returnDate
 						? getDefaultReturnDate(formData.departureDate)
@@ -62,7 +62,7 @@ const DepartureFlights = () => {
 			setIsLoading(false);
 		} catch (error) {
 			setIsLoading(false);
-			console.error('Error searching flights:', error);
+			// console.error('Error searching flights:', error);
 
 			if (error.response) {
 				const { message, details } = error.response.data;
@@ -167,6 +167,32 @@ const DepartureFlights = () => {
 					</div>
 				) : (
 					<div id="sampleFlights">
+						<div className="row border border-subtle rounded m-0 mb-3 py-2 align-items-center bg-white fw-bold">
+							<div className="col-12 col-md-1">
+								<p className="mb-0">Flight No</p>
+							</div>
+							<div className="col-12 col-md-1">
+								<p className="mb-0">Airline</p>
+							</div>
+							<div className="col-12 col-md-1">
+								<p className="mb-0">Aircraft</p>
+							</div>
+							<div className="col-12 col-md-3 d-flex justify-content-evenly align-items-center">
+								<div className="align-items-center">
+									<p className="mb-0">From</p>
+								</div>
+								<p className="mb-0"></p>
+								<div className="align-items-center">
+									<p className="mb-0">To</p>
+								</div>
+							</div>
+							<div className="col-12 col-md-2">
+								<p className="mb-0">Duration</p>
+							</div>
+							<div className="col-12 col-md-2">
+								<p className="mb-0">Price</p>
+							</div>
+						</div>
 						{departureFlightsList.map((flight, index) => (
 							<FlightCard
 								key={index}

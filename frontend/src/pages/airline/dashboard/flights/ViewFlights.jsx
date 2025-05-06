@@ -4,12 +4,14 @@ import axios from 'axios';
 const ViewFlights = () => {
 	const [flights, setFlights] = useState([]);
 	const [isLoading, setIsLoading] = useState(true);
+	const [currentPage, setCurrentPage] = useState(0);
+	const pageSize = 10;
 
 	useEffect(() => {
 		const fetchFlights = async () => {
 			try {
 				const response = await axios.get(
-					'http://localhost:8000/api/flights/getAllFlightsForAirline',
+					`http://localhost:8000/api/flights/getAllFlightsForAirline?page=${currentPage}&size=${pageSize}`,
 					{ withCredentials: true }
 				);
 				setFlights(response.data.flights);
@@ -20,7 +22,7 @@ const ViewFlights = () => {
 			}
 		};
 		fetchFlights();
-	}, []);
+	}, [currentPage]);
 
 	const formatTime = (time) => {
 		const hours = Math.floor(time / 100);
@@ -121,6 +123,21 @@ const ViewFlights = () => {
 					</div>
 				</div>
 			))}
+			<div className="d-flex justify-content-center gap-3">
+				<button
+					onClick={() => setCurrentPage((prev) => prev - 1)}
+					disabled={currentPage === 0}
+				className="btn btn-primary"
+			>
+				Previous
+			</button>
+			<button
+				onClick={() => setCurrentPage((prev) => prev + 1)}
+				className="btn btn-primary"
+				>
+					Next
+				</button>
+			</div>
 		</div>
 	);
 };

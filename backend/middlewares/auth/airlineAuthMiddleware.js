@@ -3,9 +3,9 @@ const Airline = require('../../models/Airline');
 
 /**
  * Middleware to verify user type is airline
- * @param {*} req 
- * @param {*} res 
- * @param {*} next 
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
  * 1. Gets the token from the cookie
  * 2. Decodes the token using the JWT Secret
  * 3. Checks if userType is airline

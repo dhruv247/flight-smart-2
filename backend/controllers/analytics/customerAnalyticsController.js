@@ -64,9 +64,7 @@ exports.popularDestinations = async (req, res) => {
 				$project: {
 					_id: '$cityDetails._id',
 					name: '$cityDetails.name',
-					country: '$cityDetails.country',
 					image: '$cityDetails.image',
-					description: '$cityDetails.description',
 				},
 			},
 		]);

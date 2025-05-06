@@ -19,7 +19,7 @@ export const useCities = () => {
 				setCities(citiesData);
 			} catch (error) {
 				setError(error.message);
-				console.error('Error fetching cities:', error);
+				// console.error('Error fetching cities:', error);
 			} finally {
 				setIsLoading(false);
 			}

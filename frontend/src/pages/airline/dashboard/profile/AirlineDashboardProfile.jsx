@@ -41,7 +41,7 @@ const AirlineDashboardProfile = () => {
 							src={user.profilePicture}
 							alt="Bengaluru"
 							className="rounded-circle"
-							style={{ width: '250px', height: '250px' }}
+							style={{ width: '225px', height: '225px' }}
 						/>
 					</button>
 
