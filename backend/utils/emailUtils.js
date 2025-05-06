@@ -30,18 +30,17 @@ const sendEmail = async (to, subject, text, html = null) => {
 	}
 };
 
-// send password email to airline
-const sendAirlinePasswordEmail = async (airline, password) => {
-	const subject = 'Your Flight Smart Account Password';
-	const text = `Hello ${airline.airlineName},\n\nYour account has been verified and a password has been generated for you.\n\nYour password is: ${password}\n\nPlease login to your account and change this password immediately for security reasons.\n\nBest regards,\nFlight Smart Team`;
+// send airline verification email
+const sendAirlineVerificationEmail = async (airline) => {
+	const subject = 'Flight Smart - Airline Verification';
+	const text = `Hello ${airline.username},\n\nWe are pleased to inform you that your registration request for Flight Smart has been approved.\n\nPlease proceed to the login page to access your account.\n\nBest regards,\nFlight Smart Team`;
 
 	const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2>Your Flight Smart Account Password</h2>
-      <p>Hello ${airline.airlineName},</p>
-      <p>Your account has been verified and a password has been generated for you.</p>
-      <p><strong>Your password is: ${password}</strong></p>
-      <p>Please login to your account and change this password immediately for security reasons.</p>
+      <h2>Flight Smart - Airline Verification</h2>
+      <p>Hello ${airline.username},</p>
+      <p>We are pleased to inform you that your registration request for Flight Smart has been approved.</p>	
+      <p>Please proceed to the login page to access your account.</p>
       <p>Best regards,<br>Flight Smart Team</p>
     </div>
   `;
@@ -52,12 +51,12 @@ const sendAirlinePasswordEmail = async (airline, password) => {
 // send rejection email to airline
 const sendAirlineDeletionEmail = async (airline) => {
 	const subject = 'Flight Smart Registration Request Denied';
-	const text = `Hello ${airline.airlineName},\n\nWe regret to inform you that your registration request for Flight Smart has been denied by our administrators.\n\nIf you believe this was a mistake or would like to reapply, please contact our support team.\n\nBest regards,\nFlight Smart Team`;
+	const text = `Hello ${airline.username},\n\nWe regret to inform you that your registration request for Flight Smart has been denied by our administrators.\n\nIf you believe this was a mistake or would like to reapply, please contact our support team.\n\nBest regards,\nFlight Smart Team`;
 
 	const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2>Flight Smart Registration Request Denied</h2>
-      <p>Hello ${airline.airlineName},</p>
+      <p>Hello ${airline.username},</p>
       <p>We regret to inform you that your registration request for Flight Smart has been denied by our administrators.</p>
       <p>If you believe this was a mistake, please try to register again.</p>
       <p>Best regards,<br>Flight Smart Team</p>
@@ -117,7 +116,7 @@ const sendBookingConfirmationEmail = async (user, booking) => {
 
 module.exports = {
 	sendEmail,
-	sendAirlinePasswordEmail,
 	sendAirlineDeletionEmail,
 	sendBookingConfirmationEmail,
+	sendAirlineVerificationEmail,
 };

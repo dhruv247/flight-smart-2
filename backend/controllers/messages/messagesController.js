@@ -1,5 +1,4 @@
 const Message = require('../../models/Message');
-const Airline = require('../../models/Airline');
 const User = require('../../models/User');
 const mongoose = require('mongoose');
 const Ticket = require('../../models/Ticket');
@@ -80,7 +79,7 @@ exports.getAirlines = async (req, res) => {
 		];
 
 		// get all airlines from the airline ids
-		const airlines = await Airline.find({ _id: { $in: airlineIds } });
+		const airlines = await User.find({ _id: { $in: airlineIds } });
 
 		res.status(200).json(airlines);
 	} catch (error) {
@@ -98,7 +97,7 @@ exports.getAirlines = async (req, res) => {
 exports.getCustomers = async (req, res) => {
 	try {
 		// Get airline from token (already done)
-		const airline = await Airline.findById(req.airline._id);
+		const airline = await User.findById(req.user._id);
 
 		if (!airline) {
 			return res.status(404).json({ message: 'Airline not found' });

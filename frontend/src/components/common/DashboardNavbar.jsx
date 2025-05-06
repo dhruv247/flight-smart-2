@@ -15,25 +15,14 @@ const DashboardNavbar = ({
 
 	const logout = async () => {
 		try {
-			const user = await getUserDetails();
 
-			if (user.userType === 'customer' || user.userType === 'admin') {
-				// Call the backend logout endpoint
-				await axios.post(
-					'http://localhost:8000/api/user/auth/logout',
-					{},
-					{
-						withCredentials: true,
-					}
-				);
-			} else {
-				// Call the backend logout endpoint
-				await axios.post(
-					'http://localhost:8000/api/airline/auth/logout',
-					{},
-					{ withCredentials: true }
-				);
-			}
+			const response = await axios.post(
+				'http://localhost:8000/api/user/auth/logout',
+				{},
+				{ withCredentials: true }
+			);	
+
+			// console.log(response);
 
 			// Clear all flight data from context
 			clearFlightData();

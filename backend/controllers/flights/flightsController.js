@@ -1,5 +1,5 @@
 const Plane = require('../../models/Plane');
-const Airline = require('../../models/Airline');
+const User = require('../../models/User');
 require('dotenv').config();
 const Flight = require('../../models/Flight');
 const createSeats = require('../../utils/createSeats');
@@ -210,9 +210,9 @@ exports.create = async (req, res) => {
 			});
 		}
 
-		const airlineId = req.airline._id;
+		const airlineId = req.user._id;
 
-		const airline = await Airline.findById(airlineId);
+		const airline = await User.findById(airlineId);
 
 		if (!airline) {
 			return res.status(400).json({
@@ -221,7 +221,7 @@ exports.create = async (req, res) => {
 		}
 
 		// Validate flight number format
-		const airlinePrefix = airline.airlineName.substring(0, 2).toUpperCase();
+		const airlinePrefix = airline.username.substring(0, 2).toUpperCase();
 		const flightNoRegex = new RegExp(`^${airlinePrefix}\\d{4}$`);
 
 		if (!flightNoRegex.test(flightNo)) {
@@ -239,7 +239,7 @@ exports.create = async (req, res) => {
 
 		const airlineDetails = {
 			_id: airline._id,
-			airlineName: airline.airlineName,
+			airlineName: airline.username,
 		};
 
 		// Format departure time
@@ -633,7 +633,7 @@ exports.getFlightById = async (req, res) => {
  */
 exports.getAllFlightsForAirline = async (req, res) => {
 	try {
-		const airlineId = req.airline._id;
+		const airlineId = req.user._id;
 		const page = parseInt(req.query.page) || 0;
 		const size = parseInt(req.query.size) || 10;
 		const flights = await Flight.find({ 'airlineDetails._id': airlineId })

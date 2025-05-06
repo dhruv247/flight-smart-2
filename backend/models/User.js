@@ -8,11 +8,12 @@ const userSchema = new mongoose.Schema(
 		password: { type: String, required: true },
 		userType: {
 			type: String,
-			enum: ['admin', 'customer'],
+			enum: ['admin', 'customer', 'airline'],
 			required: true,
 			default: 'customer',
 		},
 		profilePicture: { type: String, default: 'https://flight-smart-1-images.s3.amazonaws.com/1746506363869-download%20%281%29.jpeg' },
+		verificationStatus: { type: Boolean, required: true, default: true },
 	},
 	{
 		timestamps: true,

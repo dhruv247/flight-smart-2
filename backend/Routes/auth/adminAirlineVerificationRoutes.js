@@ -13,9 +13,6 @@ const {
 // route to verify an airline (admin only)
 router.post('/verify', verifyAdmin, verifyAirline);
 
-// Route to generate password for verified airline (admin only)
-router.post('/generate-password', verifyAdmin, generateAirlinePassword);
-
 router.post('/delete', verifyAdmin, deleteAirline); // route to delete airline (admin only)
 
 router.get('/get-all', verifyAdmin, getAllAirlines); // route to get all airlines

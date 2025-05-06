@@ -13,7 +13,7 @@ const Flight = require('../../models/Flight');
  */
 exports.profitableEconomyFlights = async (req, res) => {
 	try {
-		const airlineId = req.airline._id;
+		const airlineId = req.user._id;
 		const limit = parseInt(req.query.limit) || 10; // Default to 10 if limit not specified
 
 		const profitableFlights = await Flight.aggregate([
@@ -59,7 +59,7 @@ exports.profitableEconomyFlights = async (req, res) => {
  */
 exports.profitableBusinessFlights = async (req, res) => {
 	try {
-		const airlineId = req.airline._id;
+		const airlineId = req.user._id;
 		const limit = parseInt(req.query.limit) || 10; // Default to 10 if limit not specified
 
 		const profitableFlights = await Flight.aggregate([
@@ -103,7 +103,7 @@ exports.profitableBusinessFlights = async (req, res) => {
  */
 exports.busyDates = async (req, res) => {
 	try {
-		const airlineId = req.airline._id;
+		const airlineId = req.user._id;
 		const limit = parseInt(req.query.limit) || 10;
 
 		const busyDates = await Flight.aggregate([
@@ -145,7 +145,7 @@ exports.busyDates = async (req, res) => {
  */
 exports.flightByDuration = async (req, res) => {
 	try {
-		const airlineId = req.airline._id;
+		const airlineId = req.user._id;
 
 		const tripTypes = await Flight.aggregate([
 			{

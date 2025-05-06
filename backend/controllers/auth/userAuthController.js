@@ -1,5 +1,4 @@
 const User = require('../../models/User');
-const Airline = require('../../models/Airline');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
@@ -33,7 +32,7 @@ exports.register = async (req, res) => {
 		const { username, email, password, userType } = req.body;
 
 		// mandatory field check for backend
-		if (!username || !email || !password) {
+		if (!username || !email || !password || !userType) {
 			throw new Error(
 				'Please fill in the mandatory fields: email, username, password'
 			);
@@ -64,9 +63,11 @@ exports.register = async (req, res) => {
 			throw new Error('Admin cannot be created through registration');
 		}
 
+		let verificationStatus = true;
+
 		// throw error if user tries to set userType as airline
 		if (userType === 'airline') {
-			throw new Error('Customers cannot register as airlines!');
+			verificationStatus = false;
 		}
 
 		// normalize email
@@ -74,19 +75,15 @@ exports.register = async (req, res) => {
 
 		// check for duplicate email (in Users and airlines)
 		const duplicateUserEmail = await User.findOne({ email: lowerCaseEmail });
-		const duplicateAirlineEmail = await Airline.findOne({
-			emaiL: lowerCaseEmail,
-		});
 
 		// check for duplicate usernmaes (in Users and airlines)
 		const duplicateUserUsername = await User.findOne({ username });
-		const duplicateAirlineUsername = await Airline.findOne({ username });
 
-		if (duplicateUserEmail || duplicateAirlineEmail) {
+		if (duplicateUserEmail) {
 			throw new Error('User with the same email already exists!');
 		}
 
-		if (duplicateUserUsername || duplicateAirlineUsername) {
+		if (duplicateUserUsername) {
 			throw new Error('User with the same username already exists!');
 		}
 
@@ -96,12 +93,17 @@ exports.register = async (req, res) => {
 			email: lowerCaseEmail,
 			password,
 			userType,
+			verificationStatus,
 		});
 
 		// Save the user which will trigger validation middleware
 		await user.save();
 
-		res.status(201).json({ message: 'User registered', ...user.toJSON() });
+		if (user.userType === 'airline') {
+			res.status(201).json({ message: 'Airline Registration Request Sent! Please wait for email confirmation from admin before logging in', ...user.toJSON() });
+		} else {
+			res.status(201).json({ message: 'User registered', ...user.toJSON() });
+		}
 	} catch (error) {
 		res.status(400).json({ message: error.message });
 	}
@@ -146,6 +148,13 @@ exports.login = async (req, res) => {
 		if (!user) {
 			throw new Error('No user found with this email');
 		} else {
+
+			if (user.userType === 'airline' && !user.verificationStatus) {
+				throw new Error(
+					'Airline is not verified! Please wait for confirmation from admin'
+				);
+			}
+
 			// match given and stored passowrds
 			const match = await bcrypt.compare(password, user.password);
 
@@ -214,6 +223,10 @@ exports.getMe = async (req, res) => {
 			throw new Error('Cannot get user profile');
 		}
 
+		if (user.userType === 'airline' && !user.verificationStatus) {
+			throw new Error('Airline is not verified! Please wait for confirmation from admin');
+		}
+		
 		res.json(user);
 	} catch (error) {
 		res.status(400).json({ message: error.message });

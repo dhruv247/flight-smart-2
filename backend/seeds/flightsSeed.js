@@ -2,7 +2,7 @@
 const Flight = require('../models/Flight');
 const Plane = require('../models/Plane');
 const City = require('../models/City');
-const Airline = require('../models/Airline');
+const User = require('../models/User');
 const createSeats = require('../utils/createSeats');
 
 /**
@@ -66,7 +66,7 @@ const generateRandomTime = () => {
 const seedFlights = async () => {
 	try {
 		const planes = await Plane.find({});
-		const airlines = await Airline.find({});
+		const airlines = await User.find({ userType: 'airline' });
 		const cityDocuments = await City.find({});
 		const cities = cityDocuments.map((city) => city.name);
 
@@ -84,7 +84,7 @@ const seedFlights = async () => {
 		);
 
 		const flights = [];
-		const numberOfFlights = 450; // Generate 5 random flights
+		const numberOfFlights = 50; // Generate 5 random flights
 
 		for (let i = 0; i < numberOfFlights; i++) {
 			const plane = planes[Math.floor(Math.random() * planes.length)];
@@ -139,7 +139,7 @@ const seedFlights = async () => {
 			// Generate flight number and check for duplicates
 			let flightNo;
 			do {
-				flightNo = `${airline.airlineName.substring(0, 2).toUpperCase()}${
+				flightNo = `${airline.username.substring(0, 2).toUpperCase()}${
 					Math.floor(Math.random() * 9000) + 1000
 				}`;
 			} while (existingFlightNumbers.has(flightNo));
@@ -152,7 +152,7 @@ const seedFlights = async () => {
 				flightNo: flightNo,
 				airlineDetails: {
 					_id: airline._id.toString(),
-					airlineName: airline.airlineName,
+					airlineName: airline.username,
 				},
 				planeDetails: {
 					_id: plane._id.toString(),

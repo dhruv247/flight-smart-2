@@ -77,7 +77,7 @@ const CustomerUserList = ({ onSelectUser, selectedUser }) => {
 									className="rounded-circle me-2"
 									style={{ width: '30px', height: '30px' }}
 								/>
-								{u.airlineName}
+								{u.username}
 							</button>
 						))}
 

@@ -16,8 +16,6 @@ const LoginForm = () => {
 
 	const handleLogin = async (event) => {
 		event.preventDefault();
-		try {
-			// First try user login
 			try {
 				const userRes = await axios.post(
 					'http://localhost:8000/api/user/auth/login',
@@ -30,26 +28,14 @@ const LoginForm = () => {
 				// console.log('User Login Successful!', userRes.data);
 				if (userRes.data.userType === 'customer') {
 					navigate('/');
-				} else {
+				} else if (userRes.data.userType === 'airline') {
+					navigate('/airline/dashboard');
+				} else if (userRes.data.userType === 'admin') {
 					navigate('/admin/dashboard');
 				}
-				return;
-			} catch (userError) {
-				// If user login fails, try airline login
-				const airlineRes = await axios.post(
-					'http://localhost:8000/api/airline/auth/login',
-					formData,
-					{
-						withCredentials: true,
-					}
-				);
-				showSuccessToast('Login successful!');
-				// console.log('Airline Login Successful!', airlineRes.data);
-				navigate('/airline/dashboard');
-			}
-		} catch (error) {
-			if (error.response) {
-				showErrorToast('Error: ' + error.response.data.message);
+			} catch (error) {
+				if (error.response) {
+					showErrorToast('Error: ' + error.response.data.message);
 				// console.log('Error Message', error.response.data.message);
 			} else {
 				showErrorToast(error.message);

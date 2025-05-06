@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const Airline = require('../../models/Airline');
+const User = require('../../models/User');
 
 /**
  * Middleware to verify user type is airline
@@ -33,7 +33,7 @@ module.exports = async (req, res, next) => {
 		}
 
 		// verify if the airline still exists and is verified (because token may exist but flight might be deleted from db)
-		const airline = await Airline.findById(decoded._id);
+		const airline = await User.findById(decoded._id);
 		if (!airline) {
 			throw new Error('Airline not found');
 		}
@@ -43,7 +43,7 @@ module.exports = async (req, res, next) => {
 		}
 
 		// attach the airline data to the request
-		req.airline = decoded;
+		req.user = decoded;
 		// pass to the response
 		next();
 	} catch (error) {

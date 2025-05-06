@@ -86,7 +86,7 @@ const AddFlight = () => {
 
 		try {
 			// Add airline initials to flight number
-			const airlinePrefix = airlineDetails.airlineName
+			const airlinePrefix = airlineDetails.username
 				.substring(0, 2)
 				.toUpperCase();
 			const fullFlightNo = `${airlinePrefix}${flightDetails.flightNo}`;
@@ -157,7 +157,7 @@ const AddFlight = () => {
 								<div className="input-group">
 									<div className="input-group">
 										<span className="input-group-text">
-											{airlineDetails?.airlineName
+											{airlineDetails?.username
 												.substring(0, 2)
 												.toUpperCase()}
 										</span>

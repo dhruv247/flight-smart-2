@@ -10,11 +10,6 @@ const UnverifiedAirlineCard = ({ airline }) => {
 				{ airlineId: airline._id },
 				{ withCredentials: true }
 			);
-			await axios.post(
-				'http://localhost:8000/api/admin/airline/generate-password',
-				{ airlineId: airline._id },
-				{ withCredentials: true }
-			);
 			showSuccessToast('Airline verified successfully!');
 			window.location.reload(); // refresh needed to fetch new list
 		} catch (error) {
@@ -43,7 +38,7 @@ const UnverifiedAirlineCard = ({ airline }) => {
 		<div className="row">
 			<div className="col-md-2"></div>
 			<div className="col-md-8 row d-flex align-items-center border rounded p-2 m-0">
-				<p className="col-12 col-md-3">{airline.airlineName}</p>
+				<p className="col-12 col-md-3">{airline.username}</p>
 				<p className="col-12 col-md-5">{airline.email}</p>
 				<div className="col-12 col-md-4 d-flex gap-2 justify-content-center">
 					<button className="btn btn-success" onClick={handleVerify}>

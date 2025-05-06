@@ -15,7 +15,7 @@ const ViewCities = () => {
 		getCities();
 	}, []);
 
-	console.log(cities);
+	// console.log(cities);
 
 	return (
 		<div className="container text-center">

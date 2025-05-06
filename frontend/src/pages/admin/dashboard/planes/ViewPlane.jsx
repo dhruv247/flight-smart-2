@@ -55,7 +55,7 @@ const ViewPlane = () => {
 			</div>
 			{planesList.map((plane) => {
 				return (
-					<div className="row mt-3">
+					<div className="row mt-3" key={plane._id}>
 						<div className="col-md-2"></div>
 						<div className="col-md-8 row d-flex align-items-center border rounded p-2 m-0">
 							<p className="col-12 col-md-4">{plane.planeName}</p>

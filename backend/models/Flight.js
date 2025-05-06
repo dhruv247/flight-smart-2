@@ -5,7 +5,7 @@ const airlineDetailsSchema = new mongoose.Schema(
 		_id: {
 			type: mongoose.Schema.Types.ObjectId,
 			required: true,
-			ref: 'Airline',
+			ref: 'User',
 			// suppressWarning: true,
 		},
 		airlineName: { type: String, required: true },

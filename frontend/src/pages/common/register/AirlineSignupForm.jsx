@@ -8,19 +8,32 @@ const AirlineSignupForm = () => {
 
 	const [formData, setFormData] = useState({
 		email: '',
-		airlineName: '',
+		username: '',
+		password: '',
+		userType: 'airline',
 	});
+
+	const [confirmPassword, setConfirmPassword] = useState('');
 
 	const handleChange = (e) => {
 		setFormData({ ...formData, [e.target.name]: e.target.value });
+	};
+
+	const handleConfirmPasswordChange = (e) => {
+		setConfirmPassword(e.target.value);
 	};
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 
 		try {
+			if (confirmPassword !== formData.password) {
+				showErrorToast('Passwords must match to register user!');
+				return;
+			}
+
 			const res = await axios.post(
-				'http://localhost:8000/api/airline/auth/register',
+				'http://localhost:8000/api/user/auth/register',
 				formData,
 				{
 					withCredentials: true,
@@ -68,11 +81,60 @@ const AirlineSignupForm = () => {
 					<input
 						type="text"
 						className="form-control"
-						name="airlineName"
-						id="airlineName"
+						name="username"
+						id="username"
 						placeholder="Airline Name"
 						required
 						onChange={handleChange}
+					/>
+				</div>
+				<div className="col-1 col-md-4"></div>
+			</div>
+			{/* Password Instructions */}
+			<div className="row mb-3">
+				<div className="col-1 col-md-4"></div>
+				<div className="col-10 col-md-4">
+					<div className="text-start text-muted small">
+						Password must contain:
+						<ul>
+							<li>At least 8 characters</li>
+							<li>One uppercase letter</li>
+							<li>One lowercase letter</li>
+							<li>One number</li>
+							<li>One special character (@$!%*?&)</li>
+						</ul>
+					</div>
+				</div>
+				<div className="col-1 col-md-4"></div>
+			</div>
+			{/* Password Input */}
+			<div className="row mb-3">
+				<div className="col-1 col-md-4"></div>
+				<div className="col-10 col-md-4">
+					<input
+						type="password"
+						name="password"
+						id="password"
+						className="form-control"
+						placeholder="Password"
+						required
+						onChange={handleChange}
+					/>
+				</div>
+				<div className="col-1 col-md-4"></div>
+			</div>
+			{/* Confirm Password Input */}
+			<div className="row mb-3">
+				<div className="col-1 col-md-4"></div>
+				<div className="col-10 col-md-4">
+					<input
+						type="password"
+						name="confirmPassword"
+						id="confirmPassword"
+						className="form-control"
+						placeholder="Re-Enter Password"
+						required
+						onChange={handleConfirmPasswordChange}
 					/>
 				</div>
 				<div className="col-1 col-md-4"></div>

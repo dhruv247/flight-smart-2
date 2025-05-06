@@ -3,7 +3,7 @@ const { connectDB } = require('./connect'); // Required to make a connection to 
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const createAdminUser = require('./seeds/adminSeed'); // creates an admin manually
-// const seedFlights = require('./seeds/flightsSeed'); // creates sample flights in large numbers
+const seedFlights = require('./seeds/flightsSeed'); // creates sample flights in large numbers
 const { setupSocket } = require('./socket');
 
 const http = require('http');
@@ -30,7 +30,6 @@ app.use(cookieParser());
  * Custom Middleware
  */
 app.use('/api/user/auth', require('./Routes/auth/userAuthRoutes')); // auth routes for users (admin, customer)
-app.use('/api/airline/auth', require('./Routes/auth/airlineAuthRoutes')); // auth routes for airlines
 // verification routes for admin to verify airlines
 app.use(
 	'/api/admin/airline',

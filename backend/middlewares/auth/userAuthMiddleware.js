@@ -29,7 +29,7 @@ module.exports = async (req, res, next) => {
 		}
 
 		// check if its a user token
-		if (!['admin', 'customer'].includes(decoded.userType)) {
+		if (!['admin', 'customer', 'airline'].includes(decoded.userType)) {
 			throw new Error('Not authorized');
 		}
 

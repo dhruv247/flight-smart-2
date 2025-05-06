@@ -1,9 +1,8 @@
 // this file is used by admin to verify airlines before they can create flights
-const Airline = require('../../models/Airline');
-const generateRandomPassword = require('../../utils/passwordUtils');
+const User = require('../../models/User');
 const {
-	sendAirlinePasswordEmail,
 	sendAirlineDeletionEmail,
+	sendAirlineVerificationEmail,
 } = require('../../utils/emailUtils');
 
 /**
@@ -27,7 +26,7 @@ const verifyAirline = async (req, res) => {
 				.json({ message: 'Airline ID is required in request body' });
 		}
 
-		const airline = await Airline.findById(airlineId);
+		const airline = await User.findById(airlineId);
 
 		if (!airline) {
 			return res.status(404).json({ message: 'Airline not found' });
@@ -41,11 +40,18 @@ const verifyAirline = async (req, res) => {
 
 		await airline.save();
 
+		// Send email to airline with their password
+		try {
+			await sendAirlineVerificationEmail(airline);
+			// console.log('Password email sent successfully to airline');
+		} catch (emailError) {
+			console.error('Error sending password email:', emailError);
+		}
+
 		res.status(200).json({
 			message: 'Airline verified successfully',
 			airline: {
 				id: airline._id,
-				airlineName: airline.airlineName,
 				email: airline.email,
 				verificationStatus: airline.verificationStatus,
 			},
@@ -56,75 +62,75 @@ const verifyAirline = async (req, res) => {
 	}
 };
 
-/**
- * Generates a password for airlines
- * @param {*} req 
- * @param {*} res 
- * @description
- * 1. Gets the airline
- * 2. Checks that the airline is verified
- * 3. Generates new password using utility function
- * 4. Sends email to airline on success
- */
-const generateAirlinePassword = async (req, res) => {
-	try {
+// /**
+//  * Generates a password for airlines
+//  * @param {*} req 
+//  * @param {*} res 
+//  * @description
+//  * 1. Gets the airline
+//  * 2. Checks that the airline is verified
+//  * 3. Generates new password using utility function
+//  * 4. Sends email to airline on success
+//  */
+// const generateAirlinePassword = async (req, res) => {
+// 	try {
 
-		const { airlineId } = req.body;
+// 		const { airlineId } = req.body;
 
-		if (!airlineId) {
-			return res
-				.status(400)
-				.json({ message: 'Airline ID is required in request body' });
-		}
+// 		if (!airlineId) {
+// 			return res
+// 				.status(400)
+// 				.json({ message: 'Airline ID is required in request body' });
+// 		}
 
-		const airline = await Airline.findById(airlineId);
-		if (!airline) {
-			return res.status(404).json({ message: 'Airline not found' });
-		}
+// 		const airline = await Airline.findById(airlineId);
+// 		if (!airline) {
+// 			return res.status(404).json({ message: 'Airline not found' });
+// 		}
 
-		if (!airline.verificationStatus) {
-			return res
-				.status(400)
-				.json({ message: 'Airline must be verified first' });
-		}
+// 		if (!airline.verificationStatus) {
+// 			return res
+// 				.status(400)
+// 				.json({ message: 'Airline must be verified first' });
+// 		}
 
-		const newPassword = generateRandomPassword();
+// 		const newPassword = generateRandomPassword();
 
-		airline.password = newPassword;
-		await airline.save();
+// 		airline.password = newPassword;
+// 		await airline.save();
 
-		// console.log('Airline updated successfully');
+// 		// console.log('Airline updated successfully');
 
-		// Send email to airline with their password
-		try {
-			await sendAirlinePasswordEmail(airline, newPassword);
-			// console.log('Password email sent successfully to airline');
-		} catch (emailError) {
-			// console.error('Error sending password email:', emailError);
-		}
+// 		// Send email to airline with their password
+// 		try {
+// 			await sendAirlinePasswordEmail(airline, newPassword);
+// 			// console.log('Password email sent successfully to airline');
+// 		} catch (emailError) {
+// 			// console.error('Error sending password email:', emailError);
+// 		}
 
-		res.status(200).json({
-			message: 'Password generated successfully',
-			airline: {
-				id: airline._id,
-				airlineName: airline.airlineName,
-				email: airline.email,
-				password: newPassword,
-			},
-		});
-	} catch (error) {
-		res.status(500).json({
-			message: 'Internal server error',
-			error: error.message,
-		});
-	}
-};
+// 		res.status(200).json({
+// 			message: 'Password generated successfully',
+// 			airline: {
+// 				id: airline._id,
+// 				airlineName: airline.airlineName,
+// 				email: airline.email,
+// 				password: newPassword,
+// 			},
+// 		});
+// 	} catch (error) {
+// 		res.status(500).json({
+// 			message: 'Internal server error',
+// 			error: error.message,
+// 		});
+// 	}
+// };
 
 /**
  * Deletes an airline
  * @param {*} req 
  * @param {*} res 
- * @returns 
+ * @returns
  * 1. GEts the airline using id
  * 2. IF the airline is unverfied, delete it
  * 3. Sends email on deletion
@@ -139,7 +145,7 @@ const deleteAirline = async (req, res) => {
 				.json({ message: 'Airline Id is required in request body' });
 		}
 
-		const airline = await Airline.findById(airlineId);
+		const airline = await User.findById(airlineId);
 
 		if (!airline) {
 			return res.status(404).json({ message: 'Airline not found!' });
@@ -159,7 +165,7 @@ const deleteAirline = async (req, res) => {
 			// console.error('Error sending deletion email:', emailError);
 		}
 
-		await Airline.findByIdAndDelete(airlineId);
+		await User.findByIdAndDelete(airlineId);
 
 		res.status(200).json({ message: 'Airline deleted successfully' });
 	} catch (error) {
@@ -175,7 +181,7 @@ const deleteAirline = async (req, res) => {
  */
 const getAllAirlines = async (req, res) => {
 	try {
-		const airlines = await Airline.find({});
+		const airlines = await User.find({ userType: 'airline' });
 
 		res.status(200).json({
 			message: 'Airlines retrieved successfully',
@@ -189,7 +195,6 @@ const getAllAirlines = async (req, res) => {
 
 module.exports = {
 	verifyAirline,
-	generateAirlinePassword,
 	deleteAirline,
 	getAllAirlines,
 };

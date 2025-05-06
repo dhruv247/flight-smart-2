@@ -124,7 +124,7 @@ const CustomerChatBox = ({ selectedUser }) => {
 	return (
 		<div className="flex-grow-1 d-flex flex-column bg-white border-start">
 			<div className="p-3 border-bottom shadow-sm">
-				<h5 className="mb-0 fw-bold">{selectedUser.airlineName}</h5>
+				<h5 className="mb-0 fw-bold">{selectedUser.username}</h5>
 			</div>
 
 			<div className="flex-grow-1 overflow-auto px-3">

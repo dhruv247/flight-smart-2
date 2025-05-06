@@ -46,7 +46,7 @@ const AirlineDashboardProfile = () => {
 					</button>
 
 					<p className="my-3">
-						<span className="fw-bold">Airline Name:</span> {user.airlineName}
+						<span className="fw-bold">Airline Name:</span> {user.username}
 					</p>
 					<p className="my-3">
 						<span className="fw-bold">Email:</span> {user.email}
