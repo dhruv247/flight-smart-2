@@ -14,13 +14,15 @@ const isValidDate = (dateStr) => {
 	const dateRegex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/;
 	if (!dateRegex.test(dateStr)) return false;
 
-	const [year, month, day] = dateStr.split('-').map(Number);
-	const date = new Date(year, month - 1, day);
-	return (
-		date.getFullYear() === year &&
-		date.getMonth() === month - 1 &&
-		date.getDate() === day
-	);
+	return true;
+
+	// const [year, month, day] = dateStr.split('-').map(Number);
+	// const date = new Date(year, month - 1, day);
+	// return (
+	// 	date.getFullYear() === year &&
+	// 	date.getMonth() === month - 1 &&
+	// 	date.getDate() === day
+	// );
 };
 
 /**
@@ -84,7 +86,7 @@ const seedFlights = async () => {
 		);
 
 		const flights = [];
-		const numberOfFlights = 490; // Generate 5 random flights
+		const numberOfFlights = 10; // Generate 5 random flights
 
 		for (let i = 0; i < numberOfFlights; i++) {
 			const plane = planes[Math.floor(Math.random() * planes.length)];

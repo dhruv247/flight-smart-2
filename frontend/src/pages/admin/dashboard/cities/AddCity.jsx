@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import axios from 'axios';
 import { showSuccessToast, showErrorToast } from '../../../../utils/toast';
 
 const AddCity = () => {
+	const formRef = useRef(null);
 	const [cityDetails, setCityDetails] = useState({
 		name: '',
 		image: '',
@@ -71,6 +72,7 @@ const AddCity = () => {
 					name: '',
 					image: '',
 				});
+				formRef.current.reset();
 			}
 		} catch (error) {
 			console.log(error.message);
@@ -80,7 +82,7 @@ const AddCity = () => {
 
 	return (
 		<div className="mt-5">
-			<form action="" onSubmit={handleAddCity}>
+			<form ref={formRef} action="" onSubmit={handleAddCity}>
 				<div className="row">
 					<div className="col-md-4"></div>
 					<div className="col-md-4 col-12">

@@ -95,7 +95,7 @@ const sendBookingConfirmationEmail = async (user, booking) => {
 				<p><strong>Booking Date:</strong> ${formatDateTime(booking.createdAt)}</p>
 			</div>
 
-			<p style="margin-top: 30px;">If you have any questions or need to make changes to your booking, please contact our customer support.</p>
+			<p style="margin-top: 30px;">Please check your booking details in your Flight Smart Dashboard.</p>
 			
 			<p>Best regards,<br>Flight Smart Team</p>
 		</div>
@@ -107,7 +107,7 @@ const sendBookingConfirmationEmail = async (user, booking) => {
 		Booking ID: ${booking._id}\n
 		Total Amount: ${booking.bookingPrice}\n
 		Booking Date: ${formatDateTime(booking.createdAt)}\n\n
-		Please check your booking details in your Flight Smart account.\n\n
+		Please check your booking details in your Flight Smart Dashboard.\n\n
 		Best regards,\n
 		Flight Smart Team`;
 

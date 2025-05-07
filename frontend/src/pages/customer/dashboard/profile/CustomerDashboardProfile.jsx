@@ -1,8 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import getUserDetails from '../../../../utils/getUserDetails';
+import ChangePasswordModal from '../../../../components/common/ChangePasswordModal';
+import ChangeProfileModal from '../../../../components/common/ChangeProfileModal';
+
 const CustomerDashboardProfile = () => {
 	const [user, setUser] = useState(null);
 	const [isLoading, setIsLoading] = useState(true);
+	const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+	const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
 	useEffect(() => {
 		const fetchUser = async () => {
@@ -33,25 +38,42 @@ const CustomerDashboardProfile = () => {
 			<div className="row">
 				<div className="col-1 col-md-4"></div>
 				<div className="border rounded col-10 col-md-4 py-4">
-					<button className="rounded-circle bg-light border p-2">
+					<button
+						className="rounded-circle bg-light border p-2"
+						onClick={() => setIsProfileModalOpen(true)}
+					>
 						<img
 							src={user.profilePicture}
-							alt="Bengaluru"
+							alt="Profile Picture"
 							className="rounded-circle"
 							style={{ width: '225px', height: '225px' }}
 						/>
 					</button>
 
 					<p className="my-3">
-						<span className="fw-bold">Username:</span> {user.username}
+						<span className="fw-bold">Customer Name:</span> {user.username}
 					</p>
 					<p className="my-3">
 						<span className="fw-bold">Email:</span> {user.email}
 					</p>
-					{/* <button className="btn btn-primary">Change Password</button> */}
+					<button
+						className="btn btn-primary"
+						onClick={() => setIsPasswordModalOpen(true)}
+					>
+						Change Password
+					</button>
 				</div>
 				<div className="col-1 col-md-4"></div>
 			</div>
+
+			<ChangePasswordModal
+				isOpen={isPasswordModalOpen}
+				onClose={() => setIsPasswordModalOpen(false)}
+			/>
+			<ChangeProfileModal
+				isOpen={isProfileModalOpen}
+				onClose={() => setIsProfileModalOpen(false)}
+			/>
 		</div>
 	);
 };

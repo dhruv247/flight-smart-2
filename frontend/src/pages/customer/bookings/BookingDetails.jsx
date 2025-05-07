@@ -506,10 +506,10 @@ const BookingDetails = () => {
 									role="status"
 									aria-hidden="true"
 								></span>
-								Creating Booking...
+								Booking...
 							</>
 						) : (
-							'Create Tickets'
+							'Book Tickets'
 						)}
 					</button>
 				</div>

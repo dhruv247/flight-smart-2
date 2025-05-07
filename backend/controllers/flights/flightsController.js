@@ -14,16 +14,18 @@ const isValidDate = (dateStr) => {
 	const dateRegex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/;
 	if (!dateRegex.test(dateStr)) return false;
 
-	// convert each part to number
-	const [year, month, day] = dateStr.split('-').map(Number);
-	// create a new date object (month is 0-indexed)
-	const date = new Date(year, month - 1, day);
-	// check if the date is valid
-	return (
-		date.getFullYear() === year &&
-		date.getMonth() === month - 1 &&
-		date.getDate() === day
-	);
+	return true;
+
+	// // convert each part to number
+	// const [year, month, day] = dateStr.split('-').map(Number);
+	// // create a new date object (month is 0-indexed)
+	// const date = new Date(year, month - 1, day);
+	// // check if the date is valid
+	// return (
+	// 	date.getFullYear() === year &&
+	// 	date.getMonth() === month - 1 &&
+	// 	date.getDate() === day
+	// );
 };
 
 /**

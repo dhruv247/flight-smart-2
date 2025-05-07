@@ -169,37 +169,40 @@ exports.cancelBooking = async (req, res) => {
 
 		for (let ticket of tickets) {
 			const departureFlightId = ticket.departureFlight._id;
-			const returnFlightId = ticket.returnFlight._id;
-
 			const departureFlightSeatNumber = ticket.departureFlightSeatNumber;
-			const returnFlightSeatNumber = ticket.returnFlightSeatNumber;
 
 			const departureFlightSeat = await Seat.findOne({
 				flight: departureFlightId,
 				seatNumber: departureFlightSeatNumber,
 			});
-			let returnFlightSeat;
-			if (returnFlightId) {
-				returnFlightSeat = await Seat.findOne({
-					flight: returnFlightId,
-					seatNumber: returnFlightSeatNumber,
-				});
-			}
 
 			if (departureFlightSeat) {
 				departureFlightSeat.occupied = false;
 				await departureFlightSeat.save();
 			}
 
-			if (returnFlightSeat) {
-				returnFlightSeat.occupied = false;
-				await returnFlightSeat.save();
+			// Only process return flight if it's a round trip
+			if (ticket.roundTrip && ticket.returnFlight) {
+				const returnFlightId = ticket.returnFlight._id;
+				const returnFlightSeatNumber = ticket.returnFlightSeatNumber;
+
+				const returnFlightSeat = await Seat.findOne({
+					flight: returnFlightId,
+					seatNumber: returnFlightSeatNumber,
+				});
+
+				if (returnFlightSeat) {
+					returnFlightSeat.occupied = false;
+					await returnFlightSeat.save();
+				}
 			}
 		}
 
-		const departureFlight = await Flight.findById(tickets[0].departureFlight._id);
+		const departureFlight = await Flight.findById(
+			tickets[0].departureFlight._id
+		);
 		let returnFlight;
-		if (tickets[0].roundTrip) {
+		if (tickets[0].roundTrip && tickets[0].returnFlight) {
 			returnFlight = await Flight.findById(tickets[0].returnFlight._id);
 		}
 

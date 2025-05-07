@@ -21,9 +21,8 @@ ChartJS.register(
 	Legend
 );
 
-const TopFlights = () => {
+const TopFlights = ({ noOfTopFlights }) => {
 	const [topFlightsList, setTopFlightList] = useState([]);
-	const [noOfTopFlights, setNoOfTopFlights] = useState(5);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState(null);
 	const [data, setData] = useState({});
@@ -42,7 +41,7 @@ const TopFlights = () => {
 			},
 			title: {
 				display: true,
-				text: 'Most Booked Flights',
+				text: 'Most Booked Departure Flights',
 				font: {
 					size: 16,
 					weight: 'normal',

@@ -100,7 +100,13 @@ exports.register = async (req, res) => {
 		await user.save();
 
 		if (user.userType === 'airline') {
-			res.status(201).json({ message: 'Airline Registration Request Sent! Please wait for email confirmation from admin before logging in', ...user.toJSON() });
+			res
+				.status(201)
+				.json({
+					message:
+						'Airline Registration Request Sent! Please wait for email confirmation from admin before logging in',
+					...user.toJSON(),
+				});
 		} else {
 			res.status(201).json({ message: 'User registered', ...user.toJSON() });
 		}
@@ -148,7 +154,6 @@ exports.login = async (req, res) => {
 		if (!user) {
 			throw new Error('No user found with this email');
 		} else {
-
 			if (user.userType === 'airline' && !user.verificationStatus) {
 				throw new Error(
 					'Airline is not verified! Please wait for confirmation from admin'
@@ -224,9 +229,11 @@ exports.getMe = async (req, res) => {
 		}
 
 		if (user.userType === 'airline' && !user.verificationStatus) {
-			throw new Error('Airline is not verified! Please wait for confirmation from admin');
+			throw new Error(
+				'Airline is not verified! Please wait for confirmation from admin'
+			);
 		}
-		
+
 		res.json(user);
 	} catch (error) {
 		res.status(400).json({ message: error.message });
@@ -253,14 +260,44 @@ exports.updatePassword = async (req, res) => {
 		const match = await bcrypt.compare(oldPassword, user.password);
 
 		if (match) {
+			// Validate password complexity
+			const passwordRegex =
+				/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+			if (!passwordRegex.test(newPassword)) {
+				throw new Error(
+					'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)'
+				);
+			}
+
 			user.password = newPassword;
-			user.save();
+			await user.save();
 			res.status(201).json({
 				message: 'Password updated successfully',
 			});
 		} else {
 			throw new Error('Incorrect old password');
 		}
+	} catch (error) {
+		res.status(400).json({ message: error.message });
+	}
+};
+
+exports.updateProfilePicture = async (req, res) => {
+	try {
+		const { profilePicture } = req.body;
+	
+		const user = await User.findById(req.user._id);
+
+		if (!user) {
+			throw new Error('User not found');
+		}
+
+		user.profilePicture = profilePicture;
+		await user.save();
+
+		res.status(201).json({
+			message: 'Profile picture updated successfully',
+		});
 	} catch (error) {
 		res.status(400).json({ message: error.message });
 	}

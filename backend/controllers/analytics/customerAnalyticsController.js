@@ -8,40 +8,34 @@ exports.popularDestinations = async (req, res) => {
 				$facet: {
 					departureFlights: [
 						{ $match: { 'departureFlight._id': { $exists: true } } },
-						{ $group: { _id: '$departureFlight._id' } },
+						{
+							$group: {
+								_id: '$departureFlight.arrivalPlace',
+								count: { $sum: 1 },
+							},
+						},
 					],
 					returnFlights: [
 						{ $match: { 'returnFlight._id': { $exists: true } } },
-						{ $group: { _id: '$returnFlight._id' } },
+						{
+							$group: { _id: '$returnFlight.arrivalPlace', count: { $sum: 1 } },
+						},
 					],
 				},
 			},
-			// Combine both arrays
+			// Combine both arrays and merge counts for same destinations
 			{
 				$project: {
-					allFlightIds: {
-						$concatArrays: ['$departureFlights._id', '$returnFlights._id'],
+					allDestinations: {
+						$concatArrays: ['$departureFlights', '$returnFlights'],
 					},
 				},
 			},
-			// Unwind the combined array
-			{ $unwind: '$allFlightIds' },
-			// Lookup to get flight details
-			{
-				$lookup: {
-					from: 'flights',
-					localField: 'allFlightIds',
-					foreignField: '_id',
-					as: 'flightDetails',
-				},
-			},
-			// Unwind flight details
-			{ $unwind: '$flightDetails' },
-			// Group by arrival place and count
+			{ $unwind: '$allDestinations' },
 			{
 				$group: {
-					_id: '$flightDetails.arrivalPlace',
-					count: { $sum: 1 },
+					_id: '$allDestinations._id',
+					count: { $sum: '$allDestinations.count' },
 				},
 			},
 			// Sort by count in descending order

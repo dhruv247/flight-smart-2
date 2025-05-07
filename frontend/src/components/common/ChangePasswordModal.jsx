@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { showSuccessToast, showErrorToast } from '../../../../utils/toast';
+import { showSuccessToast, showErrorToast } from '../../utils/toast';
 
 const ChangePasswordModal = ({ isOpen, onClose }) => {
 	const [formData, setFormData] = useState({
@@ -24,7 +24,7 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
 
 		try {
 			await axios.patch(
-				'http://localhost:8000/api/airline/auth/update-password',
+				'http://localhost:8000/api/user/auth/update-password',
 				{
 					oldPassword: formData.oldPassword,
 					newPassword: formData.newPassword,
@@ -32,6 +32,11 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
 				{ withCredentials: true }
 			);
 			showSuccessToast('Password updated successfully');
+			setFormData({
+				oldPassword: '',
+				newPassword: '',
+				confirmPassword: '',
+			});
 			onClose();
 		} catch (error) {
 			if (error.response) {

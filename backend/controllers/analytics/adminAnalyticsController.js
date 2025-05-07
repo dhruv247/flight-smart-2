@@ -1,54 +1,51 @@
 const Ticket = require('../../models/Ticket');
 const Flight = require('../../models/Flight');
+const Booking = require('../../models/Booking');
 
 /**
  * Get's the top flights by number of Tickets (only departure flights for now)
  * @param {*} req
  * @param {*} res
  * @description
- * 1. Get the top departure flights by number of tickets
- * 2. Get the flight details for the top flights (using map here as the operation is limited by the number of flights)
+ * 1. Get the top departure flights by number of tickets using a single aggregation pipeline
+ * 2. Uses embedded flight data from the Booking model for better performance
  */
 exports.flights = async (req, res) => {
 	try {
-		const num = parseInt(req.query.num) || 3; // Default to 10 if not provided
+		const num = parseInt(req.query.num) || 5; // Default to 3 if not provided
 
-		const departureFlights = await Ticket.aggregate([
+		const topFlights = await Booking.aggregate([
+			// Unwind the tickets array to work with individual tickets
+			{ $unwind: '$tickets' },
+			// Group by departure flight details
 			{
 				$group: {
-					_id: '$departureFlight._id',
+					_id: '$tickets.departureFlight._id',
+					flightNo: { $first: '$tickets.departureFlight.flightNo' },
+					airline: { $first: '$tickets.departureFlight.airline' },
+					departurePlace: { $first: '$tickets.departureFlight.departurePlace' },
+					arrivalPlace: { $first: '$tickets.departureFlight.arrivalPlace' },
 					count: { $sum: 1 },
 				},
 			},
-			{
-				$sort: { count: -1 },
-			},
-			{
-				$limit: num,
-			},
+			// Sort by count in descending order
+			{ $sort: { count: -1 } },
+			// Limit to requested number of results
+			{ $limit: num },
+			// Project final output format
 			{
 				$project: {
 					_id: 0,
-					flightId: '$_id',
+					flightNo: 1,
+					// airline: 1,
+					// departurePlace: 1,
+					// arrivalPlace: 1,
 					count: 1,
 				},
 			},
 		]);
 
-		const idList = departureFlights.map((doc) => doc.flightId);
-
-		// Get the flight details for the top flights (using map here as the operation is limited by the number of flights)
-		const flights = await Promise.all(
-			idList.map(async (id) => {
-				const flight = await Flight.findById(id);
-				return {
-					flightNo: flight.flightNo,
-					count: departureFlights.find((f) => f.flightId === id).count,
-				};
-			})
-		);
-
-		res.json(flights);
+		res.json(topFlights);
 	} catch (error) {
 		res.status(500).json({ message: error.message });
 	}
