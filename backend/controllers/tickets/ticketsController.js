@@ -70,6 +70,20 @@ exports.create = async (req, res) => {
 			});
 		}
 
+		const departureFlightDetails = {
+			_id: departureFlightId,
+			flightNo: departureFlight.flightNo,
+			airline: departureFlight.airlineDetails.airlineName,
+			plane: departureFlight.planeDetails.planeName,
+			departurePlace: departureFlight.departurePlace,
+			departureDate: departureFlight.departureDate,
+			departureTime: departureFlight.departureTime,
+			arrivalPlace: departureFlight.arrivalPlace,
+			arrivalDate: departureFlight.arrivalDate,
+			arrivalTime: departureFlight.arrivalTime,
+			duration: departureFlight.duration,
+		}
+
 		// Find and check departure seat
 		const departureSeat = await Seat.findOne({
 			flight: departureFlightId,
@@ -93,6 +107,8 @@ exports.create = async (req, res) => {
 		let returnSeat = null;
 		let roundTrip = false;
 
+		let returnFlightDetails = null;
+
 		if (returnFlightId && returnFlightSeatNumber) {
 			returnFlight = await Flight.findById(returnFlightId);
 			if (!returnFlight) {
@@ -101,6 +117,19 @@ exports.create = async (req, res) => {
 				});
 			}
 
+			returnFlightDetails = {
+				_id: returnFlightId,
+				flightNo: returnFlight.flightNo,
+				airline: returnFlight.airlineDetails.airlineName,
+				plane: returnFlight.planeDetails.planeName,
+				departurePlace: returnFlight.departurePlace,
+				departureDate: returnFlight.departureDate,
+				departureTime: returnFlight.departureTime,
+				arrivalPlace: returnFlight.arrivalPlace,
+				arrivalDate: returnFlight.arrivalDate,
+				arrivalTime: returnFlight.arrivalTime,
+				duration: returnFlight.duration,
+			}
 			// Find and check return seat
 			returnSeat = await Seat.findOne({
 				flight: returnFlightId,
@@ -128,6 +157,7 @@ exports.create = async (req, res) => {
 		const userDetails = {
 			_id: user._id,
 			email: user.email,
+			username: user.username,
 		};
 
 		// Calculate ticket price
@@ -152,8 +182,8 @@ exports.create = async (req, res) => {
 			// Create the ticket
 			const ticket = new Ticket({
 				userDetails,
-				departureFlightId,
-				returnFlightId,
+				departureFlight: departureFlightDetails,
+				returnFlight: returnFlightDetails,
 				nameOfFlyer,
 				dateOfBirth: dateOfBirth.split('T')[0],
 				roundTrip,

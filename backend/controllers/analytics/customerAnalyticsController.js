@@ -7,12 +7,12 @@ exports.popularDestinations = async (req, res) => {
 			{
 				$facet: {
 					departureFlights: [
-						{ $match: { departureFlightId: { $exists: true } } },
-						{ $group: { _id: '$departureFlightId' } },
+						{ $match: { 'departureFlight._id': { $exists: true } } },
+						{ $group: { _id: '$departureFlight._id' } },
 					],
 					returnFlights: [
-						{ $match: { returnFlightId: { $exists: true } } },
-						{ $group: { _id: '$returnFlightId' } },
+						{ $match: { 'returnFlight._id': { $exists: true } } },
+						{ $group: { _id: '$returnFlight._id' } },
 					],
 				},
 			},

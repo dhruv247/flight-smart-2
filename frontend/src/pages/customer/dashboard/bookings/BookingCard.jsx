@@ -15,59 +15,59 @@ const formatHHMM = (time) => {
 
 const BookingCard = ({ booking }) => {
 	const bookingState = booking.confirmed ? 'Confirmed' : 'Cancelled';
-	const [tickets, setTickets] = useState([]);
-	const [departureFlight, setDepartureFlight] = useState(null);
-	const [returnFlight, setReturnFlight] = useState(null);
-	const [loading, setLoading] = useState(true);
+	// const [tickets, setTickets] = useState([]);
+	// const [departureFlight, setDepartureFlight] = useState(null);
+	// const [returnFlight, setReturnFlight] = useState(null);
+	// const [loading, setLoading] = useState(true);
 	const [isTicketsModalOpen, setIsTicketsModalOpen] = useState(false);
 
-	useEffect(() => {
-		const getTicketsFromDB = async () => {
-			try {
-				const ticketIds = booking.tickets;
-				const ticketPromises = ticketIds.map(async (ticketId) => {
-					const response = await axios.get(
-						`http://localhost:8000/api/tickets/getTicketById/${ticketId}`,
-						{
-							withCredentials: true,
-						}
-					);
-					return response.data.ticket;
-				});
+	// useEffect(() => {
+	// 	const getTicketsFromDB = async () => {
+	// 		try {
+	// 			const ticketIds = booking.tickets;
+	// 			const ticketPromises = ticketIds.map(async (ticketId) => {
+	// 				const response = await axios.get(
+	// 					`http://localhost:8000/api/tickets/getTicketById/${ticketId}`,
+	// 					{
+	// 						withCredentials: true,
+	// 					}
+	// 				);
+	// 				return response.data.ticket;
+	// 			});
 
-				const fetchedTickets = await Promise.all(ticketPromises);
-				setTickets(fetchedTickets);
+	// 			const fetchedTickets = await Promise.all(ticketPromises);
+	// 			setTickets(fetchedTickets);
 
-				if (fetchedTickets && fetchedTickets.length > 0) {
-					const firstTicket = fetchedTickets[0];
-					if (firstTicket.departureFlightId) {
-						const departureFlightResponse = await axios.get(
-							`http://localhost:8000/api/flights/getFlightById/${firstTicket.departureFlightId}`,
-							{
-								withCredentials: true,
-							}
-						);
-						setDepartureFlight(departureFlightResponse.data.flight);
+	// 			if (fetchedTickets && fetchedTickets.length > 0) {
+	// 				const firstTicket = fetchedTickets[0];
+	// 				if (firstTicket.departureFlightId) {
+	// 					const departureFlightResponse = await axios.get(
+	// 						`http://localhost:8000/api/flights/getFlightById/${firstTicket.departureFlightId}`,
+	// 						{
+	// 							withCredentials: true,
+	// 						}
+	// 					);
+	// 					setDepartureFlight(departureFlightResponse.data.flight);
 
-						if (firstTicket.returnFlightId) {
-							const returnFlightResponse = await axios.get(
-								`http://localhost:8000/api/flights/getFlightById/${firstTicket.returnFlightId}`,
-								{
-									withCredentials: true,
-								}
-							);
-							setReturnFlight(returnFlightResponse.data.flight);
-						}
-					}
-				}
-			} catch (error) {
-				console.error('Error fetching tickets:', error);
-			} finally {
-				setLoading(false);
-			}
-		};
-		getTicketsFromDB();
-	}, [booking.tickets]);
+	// 					if (firstTicket.returnFlightId) {
+	// 						const returnFlightResponse = await axios.get(
+	// 							`http://localhost:8000/api/flights/getFlightById/${firstTicket.returnFlightId}`,
+	// 							{
+	// 								withCredentials: true,
+	// 							}
+	// 						);
+	// 						setReturnFlight(returnFlightResponse.data.flight);
+	// 					}
+	// 				}
+	// 			}
+	// 		} catch (error) {
+	// 			console.error('Error fetching tickets:', error);
+	// 		} finally {
+	// 			setLoading(false);
+	// 		}
+	// 	};
+	// 	getTicketsFromDB();
+	// }, [booking.tickets]);
 
 	const handleCancelBooking = async () => {
 		try {
@@ -82,15 +82,15 @@ const BookingCard = ({ booking }) => {
 			if (response.status === 200) {
 				showSuccessToast('Booking cancelled successfully');
 				const departureFlightResponse = await axios.patch(
-					`http://localhost:8000/api/flights/updateFlightPrice/${departureFlight._id}`,
+					`http://localhost:8000/api/flights/updateFlightPrice/${booking.tickets[0].departureFlight._id}`,
 					{},
 					{
 						withCredentials: true,
 					}
 				);
-				if (returnFlight) {
+				if (booking.tickets[0].returnFlight) {
 					const returnFlightResponse = await axios.patch(
-						`http://localhost:8000/api/flights/updateFlightPrice/${returnFlight._id}`,
+						`http://localhost:8000/api/flights/updateFlightPrice/${booking.tickets[0].returnFlight._id}`,
 						{},
 						{
 							withCredentials: true,
@@ -105,34 +105,34 @@ const BookingCard = ({ booking }) => {
 		}
 	};
 
-	if (loading) {
-		return (
-			<div className="d-flex flex-column">
-				<div className="row border border rounded m-0 py-2 my-2 align-items-center">
-					<div className="col-12 col-md-3 d-flex justify-content-center align-items-center">
-						<div className="d-flex flex-column align-items-center gap-2">
-							<p className="fw-bold">Id: {booking._id}</p>
-						</div>
-					</div>
-					<div className="col-12 col-md-3 d-flex justify-content-center align-items-center">
-						<div className="spinner-border" role="status">
-							<span className="visually-hidden">Loading...</span>
-						</div>
-					</div>
-					<div className="col-12 col-md-6 d-flex justify-content-around align-items-center gap-2">
-						<button className="btn btn-success px-3 py-2" disabled>
-							Tickets
-						</button>
-						<button className="btn btn-danger px-3 py-2" disabled>
-							Cancel
-						</button>
-					</div>
-				</div>
-			</div>
-		);
-	}
+	// if (loading) {
+	// 	return (
+	// 		<div className="d-flex flex-column">
+	// 			<div className="row border border rounded m-0 py-2 my-2 align-items-center">
+	// 				<div className="col-12 col-md-3 d-flex justify-content-center align-items-center">
+	// 					<div className="d-flex flex-column align-items-center gap-2">
+	// 						<p className="fw-bold">Id: {booking._id}</p>
+	// 					</div>
+	// 				</div>
+	// 				<div className="col-12 col-md-3 d-flex justify-content-center align-items-center">
+	// 					<div className="spinner-border" role="status">
+	// 						<span className="visually-hidden">Loading...</span>
+	// 					</div>
+	// 				</div>
+	// 				<div className="col-12 col-md-6 d-flex justify-content-around align-items-center gap-2">
+	// 					<button className="btn btn-success px-3 py-2" disabled>
+	// 						Tickets
+	// 					</button>
+	// 					<button className="btn btn-danger px-3 py-2" disabled>
+	// 						Cancel
+	// 					</button>
+	// 				</div>
+	// 			</div>
+	// 		</div>
+	// 	);
+	// }
 
-	if (!tickets || tickets.length === 0) {
+	if (!booking.tickets || booking.tickets.length === 0) {
 		return (
 			<div className="d-flex flex-column">
 				<div className="row border border rounded m-0 py-2 my-2 align-items-center">
@@ -144,7 +144,7 @@ const BookingCard = ({ booking }) => {
 		);
 	}
 
-	const isRoundTrip = tickets[0]?.returnFlightId !== null;
+	const isRoundTrip = booking.tickets[0]?.returnFlight !== null;
 
 	if (isRoundTrip) {
 		return (
@@ -159,32 +159,32 @@ const BookingCard = ({ booking }) => {
 					<div className="col-12 col-md-4 d-flex flex-column gap-3">
 						<div className="d-flex justify-content-between align-items-center">
 							<div className="d-flex flex-column align-items-center">
-								<p>{departureFlight?.departurePlace}</p>
-								<p>{departureFlight?.departureDate}</p>
-								<p>{formatHHMM(departureFlight?.departureTime)}</p>
+								<p>{booking.tickets[0].departureFlight?.departurePlace}</p>
+								<p>{booking.tickets[0].departureFlight?.departureDate}</p>
+								<p>{formatHHMM(booking.tickets[0].departureFlight?.departureTime)}</p>
 							</div>
 							<div className="d-flex flex-column align-items-center">
 								<p>-</p>
 							</div>
 							<div className="d-flex flex-column align-items-center">
-								<p>{departureFlight?.arrivalPlace}</p>
-								<p>{departureFlight?.arrivalDate}</p>
-								<p>{formatHHMM(departureFlight?.arrivalTime)}</p>
+								<p>{booking.tickets[0].departureFlight?.arrivalPlace}</p>
+								<p>{booking.tickets[0].departureFlight?.arrivalDate}</p>
+								<p>{formatHHMM(booking.tickets[0].departureFlight?.arrivalTime)}</p>
 							</div>
 						</div>
 						<div className="d-flex justify-content-between align-items-center">
 							<div className="d-flex flex-column align-items-center">
-								<p>{returnFlight?.departurePlace}</p>
-								<p>{returnFlight?.departureDate}</p>
-								<p>{formatHHMM(returnFlight?.departureTime)}</p>
+								<p>{booking.tickets[0].returnFlight?.departurePlace}</p>
+								<p>{booking.tickets[0].returnFlight?.departureDate}</p>
+								<p>{formatHHMM(booking.tickets[0].returnFlight?.departureTime)}</p>
 							</div>
 							<div className="d-flex flex-column align-items-center">
 								<p>-</p>
 							</div>
 							<div className="d-flex flex-column align-items-center">
-								<p>{returnFlight?.arrivalPlace}</p>
-								<p>{returnFlight?.arrivalDate}</p>
-								<p>{formatHHMM(returnFlight?.arrivalTime)}</p>
+								<p>{booking.tickets[0].returnFlight?.arrivalPlace}</p>
+								<p>{booking.tickets[0].returnFlight?.arrivalDate}</p>
+								<p>{formatHHMM(booking.tickets[0].returnFlight?.arrivalTime)}</p>
 							</div>
 						</div>
 					</div>
@@ -214,9 +214,9 @@ const BookingCard = ({ booking }) => {
 					isOpen={isTicketsModalOpen}
 					onClose={() => setIsTicketsModalOpen(false)}
 					booking={booking}
-					tickets={tickets}
-					departureFlight={departureFlight}
-					returnFlight={returnFlight}
+					tickets={booking.tickets}
+					departureFlight={booking.tickets[0].departureFlight}
+					returnFlight={booking.tickets[0].returnFlight}
 				/>
 			</div>
 		);
@@ -232,17 +232,17 @@ const BookingCard = ({ booking }) => {
 				</div>
 				<div className="col-12 col-md-4 d-flex justify-content-between align-items-center">
 					<div className="d-flex flex-column align-items-center">
-						<p>{departureFlight?.departurePlace}</p>
-						<p>{departureFlight?.departureDate}</p>
-						<p>{formatHHMM(departureFlight?.departureTime)}</p>
+						<p>{booking.tickets[0].departureFlight?.departurePlace}</p>
+						<p>{booking.tickets[0].departureFlight?.departureDate}</p>
+						<p>{formatHHMM(booking.tickets[0].departureFlight?.departureTime)}</p>
 					</div>
 					<div className="d-flex flex-column align-items-center">
 						<p>-</p>
 					</div>
 					<div className="d-flex flex-column align-items-center">
-						<p>{departureFlight?.arrivalPlace}</p>
-						<p>{departureFlight?.arrivalDate}</p>
-						<p>{formatHHMM(departureFlight?.arrivalTime)}</p>
+						<p>{booking.tickets[0].departureFlight?.arrivalPlace}</p>
+						<p>{booking.tickets[0].departureFlight?.arrivalDate}</p>
+						<p>{formatHHMM(booking.tickets[0].departureFlight?.arrivalTime)}</p>
 					</div>
 				</div>
 
@@ -271,9 +271,9 @@ const BookingCard = ({ booking }) => {
 				isOpen={isTicketsModalOpen}
 				onClose={() => setIsTicketsModalOpen(false)}
 				booking={booking}
-				tickets={tickets}
-				departureFlight={departureFlight}
-				returnFlight={returnFlight}
+				tickets={booking.tickets}
+				departureFlight={booking.tickets[0].departureFlight}
+				returnFlight={booking.tickets[0].returnFlight}
 			/>
 		</div>
 	);

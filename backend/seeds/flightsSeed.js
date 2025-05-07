@@ -40,7 +40,7 @@ const isValidTime = (timeStr) => {
 const generateRandomDate = () => {
 	const startDate = new Date(); // Current Day
 	startDate.setHours(0, 0, 0, 0); // Set to start of day to ensure we don't miss today
-	const endDate = new Date('2025-05-11');
+	const endDate = new Date('2025-05-14');
 	const randomDate = new Date(
 		startDate.getTime() +
 			Math.random() * (endDate.getTime() - startDate.getTime())
@@ -84,7 +84,7 @@ const seedFlights = async () => {
 		);
 
 		const flights = [];
-		const numberOfFlights = 50; // Generate 5 random flights
+		const numberOfFlights = 490; // Generate 5 random flights
 
 		for (let i = 0; i < numberOfFlights; i++) {
 			const plane = planes[Math.floor(Math.random() * planes.length)];

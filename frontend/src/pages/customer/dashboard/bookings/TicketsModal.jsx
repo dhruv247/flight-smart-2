@@ -86,7 +86,7 @@ const TicketsModal = ({
 													<div className="d-flex flex-column gap-2">
 														<div>
 															<strong>Airline:</strong>{' '}
-															{departureFlight?.airlineDetails?.airlineName}
+															{departureFlight?.airline}
 														</div>
 														<div>
 															<strong>Flight Number:</strong>{' '}
@@ -140,7 +140,7 @@ const TicketsModal = ({
 														<div className="d-flex flex-column gap-2">
 															<div>
 																<strong>Airline:</strong>{' '}
-																{returnFlight?.airlineDetails?.airlineName}
+																{returnFlight?.airline}
 															</div>
 															<div>
 																<strong>Flight Number:</strong>{' '}

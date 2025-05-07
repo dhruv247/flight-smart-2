@@ -20,6 +20,38 @@ const BookingDetails = () => {
 	const [loading, setLoading] = useState(true);
 	const [isCreatingBooking, setIsCreatingBooking] = useState(false);
 
+	/**
+	 * Calculate age from date of birth
+	 * @param {string} dateOfBirth - Date of birth in YYYY-MM-DD format
+	 * @returns {number} Age in years
+	 */
+	const calculateAge = (dateOfBirth) => {
+		if (!dateOfBirth) return 0;
+		const today = new Date();
+		const birthDate = new Date(dateOfBirth);
+		let age = today.getFullYear() - birthDate.getFullYear();
+		const monthDiff = today.getMonth() - birthDate.getMonth();
+
+		if (
+			monthDiff < 0 ||
+			(monthDiff === 0 && today.getDate() < birthDate.getDate())
+		) {
+			age--;
+		}
+
+		return age;
+	};
+
+	/**
+	 * Check if at least one adult (18 or older) is present in the booking
+	 * @returns {boolean} True if at least one adult is present
+	 */
+	const hasAdultPresent = () => {
+		return passengerDetails.some(
+			(passenger) => calculateAge(passenger.dateOfBirth) >= 18
+		);
+	};
+
 	useEffect(() => {
 		/**
 		 * Get current users details for creation of tickets and bookings
@@ -135,6 +167,7 @@ const BookingDetails = () => {
 		const userDetails = {
 			_id: currentUserDetails._id,
 			email: currentUserDetails.email,
+			username: currentUserDetails.username,
 		};
 
 		try {
@@ -156,7 +189,19 @@ const BookingDetails = () => {
 				}
 			}
 
+			// Check if at least one adult is present
+			if (!hasAdultPresent()) {
+				throw new Error(
+					'At least one adult (18 or older) must be present in the booking'
+				);
+			}
+
 			const createdTickets = [];
+
+			const adultPresent = passengerDetails.some(
+				(passenger) => calculateAge(passenger.dateOfBirth) >= 18
+			);
+
 			for (const passenger of passengerDetails) {
 				let documentImageUrl = '';
 
@@ -190,13 +235,13 @@ const BookingDetails = () => {
 
 				try {
 					const ticket = {
-						userDetails,
+						// userDetails,
 						departureFlightId: bookingDetails.departureFlightId,
 						returnFlightId: bookingDetails.returnFlightId || null,
 						nameOfFlyer: passenger.nameOfFlyer,
 						dateOfBirth: passenger.dateOfBirth,
 						seatType: bookingDetails.seatType,
-						ticketPrice: bookingDetails.ticketPrice,
+						// ticketPrice: bookingDetails.ticketPrice,
 						identificationDocument,
 						departureFlightSeatNumber: parseInt(
 							passenger.departureFlightSeatNumber
@@ -204,7 +249,7 @@ const BookingDetails = () => {
 						returnFlightSeatNumber: passenger.returnFlightSeatNumber
 							? parseInt(passenger.returnFlightSeatNumber)
 							: null,
-						roundTrip: !!bookingDetails.returnFlightId,
+						// roundTrip: !!bookingDetails.returnFlightId,
 					};
 
 					const response = await axios.post(

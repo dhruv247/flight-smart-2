@@ -4,7 +4,7 @@ const User = require('../../models/User');
 const Flight = require('../../models/Flight');
 const Seat = require('../../models/Seat');
 const { sendBookingConfirmationEmail } = require('../../utils/emailUtils');
-
+const mongoose = require('mongoose');
 // Helper function to calculate age from date of birth
 const calculateAge = (dateOfBirth) => {
 	const today = new Date();
@@ -59,14 +59,31 @@ exports.create = async (req, res) => {
 			bookingPrice += Number(ticket.ticketPrice);
 		}
 
+		const ticketsArray = ticketDetails.map((ticket) => {
+			return {
+				_id: ticket._id,
+				departureFlight: ticket.departureFlight,
+				returnFlight: ticket.returnFlight,
+				nameOfFlyer: ticket.nameOfFlyer,
+				dateOfBirth: ticket.dateOfBirth,
+				roundTrip: ticket.roundTrip,
+				seatType: ticket.seatType,
+				departureFlightSeatNumber: ticket.departureFlightSeatNumber,
+				returnFlightSeatNumber: ticket.returnFlightSeatNumber,
+				ticketPrice: ticket.ticketPrice,
+				identificationDocument: ticket.identificationDocument,
+			};
+		});
+
 		const userDetails = {
 			_id: user._id,
 			email: user.email,
+			username: user.username,
 		};
 
 		const booking = new Booking({
 			userDetails,
-			tickets,
+			tickets: ticketsArray,
 			bookingPrice,
 		});
 
@@ -100,7 +117,7 @@ exports.getBookings = async (req, res) => {
 		const bookings = await Booking.aggregate([
 			{
 				$match: {
-					'userDetails._id': userId,
+					'userDetails._id': new mongoose.Types.ObjectId(userId),
 				},
 			},
 			{
@@ -146,13 +163,13 @@ exports.cancelBooking = async (req, res) => {
 		booking.confirmed = false;
 		await booking.save();
 
-		const ticketIds = booking.tickets;
+		const tickets = booking.tickets;
 
-		const tickets = await Ticket.find({ _id: { $in: ticketIds } });
+		// const tickets = await Ticket.find({ _id: { $in: ticketIds } });
 
 		for (let ticket of tickets) {
-			const departureFlightId = ticket.departureFlightId;
-			const returnFlightId = ticket.returnFlightId;
+			const departureFlightId = ticket.departureFlight._id;
+			const returnFlightId = ticket.returnFlight._id;
 
 			const departureFlightSeatNumber = ticket.departureFlightSeatNumber;
 			const returnFlightSeatNumber = ticket.returnFlightSeatNumber;
@@ -180,10 +197,10 @@ exports.cancelBooking = async (req, res) => {
 			}
 		}
 
-		const departureFlight = await Flight.findById(tickets[0].departureFlightId);
+		const departureFlight = await Flight.findById(tickets[0].departureFlight._id);
 		let returnFlight;
 		if (tickets[0].roundTrip) {
-			returnFlight = await Flight.findById(tickets[0].returnFlightId);
+			returnFlight = await Flight.findById(tickets[0].returnFlight._id);
 		}
 
 		if (departureFlight) {

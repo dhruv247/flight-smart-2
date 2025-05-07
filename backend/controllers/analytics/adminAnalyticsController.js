@@ -11,12 +11,12 @@ const Flight = require('../../models/Flight');
  */
 exports.flights = async (req, res) => {
 	try {
-		const num = parseInt(req.query.num) || 10; // Default to 10 if not provided
+		const num = parseInt(req.query.num) || 3; // Default to 10 if not provided
 
 		const departureFlights = await Ticket.aggregate([
 			{
 				$group: {
-					_id: '$departureFlightId',
+					_id: '$departureFlight._id',
 					count: { $sum: 1 },
 				},
 			},

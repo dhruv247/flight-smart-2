@@ -2,7 +2,7 @@ const Message = require('../../models/Message');
 const User = require('../../models/User');
 const mongoose = require('mongoose');
 const Ticket = require('../../models/Ticket');
-const Flight = require('../../models/Flight'); 
+const Flight = require('../../models/Flight');
 
 /**
  * Get conversation between two users
@@ -10,7 +10,7 @@ const Flight = require('../../models/Flight');
  * @param {*} res
  * @description
  * 1. Get conversation between two users
- * 
+ *
  */
 exports.getConversation = async (req, res) => {
 	try {
@@ -51,7 +51,6 @@ exports.getConversation = async (req, res) => {
  */
 exports.getAirlines = async (req, res) => {
 	try {
-		
 		const customer = await User.findById(req.user._id);
 
 		if (!customer) {
@@ -63,9 +62,11 @@ exports.getAirlines = async (req, res) => {
 
 		// get all flight ids from the tickets
 		const flightIds = tickets.reduce((acc, ticket) => {
-			acc.push(ticket.departureFlightId);
-			if (ticket.returnFlightId) {
-				acc.push(ticket.returnFlightId);
+			if (ticket.departureFlight && ticket.departureFlight._id) {
+				acc.push(ticket.departureFlight._id);
+			}
+			if (ticket.returnFlight && ticket.returnFlight._id) {
+				acc.push(ticket.returnFlight._id);
 			}
 			return acc;
 		}, []);
@@ -110,8 +111,8 @@ exports.getCustomers = async (req, res) => {
 		// Get all tickets that use these flights
 		const tickets = await Ticket.find({
 			$or: [
-				{ departureFlightId: { $in: flightIds } },
-				{ returnFlightId: { $in: flightIds } },
+				{ 'departureFlight._id': { $in: flightIds } },
+				{ 'returnFlight._id': { $in: flightIds } },
 			],
 		});
 

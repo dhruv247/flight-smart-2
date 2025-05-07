@@ -1,5 +1,43 @@
 const mongoose = require('mongoose');
 
+const departureFlightSchema = new mongoose.Schema({
+	_id: {
+		type: mongoose.Schema.Types.ObjectId,
+		required: true,
+		ref: 'Flight',
+		suppressWarning: true,
+	},
+	flightNo: { type: String, required: true },
+	airline: { type: String, required: true },
+	plane: { type: String, required: true },
+	departurePlace: { type: String, required: true },
+	departureDate: { type: String, required: true },
+	departureTime: { type: Number, required: true },
+	arrivalPlace: { type: String, required: true },
+	arrivalDate: { type: String, required: true },
+	arrivalTime: { type: Number, required: true },
+	duration: { type: Number, required: true },
+}, { _id: false });
+
+const returnFlightSchema = new mongoose.Schema({
+	_id: {
+		type: mongoose.Schema.Types.ObjectId,
+		required: true,
+		ref: 'Flight',
+		suppressWarning: true,
+	},
+	flightNo: { type: String, required: true },
+	airline: { type: String, required: true },
+	plane: { type: String, required: true },
+	departurePlace: { type: String, required: true },
+	departureDate: { type: String, required: true },
+	departureTime: { type: Number, required: true },
+	arrivalPlace: { type: String, required: true },
+	arrivalDate: { type: String, required: true },
+	arrivalTime: { type: Number, required: true },
+	duration: { type: Number, required: true },
+}, { _id: false });
+
 const userDetailsSchema = new mongoose.Schema({
 	_id: {
 		type: mongoose.Schema.Types.ObjectId,
@@ -8,7 +46,8 @@ const userDetailsSchema = new mongoose.Schema({
 		suppressWarning: true,
 	},
 	email: { type: String, required: true },
-});
+	username: { type: String, required: true },
+}, { _id: false });
 
 const identificationDocumentSchema = new mongoose.Schema(
 	{
@@ -25,18 +64,8 @@ const identificationDocumentSchema = new mongoose.Schema(
 const ticketSchema = new mongoose.Schema(
 	{
 		userDetails: userDetailsSchema,
-		departureFlightId: {
-			type: mongoose.Schema.Types.ObjectId,
-			required: true,
-			ref: 'Flight',
-			suppressWarning: true,
-		},
-		returnFlightId: {
-			type: mongoose.Schema.Types.ObjectId,
-			default: null,
-			ref: 'Flight',
-			suppressWarning: true,
-		},
+		departureFlight: departureFlightSchema,
+		returnFlight: returnFlightSchema,
 		nameOfFlyer: { type: String, required: true },
 		dateOfBirth: { type: String, required: true },
 		roundTrip: { type: Boolean, required: true, default: false },
