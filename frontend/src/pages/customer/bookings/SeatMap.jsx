@@ -87,7 +87,7 @@ const SeatMap = ({ flightId, seatType, onSeatSelect, blockedSeats = [] }) => {
 	return (
 		<div>
 			<div className="mb-3">
-				<div className="d-flex justify-content-center mb-2">
+				<div className="d-flex flex-md-row flex-column justify-content-center align-items-center gap-2 mb-2">
 					<div className="d-flex align-items-center me-3">
 						<div
 							className="btn btn-outline-primary me-1"

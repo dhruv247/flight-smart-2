@@ -14,7 +14,7 @@ const CustomerDashboardChat = () => {
 	return (
 		<div className="h-100">
 			<div className="d-flex h-100">
-				{/* Sidebar Toggle Button - Only visible on mobile */}
+				{/* Sidebar Toggle Button */}
 				<button
 					className="btn btn-primary d-lg-none position-fixed start-0 top-50 translate-middle-y rounded-end"
 					onClick={() => setIsSidebarOpen(true)}

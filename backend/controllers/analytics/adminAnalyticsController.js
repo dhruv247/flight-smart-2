@@ -7,8 +7,7 @@ const Booking = require('../../models/Booking');
  * @param {*} req
  * @param {*} res
  * @description
- * 1. Get the top departure flights by number of tickets using a single aggregation pipeline
- * 2. Uses embedded flight data from the Booking model for better performance
+ * 1. Get the top departure flights by number of tickets
  */
 exports.flights = async (req, res) => {
 	try {
@@ -30,9 +29,9 @@ exports.flights = async (req, res) => {
 			},
 			// Sort by count in descending order
 			{ $sort: { count: -1 } },
-			// Limit to requested number of results
+			
 			{ $limit: num },
-			// Project final output format
+			
 			{
 				$project: {
 					_id: 0,

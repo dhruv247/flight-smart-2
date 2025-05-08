@@ -160,6 +160,16 @@ const CustomerChatBox = ({ selectedUser }) => {
 										style={{ maxWidth: '75%', wordBreak: 'break-word' }}
 									>
 										{msg.text}
+										<div
+											className={`small ${
+												msg.sender === user._id ? 'text-white-50' : 'text-muted'
+											} mt-1`}
+										>
+											{new Date(msg.createdAt).toLocaleTimeString([], {
+												hour: '2-digit',
+												minute: '2-digit',
+											})}
+										</div>
 									</div>
 								</div>
 							))

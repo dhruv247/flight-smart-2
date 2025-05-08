@@ -45,8 +45,8 @@ exports.register = async (req, res) => {
 		}
 
 		// Validate username length
-		if (username.length > 10) {
-			throw new Error('Username must be less than 10 characters');
+		if (username.length > 30) {
+			throw new Error('Username must be less than 30 characters');
 		}
 
 		// Validate password complexity
@@ -282,6 +282,14 @@ exports.updatePassword = async (req, res) => {
 	}
 };
 
+/**
+ * Update the profile picture of the logged in user
+ * @param {*} req
+ * @param {*} res
+ * @description
+ * 1. Finds the user by id
+ * 2. Updates the profile picture
+ */
 exports.updateProfilePicture = async (req, res) => {
 	try {
 		const { profilePicture } = req.body;

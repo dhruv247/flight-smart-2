@@ -1,9 +1,22 @@
 const Ticket = require('../../models/Ticket');
 
+/**
+ * Get's the popular destinations for a customer
+ * @param {*} req
+ * @param {*} res
+ * @description
+ * Group the tickets by departure and return flights
+ * unwind both departure and return flights
+ * Then, group by arrival place
+ * Then, sort by count in descending order
+ * Then, lookup city details (doin this because images are not stored in the ticket model)
+ * Then, unwind city details
+ * Then, project only the city details
+ */
 exports.popularDestinations = async (req, res) => {
 	try {
 		const popularDestinations = await Ticket.aggregate([
-			// First, unwind both departure and return flights
+			
 			{
 				$facet: {
 					departureFlights: [
@@ -23,7 +36,7 @@ exports.popularDestinations = async (req, res) => {
 					],
 				},
 			},
-			// Combine both arrays and merge counts for same destinations
+			
 			{
 				$project: {
 					allDestinations: {
@@ -38,11 +51,11 @@ exports.popularDestinations = async (req, res) => {
 					count: { $sum: '$allDestinations.count' },
 				},
 			},
-			// Sort by count in descending order
+			
 			{ $sort: { count: -1 } },
-			// Limit to top 4
+			
 			{ $limit: 4 },
-			// Lookup city details
+			
 			{
 				$lookup: {
 					from: 'cities',
@@ -51,9 +64,9 @@ exports.popularDestinations = async (req, res) => {
 					as: 'cityDetails',
 				},
 			},
-			// Unwind city details
+			
 			{ $unwind: '$cityDetails' },
-			// Project only the city details
+			
 			{
 				$project: {
 					_id: '$cityDetails._id',

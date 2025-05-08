@@ -87,15 +87,14 @@ const sendBookingConfirmationEmail = async (user, booking) => {
 			<h2 style="color: #2c3e50;">Booking Confirmation</h2>
 			<p>Hello</p>
 			<p>Thank you for booking with Flight Smart! Your booking has been confirmed.</p>
+			<p>Please check your booking details in your Flight Smart Dashboard.</p>
 			
 			<div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0;">
 				<h3 style="color: #2c3e50;">Booking Details</h3>
 				<p><strong>Booking ID:</strong> ${booking._id}</p>
-				<p><strong>Total Amount:</strong> ${booking.bookingPrice}</p>
+				<p><strong>Total Amount:</strong> ₹${booking.bookingPrice}</p>
 				<p><strong>Booking Date:</strong> ${formatDateTime(booking.createdAt)}</p>
 			</div>
-
-			<p style="margin-top: 30px;">Please check your booking details in your Flight Smart Dashboard.</p>
 			
 			<p>Best regards,<br>Flight Smart Team</p>
 		</div>
@@ -104,10 +103,10 @@ const sendBookingConfirmationEmail = async (user, booking) => {
 	const text = `Booking Confirmation\n\n
 		Hello,\n\n
 		Thank you for booking with Flight Smart! Your booking has been confirmed.\n\n
+		Please check your booking details in your Flight Smart Dashboard.\n\n
 		Booking ID: ${booking._id}\n
 		Total Amount: ${booking.bookingPrice}\n
 		Booking Date: ${formatDateTime(booking.createdAt)}\n\n
-		Please check your booking details in your Flight Smart Dashboard.\n\n
 		Best regards,\n
 		Flight Smart Team`;
 

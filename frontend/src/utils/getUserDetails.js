@@ -1,7 +1,11 @@
 import axios from 'axios';
 
+/**
+ * Get the details of the logged in user
+ * @returns {Promise<Object>} The user details
+ * @throws {Error} If the user is not logged in
+ */
 const getUserDetails = async () => {
-
 	try {
 		const response = await axios
 			.get('http://localhost:8000/api/user/auth/me', { withCredentials: true })

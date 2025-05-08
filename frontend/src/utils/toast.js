@@ -23,12 +23,12 @@ export const showToast = (type, message) => {
 		case 'error':
 			toast.error(message, options);
 			break;
-		case 'info':
-			toast.info(message, options);
-			break;
-		case 'warning':
-			toast.warning(message, options);
-			break;
+		// case 'info':
+		// 	toast.info(message, options);
+		// 	break;
+		// case 'warning':
+		// 	toast.warning(message, options);
+		// 	break;
 		default:
 			toast(message, options);
 	}

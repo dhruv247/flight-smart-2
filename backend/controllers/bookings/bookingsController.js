@@ -5,6 +5,7 @@ const Flight = require('../../models/Flight');
 const Seat = require('../../models/Seat');
 const { sendBookingConfirmationEmail } = require('../../utils/emailUtils');
 const mongoose = require('mongoose');
+
 // Helper function to calculate age from date of birth
 const calculateAge = (dateOfBirth) => {
 	const today = new Date();
