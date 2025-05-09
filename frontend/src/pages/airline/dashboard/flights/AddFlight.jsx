@@ -40,7 +40,7 @@ const AddFlight = () => {
 		const fetchPlanes = async () => {
 			try {
 				const response = await axios.get(
-					'http://localhost:8000/api/planes/get-all',
+					'http://localhost:8000/api/planes/get-all-planes',
 					{
 						withCredentials: true,
 					}
@@ -100,7 +100,7 @@ const AddFlight = () => {
 			);
 
 			const response = await axios.post(
-				'http://localhost:8000/api/flights/create',
+				'http://localhost:8000/api/flights/create-flight',
 				{
 					...flightDetails,
 					flightNo: fullFlightNo,

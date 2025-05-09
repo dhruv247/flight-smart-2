@@ -36,7 +36,7 @@ const AddCity = () => {
 
 		try {
 			const imageURLResponse = await axios.post(
-				'http://localhost:8000/api/images/upload',
+				'http://localhost:8000/api/images/upload-image',
 				formData,
 				{
 					headers: {
@@ -45,7 +45,7 @@ const AddCity = () => {
 				}
 			);
 
-			if (!imageURLResponse.data.success) {
+			if (!imageURLResponse.data.url) {
 				throw new Error(
 					imageURLResponse.data.message || 'Failed to upload document image'
 				);
@@ -59,14 +59,14 @@ const AddCity = () => {
 			};
 
 			const response = await axios.post(
-				'http://localhost:8000/api/cities/create',
+				'http://localhost:8000/api/cities/add-city',
 				city,
 				{
 					withCredentials: true,
 				}
 			);
 
-			if (response.data.success) {
+			if (response.data.message === 'City created successfully') {
 				showSuccessToast('City added successfully!');
 				setCityDetails({
 					name: '',
@@ -75,8 +75,8 @@ const AddCity = () => {
 				formRef.current.reset();
 			}
 		} catch (error) {
-			console.log(error.message);
-			showErrorToast(error.message);
+			const errorMessage = error.response?.data?.message || error.message;
+			showErrorToast(errorMessage);
 		}
 	};
 

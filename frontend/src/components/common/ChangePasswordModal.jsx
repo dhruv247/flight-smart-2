@@ -24,7 +24,7 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
 
 		try {
 			await axios.patch(
-				'http://localhost:8000/api/user/auth/update-password',
+				'http://localhost:8000/api/auth/update-password',
 				{
 					oldPassword: formData.oldPassword,
 					newPassword: formData.newPassword,

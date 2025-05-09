@@ -1,9 +1,8 @@
-// Import models
-const Flight = require('../models/Flight');
-const Plane = require('../models/Plane');
-const City = require('../models/City');
-const User = require('../models/User');
-const createSeats = require('../utils/createSeats');
+import { Flight } from '../models/flight.model.js';
+import { Plane } from '../models/plane.model.js';
+import { City } from '../models/city.model.js';
+import { User } from '../models/user.model.js';
+import { createSeats } from '../utils/seatUtils.js';
 
 /**
  * Validates if a string is a valid date in YYYY-MM-DD format
@@ -193,4 +192,4 @@ const seedFlights = async () => {
 	}
 };
 
-module.exports = seedFlights;
+export { seedFlights };

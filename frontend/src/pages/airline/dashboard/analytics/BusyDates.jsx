@@ -65,7 +65,7 @@ const BusyDates = () => {
 		const getBusyDates = async () => {
 			try {
 				const response = await axios.get(
-					'http://localhost:8000/api/analytics/airline/busy-dates',
+					'http://localhost:8000/api/analytics/top-dates-by-number-of-flights',
 					{
 						withCredentials: true,
 					}

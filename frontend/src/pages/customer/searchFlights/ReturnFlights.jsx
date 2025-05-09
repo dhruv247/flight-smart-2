@@ -26,7 +26,7 @@ const ReturnFlights = () => {
 		try {
 			setIsLoading(true);
 			const response = await axios.post(
-				'http://localhost:8000/api/flights/search',
+				'http://localhost:8000/api/flights/search-flights',
 				{
 					flightFrom: flightSearchData.flightTo,
 					flightTo: flightSearchData.flightFrom,

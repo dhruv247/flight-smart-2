@@ -27,7 +27,7 @@ const ChangeProfileModal = ({ isOpen, onClose }) => {
 			formData.append('image', selectedImage);
 
 			const imageURLResponse = await axios.post(
-				'http://localhost:8000/api/images/upload',
+				'http://localhost:8000/api/images/upload-image',
 				formData,
 				{
 					headers: {
@@ -36,7 +36,7 @@ const ChangeProfileModal = ({ isOpen, onClose }) => {
 				}
 			);
 
-			if (!imageURLResponse.data.success) {
+			if (!imageURLResponse.data.url) {
 				throw new Error(
 					imageURLResponse.data.message || 'Failed to upload image'
 				);
@@ -46,7 +46,7 @@ const ChangeProfileModal = ({ isOpen, onClose }) => {
 
 			// Then update the user's profile picture
 			await axios.patch(
-				'http://localhost:8000/api/user/auth/update-profile-picture',
+				'http://localhost:8000/api/auth/update-profile-picture',
 				{ profilePicture: imageUrl },
 				{ withCredentials: true }
 			);

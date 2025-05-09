@@ -61,7 +61,7 @@ const TopAirlines = ({ noOfTopAirlines }) => {
 		const getTopAirlines = async () => {
 			try {
 				const response = await axios.get(
-					`http://localhost:8000/api/analytics/admin/top-airlines?num=${noOfTopAirlines}`,
+					`http://localhost:8000/api/analytics/top-airlines-by-number-of-flights?num=${noOfTopAirlines}`,
 					{ withCredentials: true }
 				);
 				setTopAirlinesList(response.data);

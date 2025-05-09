@@ -10,7 +10,7 @@ const ViewPlane = () => {
 		const getPlanes = async () => {
 			try {
 				const response = await axios.get(
-					'http://localhost:8000/api/planes/get-all',
+					'http://localhost:8000/api/planes/get-all-planes',
 					{ withCredentials: true }
 				);
 

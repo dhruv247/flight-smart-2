@@ -72,7 +72,7 @@ const BookingCard = ({ booking }) => {
 	const handleCancelBooking = async () => {
 		try {
 			const response = await axios.patch(
-				`http://localhost:8000/api/bookings/cancelBooking/${booking._id}`,
+				`http://localhost:8000/api/bookings/cancel-booking/${booking._id}`,
 				{},
 				{
 					withCredentials: true,
@@ -82,7 +82,7 @@ const BookingCard = ({ booking }) => {
 			if (response.status === 200) {
 				showSuccessToast('Booking cancelled successfully');
 				const departureFlightResponse = await axios.patch(
-					`http://localhost:8000/api/flights/updateFlightPrice/${booking.tickets[0].departureFlight._id}`,
+					`http://localhost:8000/api/flights/update-flight-price/${booking.tickets[0].departureFlight._id}`,
 					{},
 					{
 						withCredentials: true,
@@ -90,7 +90,7 @@ const BookingCard = ({ booking }) => {
 				);
 				if (booking.tickets[0].returnFlight) {
 					const returnFlightResponse = await axios.patch(
-						`http://localhost:8000/api/flights/updateFlightPrice/${booking.tickets[0].returnFlight._id}`,
+						`http://localhost:8000/api/flights/update-flight-price/${booking.tickets[0].returnFlight._id}`,
 						{},
 						{
 							withCredentials: true,

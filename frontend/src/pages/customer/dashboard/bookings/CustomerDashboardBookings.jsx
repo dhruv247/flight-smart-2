@@ -11,7 +11,7 @@ const BookingPage = () => {
 		const getBookingsFromDB = async () => {
 			try {
 				const bookings = await axios.get(
-					'http://localhost:8000/api/bookings/getBookings',
+					'http://localhost:8000/api/bookings/get-bookings-for-customer',
 					{
 						withCredentials: true,
 					}

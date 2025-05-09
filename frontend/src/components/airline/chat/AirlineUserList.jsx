@@ -21,7 +21,7 @@ const AirlineUserList = ({ onSelectUser, selectedUser }) => {
 		const fetchCustomers = async () => {
 			try {
 				const response = await axios.get(
-					'http://localhost:8000/api/messages/get-customers',
+					'http://localhost:8000/api/messages/get-customers-for-airline',
 					{ withCredentials: true }
 				);
 				setCustomers(response.data);

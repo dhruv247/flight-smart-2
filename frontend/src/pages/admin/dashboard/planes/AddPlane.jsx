@@ -80,7 +80,7 @@ const AddPlane = () => {
 
 		try {
 			const response = await axios.post(
-				'http://localhost:8000/api/planes/create',
+				'http://localhost:8000/api/planes/add-plane',
 				planeDetails,
 				{
 					withCredentials: true,
@@ -98,7 +98,6 @@ const AddPlane = () => {
 				setErrors({});
 			}
 		} catch (error) {
-			console.error('Error adding plane:', error);
 			showErrorToast(error.response?.data?.message || 'Failed to add plane');
 		}
 	};

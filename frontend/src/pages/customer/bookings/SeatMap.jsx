@@ -15,7 +15,7 @@ const SeatMap = ({ flightId, seatType, onSeatSelect, blockedSeats = [] }) => {
 			try {
 				setLoading(true);
 				const response = await axios.get(
-					`http://localhost:8000/api/seats/getSeats/${flightId}`
+					`http://localhost:8000/api/seats/get-seats-for-flight/${flightId}`
 				);
 				setSeats(response.data.data);
 				setSelectedSeat(null); // Reset selected seat when flight changes

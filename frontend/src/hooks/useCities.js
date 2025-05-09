@@ -10,7 +10,7 @@ export const useCities = () => {
 		const fetchCities = async () => {
 			try {
 				const response = await axios.get(
-					'http://localhost:8000/api/cities/getAll',
+					'http://localhost:8000/api/cities/get-all-cities',
 					{
 						withCredentials: true,
 					}

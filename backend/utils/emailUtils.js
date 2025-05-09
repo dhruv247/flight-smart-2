@@ -1,7 +1,10 @@
-const nodemailer = require('nodemailer');
-require('dotenv').config();
+import nodemailer from 'nodemailer';
+import dotenv from 'dotenv';
+dotenv.config();
 
-// create a transporter
+/**
+ * Create a transporter
+ */
 const transporter = nodemailer.createTransport({
 	service: process.env.EMAIL_SERVICE || 'gmail',
 	auth: {
@@ -10,7 +13,13 @@ const transporter = nodemailer.createTransport({
 	},
 });
 
-// sendmail format function
+/**
+ * Send email
+ * @param {string} to - The email address of the recipient
+ * @param {string} subject - The subject of the email
+ * @param {string} text - The text of the email
+ * @param {string} html - The HTML of the email
+ */
 const sendEmail = async (to, subject, text, html = null) => {
 	try {
 		const mailOptions = {
@@ -22,7 +31,6 @@ const sendEmail = async (to, subject, text, html = null) => {
 		};
 
 		const info = await transporter.sendMail(mailOptions);
-		// console.log('Email sent successfully:', info.messageId);
 		return info;
 	} catch (error) {
 		console.error('Error sending email:', error.message);
@@ -30,7 +38,11 @@ const sendEmail = async (to, subject, text, html = null) => {
 	}
 };
 
-// send airline verification email
+/**
+ * Send airline verification email
+ * @param {object} airline - The airline object
+ * @returns {Promise<object>} - The email info
+ */
 const sendAirlineVerificationEmail = async (airline) => {
 	const subject = 'Flight Smart - Airline Verification';
 	const text = `Hello ${airline.username},\n\nWe are pleased to inform you that your registration request for Flight Smart has been approved.\n\nPlease proceed to the login page to access your account.\n\nBest regards,\nFlight Smart Team`;
@@ -48,7 +60,11 @@ const sendAirlineVerificationEmail = async (airline) => {
 	return sendEmail(airline.email, subject, text, html);
 };
 
-// send rejection email to airline
+/**
+ * Send airline deletion email
+ * @param {object} airline - The airline object
+ * @returns {Promise<object>} - The email info
+ */
 const sendAirlineDeletionEmail = async (airline) => {
 	const subject = 'Flight Smart Registration Request Denied';
 	const text = `Hello ${airline.username},\n\nWe regret to inform you that your registration request for Flight Smart has been denied by our administrators.\n\nIf you believe this was a mistake or would like to reapply, please contact our support team.\n\nBest regards,\nFlight Smart Team`;
@@ -66,7 +82,12 @@ const sendAirlineDeletionEmail = async (airline) => {
 	return sendEmail(airline.email, subject, text, html);
 };
 
-// send booking confirmation email
+/**
+ * Send booking confirmation email
+ * @param {object} user - The user object
+ * @param {object} booking - The booking object
+ * @returns {Promise<object>} - The email info
+ */
 const sendBookingConfirmationEmail = async (user, booking) => {
 	const subject = 'Flight Smart - Booking Confirmation';
 
@@ -113,8 +134,7 @@ const sendBookingConfirmationEmail = async (user, booking) => {
 	return sendEmail(user.email, subject, text, html);
 };
 
-module.exports = {
-	sendEmail,
+export {
 	sendAirlineDeletionEmail,
 	sendBookingConfirmationEmail,
 	sendAirlineVerificationEmail,

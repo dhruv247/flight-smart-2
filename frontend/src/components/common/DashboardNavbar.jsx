@@ -17,7 +17,7 @@ const DashboardNavbar = ({
 		try {
 
 			const response = await axios.post(
-				'http://localhost:8000/api/user/auth/logout',
+				'http://localhost:8000/api/auth/logout',
 				{},
 				{ withCredentials: true }
 			);	

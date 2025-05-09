@@ -11,7 +11,7 @@ const VerifiedAirlineList = () => {
 		const fetchVerifiedAirlines = async () => {
 			try {
 				const response = await axios.get(
-					'http://localhost:8000/api/admin/airline/get-all',
+					'http://localhost:8000/api/auth/get-all-airlines',
 					{
 						withCredentials: true,
 					}

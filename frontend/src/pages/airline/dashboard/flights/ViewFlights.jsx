@@ -11,7 +11,7 @@ const ViewFlights = () => {
 		const fetchFlights = async () => {
 			try {
 				const response = await axios.get(
-					`http://localhost:8000/api/flights/getAllFlightsForAirline?page=${currentPage}&size=${pageSize}`,
+					`http://localhost:8000/api/flights/get-all-flights-for-airline?page=${currentPage}&size=${pageSize}`,
 					{ withCredentials: true }
 				);
 				setFlights(response.data.flights);

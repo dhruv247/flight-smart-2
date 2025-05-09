@@ -1,23 +1,27 @@
-const express = require('express');
-const { connectDB } = require('./connect'); // Required to make a connection to DB
-const cors = require('cors');
-const cookieParser = require('cookie-parser');
-const createAdminUser = require('./seeds/adminSeed'); // creates an admin manually
-const seedFlights = require('./seeds/flightsSeed'); // creates sample flights in large numbers
-const { setupSocket } = require('./socket');
-
-const http = require('http');
+import express from 'express';
+import http from 'http';
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
+import { setupSocket } from './utils/socket.js';
+import { connectDB } from './utils/connectDB.js';
+import { createAdminUser } from './seeds/adminSeed.js';
+import { seedFlights } from './seeds/flightsSeed.js';
+import { router as analyticsRoutes } from './routes/analytics.routes.js';
+import { router as authRoutes } from './routes/auth.routes.js';
+import { router as bookingRoutes } from './routes/booking.routes.js';
+import { router as cityRoutes } from './routes/city.routes.js';
+import { router as flightRoutes } from './routes/flight.routes.js';
+import { router as imageRoutes } from './routes/image.routes.js';
+import { router as messageRoutes } from './routes/message.routes.js';
+import { router as planeRoutes } from './routes/plane.routes.js';
+import { router as seatRoutes } from './routes/seat.routes.js';
+import { router as ticketRoutes } from './routes/ticket.routes.js';
 
 const app = express();
-
-// Socket.io setup
 const server = http.createServer(app);
 const io = setupSocket(server);
 
-/**
- * Built in Middleware
- */
-app.use(express.json()); // req.body is parsed into a js object
+app.use(express.json());
 app.use(
 	cors({
 		origin: true,
@@ -26,45 +30,27 @@ app.use(
 );
 app.use(cookieParser());
 
-/**
- * Custom Middleware
- */
-app.use('/api/user/auth', require('./Routes/auth/userAuthRoutes')); // auth routes for users (admin, customer)
-// verification routes for admin to verify airlines
-app.use(
-	'/api/admin/airline',
-	require('./Routes/auth/adminAirlineVerificationRoutes')
-);
-app.use('/api/flights', require('./Routes/flights/flightsRoutes')); // routes for flights
-app.use('/api/tickets', require('./Routes/tickets/ticketsRoutes')); // routes for tickets
-app.use('/api/bookings', require('./Routes/bookings/bookingsRoutes')); // routes for bookings
-app.use('/api/planes', require('./Routes/planes/planesRoutes')); // routes for planes
-app.use('/api/seats', require('./Routes/seats/seatsRoutes')); // routes for seats
-app.use('/api/cities', require('./Routes/cities/citiesRoutes')); // routes for cities
-app.use('/api/images', require('./Routes/images/imagesRoutes')); // routes for image uploads
-app.use(
-	'/api/analytics/customer',
-	require('./Routes/analytics/customerAnalyticsRoutes')
-); // routes for customer analytics
-app.use(
-	'/api/analytics/airline',
-	require('./Routes/analytics/airlineAnalyticsRoutes')
-); // routes for airline analytics
-app.use(
-	'/api/analytics/admin',
-	require('./Routes/analytics/adminAnalyticsRoutes')
-); // routes for admin analytics
-app.use('/api/messages', require('./Routes/messages/messagesRoutes'));
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/bookings', bookingRoutes);
+app.use('/api/cities', cityRoutes);
+app.use('/api/flights', flightRoutes);
+app.use('/api/images', imageRoutes);
+app.use('/api/messages', messageRoutes);
+app.use('/api/planes', planeRoutes);
+app.use('/api/seats', seatRoutes);
+app.use('/api/tickets', ticketRoutes);
 
-// createAdminUser(); // calling the function create an admin
+// seeding the database with an admin user
+// createAdminUser();
 
-// seedFlights(); // seed Flight model in db with sample flights
+// seeding the database with sample flights
+// seedFlights();
 
-/**
- * Server Connection
- */
 const PORT = 8000;
 server.listen(PORT, () => {
 	console.log('Server Started at PORT', PORT);
-	connectDB(); // calling the function to connect to the DB
+
+	// connecting to the database
+	connectDB();
 });

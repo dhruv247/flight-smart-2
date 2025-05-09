@@ -57,7 +57,7 @@ const FlightByDuration = () => {
 		const getFlightsByDuration = async () => {
 			try {
 				const response = await axios.get(
-					'http://localhost:8000/api/analytics/airline/flights-by-duration',
+					'http://localhost:8000/api/analytics/flights-by-duration',
 					{
 						withCredentials: true,
 					}

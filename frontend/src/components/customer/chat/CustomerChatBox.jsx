@@ -71,7 +71,7 @@ const CustomerChatBox = ({ selectedUser }) => {
 				};
 
 				const response = await axios.get(
-					`http://localhost:8000/api/messages/${user._id}/${selectedUser._id}`,
+					`http://localhost:8000/api/messages/get-conversation/${user._id}/${selectedUser._id}`,
 					config
 				);
 

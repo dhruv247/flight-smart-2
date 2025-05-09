@@ -33,7 +33,7 @@ const AirlineSignupForm = () => {
 			}
 
 			const res = await axios.post(
-				'http://localhost:8000/api/user/auth/register',
+				'http://localhost:8000/api/auth/register',
 				formData,
 				{
 					withCredentials: true,

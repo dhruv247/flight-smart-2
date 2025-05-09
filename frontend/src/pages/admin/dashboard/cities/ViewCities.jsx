@@ -8,7 +8,8 @@ const ViewCities = () => {
 	useEffect(() => {
 		const getCities = async () => {
 			const citiesResponse = await axios.get(
-				'http://localhost:8000/api/cities/getAll'
+				'http://localhost:8000/api/cities/get-all-cities',
+				{ withCredentials: true }
 			);
 			setCities(citiesResponse.data.cities);
 		};

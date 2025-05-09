@@ -47,7 +47,7 @@ const DepartureFlights = () => {
 			setFlightSearchData(updatedFormData);
 
 			const response = await axios.post(
-				'http://localhost:8000/api/flights/search',
+				'http://localhost:8000/api/flights/search-flights',
 				{
 					flightFrom: formData.flightFrom,
 					flightTo: formData.flightTo,

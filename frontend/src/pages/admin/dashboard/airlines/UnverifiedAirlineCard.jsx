@@ -6,7 +6,7 @@ const UnverifiedAirlineCard = ({ airline }) => {
 	const handleVerify = async () => {
 		try {
 			await axios.post(
-				'http://localhost:8000/api/admin/airline/verify',
+				'http://localhost:8000/api/auth/verify-airline',
 				{ airlineId: airline._id },
 				{ withCredentials: true }
 			);
@@ -21,7 +21,7 @@ const UnverifiedAirlineCard = ({ airline }) => {
 	const handleReject = async () => {
 		try {
 			await axios.post(
-				'http://localhost:8000/api/admin/airline/delete',
+				'http://localhost:8000/api/auth/delete-airline',
 				{ airlineId: airline._id },
 				{ withCredentials: true }
 			);

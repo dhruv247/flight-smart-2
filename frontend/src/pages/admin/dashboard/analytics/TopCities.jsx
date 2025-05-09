@@ -60,7 +60,7 @@ const TopCities = ({ noOfTopCities }) => {
 		const getTopCities = async () => {
 			try {
 				const response = await axios.get(
-					`http://localhost:8000/api/analytics/admin/top-cities?num=${noOfTopCities}`,
+					`http://localhost:8000/api/analytics/top-cities-by-number-of-flights?num=${noOfTopCities}`,
 					{ withCredentials: true }
 				);
 				setTopCitiesList(response.data);

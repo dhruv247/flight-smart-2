@@ -8,7 +8,7 @@ const PopularDestinations = () => {
 	useEffect(() => {
 		const fetchPopularDestinations = async () => {
 			const response = await axios.get(
-				'http://localhost:8000/api/analytics/customer/popularDestinations'
+				'http://localhost:8000/api/analytics/top-destinations'
 			);
 			setPopularDestinations(response.data);
 		};

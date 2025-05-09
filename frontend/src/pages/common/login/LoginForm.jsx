@@ -18,7 +18,7 @@ const LoginForm = () => {
 		event.preventDefault();
 			try {
 				const userRes = await axios.post(
-					'http://localhost:8000/api/user/auth/login',
+					'http://localhost:8000/api/auth/login',
 					formData,
 					{
 						withCredentials: true,

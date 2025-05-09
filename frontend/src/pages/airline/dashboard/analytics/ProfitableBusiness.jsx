@@ -68,7 +68,7 @@ const ProfitableBusiness = () => {
 		const getProfitableBusinessFlights = async () => {
 			try {
 				const response = await axios.get(
-					`http://localhost:8000/api/analytics/airline/profitable-business-flights?limit=${numFlights}`,
+					`http://localhost:8000/api/analytics/profitable-business-flights?limit=${numFlights}`,
 					{
 						withCredentials: true,
 					}

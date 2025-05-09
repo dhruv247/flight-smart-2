@@ -82,8 +82,6 @@ const BookingDetails = () => {
 				const initialPassengerDetails = Array(currentBooking.passengers).fill({
 					nameOfFlyer: '',
 					dateOfBirth: '',
-					documentName: 'passport',
-					documentImage: '',
 					departureFlightSeatNumber: null,
 					returnFlightSeatNumber: null,
 				});
@@ -115,13 +113,6 @@ const BookingDetails = () => {
 			};
 			return newDetails;
 		});
-	};
-
-	const handleDocumentImageChange = (index, event) => {
-		const file = event.target.files[0];
-		if (file) {
-			handlePassengerChange(index, 'documentImage', file);
-		}
 	};
 
 	/**
@@ -210,7 +201,7 @@ const BookingDetails = () => {
 					formData.append('image', passenger.documentImage);
 
 					const imageURLResponse = await axios.post(
-						'http://localhost:8000/api/images/upload',
+						'http://localhost:8000/api/images/upload-image',
 						formData,
 						{
 							headers: {
@@ -219,7 +210,7 @@ const BookingDetails = () => {
 						}
 					);
 
-					if (!imageURLResponse.data.success) {
+					if (!imageURLResponse.data.url) {
 						throw new Error(
 							imageURLResponse.data.message || 'Failed to upload document image'
 						);
@@ -242,7 +233,6 @@ const BookingDetails = () => {
 						dateOfBirth: passenger.dateOfBirth,
 						seatType: bookingDetails.seatType,
 						// ticketPrice: bookingDetails.ticketPrice,
-						identificationDocument,
 						departureFlightSeatNumber: parseInt(
 							passenger.departureFlightSeatNumber
 						),
@@ -253,7 +243,7 @@ const BookingDetails = () => {
 					};
 
 					const response = await axios.post(
-						'http://localhost:8000/api/tickets/create',
+						'http://localhost:8000/api/tickets/create-ticket',
 						ticket,
 						{
 							withCredentials: true,
@@ -274,19 +264,23 @@ const BookingDetails = () => {
 					tickets: createdTickets,
 				};
 
-				await axios.post('http://localhost:8000/api/bookings/create', booking, {
-					withCredentials: true,
-				});
+				await axios.post(
+					'http://localhost:8000/api/bookings/create-booking',
+					booking,
+					{
+						withCredentials: true,
+					}
+				);
 
 				showSuccessToast('Booking created successfully!');
 
 				// Update flight prices
 				await axios.patch(
-					`http://localhost:8000/api/flights/updateFlightPrice/${bookingDetails.departureFlightId}`
+					`http://localhost:8000/api/flights/update-flight-price/${bookingDetails.departureFlightId}`
 				);
 				if (bookingDetails.returnFlightId) {
 					await axios.patch(
-						`http://localhost:8000/api/flights/updateFlightPrice/${bookingDetails.returnFlightId}`
+						`http://localhost:8000/api/flights/update-flight-price/${bookingDetails.returnFlightId}`
 					);
 				}
 
@@ -355,8 +349,8 @@ const BookingDetails = () => {
 	}
 
 	return (
-		<div className="container mt-3">
-			<h4 className="text-center mb-3">Passenger Details</h4>
+		<div className="container mt-3" style={{ maxWidth: 600 }}>
+			<h2 className="text-center mb-4">Passenger Details</h2>
 			<form
 				onSubmit={(e) => {
 					e.preventDefault();
@@ -364,140 +358,103 @@ const BookingDetails = () => {
 				}}
 			>
 				{passengerDetails.map((passenger, index) => (
-					<div key={index} className="border-bottom pb-3 mb-3">
-						<div className="d-flex align-items-center mb-3">
-							<h6 className="mb-0">Passenger {index + 1}</h6>
+					<div key={index} style={{ marginBottom: 32 }}>
+						<div style={{ fontWeight: 600, marginBottom: 12 }}>
+							Passenger {index + 1}
 						</div>
-						<div className="row g-3">
-							{/* Personal Information */}
-							<div className="col-12 col-lg-6">
-								<div className="mb-2">
-									<label className="form-label">Full Name</label>
+						<div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+							<label style={{ fontWeight: 500 }}>
+								Full Name
+								<input
+									type="text"
+									className="form-control"
+									value={passenger.nameOfFlyer}
+									onChange={(e) =>
+										handlePassengerChange(index, 'nameOfFlyer', e.target.value)
+									}
+									required
+									style={{ marginTop: 4 }}
+								/>
+							</label>
+							<label style={{ fontWeight: 500 }}>
+								Date of Birth
+								<input
+									type="date"
+									className="form-control"
+									value={passenger.dateOfBirth}
+									onChange={(e) =>
+										handlePassengerChange(index, 'dateOfBirth', e.target.value)
+									}
+									required
+									style={{ marginTop: 4 }}
+								/>
+							</label>
+							<label style={{ fontWeight: 500 }}>
+								Departure Flight Seat
+								<div
+									style={{
+										display: 'flex',
+										gap: 8,
+										alignItems: 'center',
+										marginTop: 4,
+									}}
+								>
 									<input
 										type="text"
 										className="form-control"
-										value={passenger.nameOfFlyer}
-										onChange={(e) =>
-											handlePassengerChange(
-												index,
-												'nameOfFlyer',
-												e.target.value
-											)
-										}
-										required
+										value={passenger.departureFlightSeatNumber || ''}
+										readOnly
+										placeholder="No seat selected"
+										style={{ width: 120 }}
 									/>
-								</div>
-								<div className="mb-2">
-									<label className="form-label">Date of Birth</label>
-									<input
-										type="date"
-										className="form-control"
-										value={passenger.dateOfBirth}
-										onChange={(e) =>
-											handlePassengerChange(
-												index,
-												'dateOfBirth',
-												e.target.value
-											)
-										}
-										required
-									/>
-								</div>
-							</div>
-
-							{/* Document Information */}
-							<div className="col-12 col-lg-6">
-								<div className="mb-2">
-									<label className="form-label">Identification Document</label>
-									<select
-										className="form-select"
-										value={passenger.documentName}
-										onChange={(e) =>
-											handlePassengerChange(
-												index,
-												'documentName',
-												e.target.value
-											)
-										}
-										required
+									<button
+										type="button"
+										className="btn btn-outline-primary btn-sm"
+										onClick={() => openSeatMapModal(index, 'departure')}
 									>
-										<option value="passport">Passport</option>
-										<option value="aadhaar">Aadhaar</option>
-									</select>
+										Select Seat
+									</button>
 								</div>
-								<div className="mb-2">
-									<label className="form-label">Upload Document</label>
-									<div className="input-group">
+							</label>
+							{isRoundTrip && (
+								<label style={{ fontWeight: 500 }}>
+									Return Flight Seat
+									<div
+										style={{
+											display: 'flex',
+											gap: 8,
+											alignItems: 'center',
+											marginTop: 4,
+										}}
+									>
 										<input
-											type="file"
+											type="text"
 											className="form-control"
-											accept="image/*"
-											onChange={(e) => handleDocumentImageChange(index, e)}
+											value={passenger.returnFlightSeatNumber || ''}
+											readOnly
+											placeholder="No seat selected"
+											style={{ width: 120 }}
 										/>
-										{passenger.documentImage && (
-											<span className="input-group-text">
-												{passenger.documentImage.name}
-											</span>
-										)}
+										<button
+											type="button"
+											className="btn btn-outline-primary btn-sm"
+											onClick={() => openSeatMapModal(index, 'return')}
+										>
+											Select Seat
+										</button>
 									</div>
-								</div>
-							</div>
-
-							{/* Seat Selection */}
-							<div className="col-12">
-								<div className="row g-3">
-									<div className="col-12 col-lg-6">
-										<label className="form-label">Departure Flight Seat</label>
-										<div className="input-group">
-											<input
-												type="text"
-												className="form-control"
-												value={passenger.departureFlightSeatNumber || ''}
-												readOnly
-												placeholder="No seat selected"
-											/>
-											<button
-												type="button"
-												className="btn btn-outline-primary"
-												onClick={() => openSeatMapModal(index, 'departure')}
-											>
-												Select Seat
-											</button>
-										</div>
-									</div>
-
-									{isRoundTrip && (
-										<div className="col-12 col-lg-6">
-											<label className="form-label">Return Flight Seat</label>
-											<div className="input-group">
-												<input
-													type="text"
-													className="form-control"
-													value={passenger.returnFlightSeatNumber || ''}
-													readOnly
-													placeholder="No seat selected"
-												/>
-												<button
-													type="button"
-													className="btn btn-outline-primary"
-													onClick={() => openSeatMapModal(index, 'return')}
-												>
-													Select Seat
-												</button>
-											</div>
-										</div>
-									)}
-								</div>
-							</div>
+								</label>
+							)}
 						</div>
 					</div>
 				))}
 
-				<div className="text-center mt-3">
+				<div className="text-center mt-4">
 					<button
 						type="submit"
 						className="btn btn-primary"
 						disabled={!canSubmitForm || isCreatingBooking}
+						style={{ minWidth: 140 }}
 					>
 						{isCreatingBooking ? (
 							<>
