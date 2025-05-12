@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import DashboardNavbar from '../../../components/common/DashboardNavbar';
+import DashboardNavbar from '../../../components/navbars/DashboardNavbar';
 import AdminDashboardAirlines from './airlines/AdminDashboardAirlines';
-import CitiesDashboard from './cities/AdminDashboardCities';
+import AdminDashboardAirports from './airports/AdminDashboardAirports';
 import AdminDashboardAnalytics from './analytics/AdminDashboardAnalytics';
 import AdminDashboardPlanes from './planes/AdminDashboardPlanes';
 
@@ -11,7 +11,7 @@ const AdminDashboardPage = () => {
 	const adminNavItems = [
 		{ id: 'analytics', label: 'Analytics', icon: 'bi-graph-up' },
 		{ id: 'airlines', label: 'Airlines', icon: 'bi-airplane-fill' },
-		{ id: 'cities', label: 'Cities', icon: 'bi-building' },
+		{ id: 'airports', label: 'Airports', icon: 'bi-airport-terminal' },
 		{ id: 'planes', label: 'Planes', icon: 'bi-airplane-engines' },
 	];
 
@@ -21,8 +21,8 @@ const AdminDashboardPage = () => {
 				return <AdminDashboardAirlines />;
 			case 'analytics':
 				return <AdminDashboardAnalytics />;
-			case 'cities':
-				return <CitiesDashboard />;
+			case 'airports':
+				return <AdminDashboardAirports />;
 			case 'planes':
 				return <AdminDashboardPlanes />;
 			default:

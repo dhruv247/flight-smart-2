@@ -15,7 +15,11 @@ const router = express.Router();
 router.get('/get-conversation/:userId/:receiverId', getConversation);
 
 // Customer Routes
-router.get('/get-airlines-for-customer', verifyCustomer, getAirlinesForCustomer);
+router.get(
+	'/get-airlines-for-customer',
+	verifyCustomer,
+	getAirlinesForCustomer
+);
 
 // Airline Routes
 router.get('/get-customers-for-airline', verifyAirline, getCustomersForAirline);

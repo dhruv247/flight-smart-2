@@ -17,26 +17,63 @@ const setupSocket = (server) => {
 		cors: {
 			origin: '*',
 		},
+		pingTimeout: 60000,
 	});
 
+	const activeUsers = new Map();
+
 	io.on('connection', (socket) => {
+		let currentUserId = null;
+
 		socket.on('join', (userId) => {
+			if (!userId) return;
+
+			currentUserId = userId;
 			socket.join(userId);
-			console.log('User joined:', userId);
+
+			if (!activeUsers.has(userId)) {
+				activeUsers.set(userId, new Set());
+			}
+			activeUsers.get(userId).add(socket.id);
 		});
 
-		socket.on('sendMessage', async ({ sender, receiver, text }) => {
-			try {
-				const message = await Message.create({ sender, receiver, text });
-				io.to(sender).emit('receiveMessage', message);
-				io.to(receiver).emit('receiveMessage', message);
-			} catch (error) {
-				console.error('Error sending message:', error);
+		socket.on(
+			'sendMessage',
+			async ({ sender, receiver, text, messageType, imageUrl }) => {
+				try {
+					const messageData = { sender, receiver };
+
+					if (messageType === 'image') {
+						messageData.messageType = 'image';
+						messageData.imageUrl = imageUrl;
+						messageData.text = text || '';
+					} else {
+						messageData.messageType = 'text';
+						messageData.text = text;
+					}
+
+					const message = await Message.create(messageData);
+
+					io.to(sender).emit('receiveMessage', message);
+
+					if (activeUsers.has(receiver)) {
+						io.to(receiver).emit('receiveMessage', message);
+					}
+				} catch (error) {
+					console.error('Error sending message:', error);
+				}
 			}
-		});
+		);
 
 		socket.on('disconnect', () => {
-			console.log('User disconnected:', socket.id);
+			if (currentUserId && activeUsers.has(currentUserId)) {
+				const userSockets = activeUsers.get(currentUserId);
+				userSockets.delete(socket.id);
+
+				if (userSockets.size === 0) {
+					activeUsers.delete(currentUserId);
+				}
+			}
 		});
 	});
 

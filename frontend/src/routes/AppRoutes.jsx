@@ -1,19 +1,19 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
+import ProtectedPublicRoute from './routeProtection/ProtectedPublicRoute';
+import ProtectedAdminRoute from './routeProtection/ProtectedAdminRoute';
+import ProtectedCustomerRoute from './routeProtection/ProtectedCustomerRoute';
+import ProtectedAirlineRoute from './routeProtection/ProtectedAirlineRoute';
+import ProtectedHomePageRoute from './routeProtection/ProtectedHomePageRoute';
 import SignupPage from '../pages/common/register/SignupPage';
 import LoginPage from '../pages/common/login/LoginPage';
 import HomePage from '../pages/common/home/HomePage';
 import AdminDashboardPage from '../pages/admin/dashboard/AdminDashboardPage';
 import CustomerDashboardPage from '../pages/customer/dashboard/CustomerDashboardPage';
 import AirlineDashboardPage from '../pages/airline/dashboard/AirlineDashboardPage';
-import ProtectedPublicRoute from './routeProtection/ProtectedPublicRoute';
-import ProtectedAdminRoute from './routeProtection/ProtectedAdminRoute';
-import ProtectedCustomerRoute from './routeProtection/ProtectedCustomerRoute';
-import ProtectedAirlineRoute from './routeProtection/ProtectedAirlineRoute';
-import DepartureFlights from '../pages/customer/searchFlights/DepartureFlights';
-import ReturnFlights from '../pages/customer/searchFlights/ReturnFlights';
-import BookingDetails from '../pages/customer/bookings/BookingDetails';
-import ProtectedHomePageRoute from './routeProtection/ProtectedHomePageRoute';
+import DepartureFlights from '../pages/customer/flightSearch/DepartureFlights';
+import ReturnFlights from '../pages/customer/flightSearch/ReturnFlights';
+import PassengerDetails from '../pages/customer/flightSearch/PassengerDetails';
 
 const AppRoutes = () => {
 	return (
@@ -70,19 +70,19 @@ const AppRoutes = () => {
 			/>
 			{/* return flights */}
 			<Route
-				path="/customer/searchFlights/return"
+				path="/customer/returnFlights"
 				element={
 					<ProtectedCustomerRoute>
 						<ReturnFlights />
 					</ProtectedCustomerRoute>
 				}
 			/>
-			{/* booking details */}
+			{/* passenger details */}
 			<Route
-				path="/customer/bookings/details"
+				path="/customer/passengerDetails"
 				element={
 					<ProtectedCustomerRoute>
-						<BookingDetails />
+						<PassengerDetails />
 					</ProtectedCustomerRoute>
 				}
 			/>

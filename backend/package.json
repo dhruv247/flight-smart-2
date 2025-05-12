@@ -4,7 +4,9 @@
 	"type": "module",
 	"main": "index.js",
 	"scripts": {
-		"start": "nodemon index.js"
+		"start": "nodemon index.js",
+		"worker:email": "node workers/emailWorker.js",
+		"setup-queues": "node -e \"import('./utils/sqsUtils.js').then(({ setupQueues }) => setupQueues())\""
 	},
 	"author": "",
 	"license": "ISC",
@@ -23,6 +25,7 @@
 		"multer-s3": "^2.10.0",
 		"nodemailer": "^6.10.0",
 		"nodemon": "^3.1.9",
+		"redis": "^5.0.1",
 		"socket.io": "^4.8.1",
 		"uuid": "^11.1.0"
 	}

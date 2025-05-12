@@ -9,8 +9,20 @@ import {
 const router = express.Router();
 
 // Customer Routes
-router.post('/create-booking', verifyCustomer, createBooking);
-router.get('/get-bookings-for-customer', verifyCustomer, getBookingsForCustomer);
-router.patch('/cancel-booking/:id', verifyCustomer, cancelBooking);
+router.post(
+	'/create-booking',
+	verifyCustomer,
+	createBooking
+);
+router.get(
+	'/get-bookings-for-customer',
+	verifyCustomer,
+	getBookingsForCustomer
+);
+router.patch(
+	'/cancel-booking/:id',
+	verifyCustomer,
+	cancelBooking
+);
 
 export { router };

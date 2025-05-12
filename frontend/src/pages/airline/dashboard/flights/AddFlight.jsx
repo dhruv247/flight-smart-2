@@ -1,21 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { showSuccessToast, showErrorToast } from '../../../../utils/toast';
-import { useCities } from '../../../../hooks/useCities';
+import { useAirports } from '../../../../hooks/useAirports';
 import getUserDetails from '../../../../utils/getUserDetails';
 
 const AddFlight = () => {
-	const { cities, isLoading: isLoadingCities } = useCities();
+	const { airports, isLoading: isLoadingAirports } = useAirports();
 	const [planes, setPlanes] = useState([]);
 	const [airlineDetails, setAirlineDetails] = useState(null);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [flightDetails, setFlightDetails] = useState({
 		flightNo: '',
 		planeName: '',
-		departurePlace: '',
+		departureAirportName: '',
 		departureDate: '',
 		departureTime: '',
-		arrivalPlace: '',
+		arrivalAirportName: '',
 		arrivalDate: '',
 		arrivalTime: '',
 		economyBasePrice: '',
@@ -118,10 +118,10 @@ const AddFlight = () => {
 				setFlightDetails({
 					flightNo: '',
 					planeName: '',
-					departurePlace: '',
+					departureAirportName: '',
 					departureDate: '',
 					departureTime: '',
-					arrivalPlace: '',
+					arrivalAirportName: '',
 					arrivalDate: '',
 					arrivalTime: '',
 					economyBasePrice: '',
@@ -157,9 +157,7 @@ const AddFlight = () => {
 								<div className="input-group">
 									<div className="input-group">
 										<span className="input-group-text">
-											{airlineDetails?.username
-												.substring(0, 2)
-												.toUpperCase()}
+											{airlineDetails?.username.substring(0, 2).toUpperCase()}
 										</span>
 										<input
 											type="text"
@@ -196,16 +194,16 @@ const AddFlight = () => {
 								<div className="input-group">
 									<select
 										className="form-control"
-										name="departurePlace"
-										value={flightDetails.departurePlace}
+										name="departureAirportName"
+										value={flightDetails.departureAirportName}
 										onChange={handleFlightDetailsChange}
 										required
 									>
-										<option value="">Select Departure City</option>
-										{!isLoadingCities &&
-											cities.map((city) => (
-												<option key={city} value={city}>
-													{city}
+										<option value="">Select Departure Airport</option>
+										{!isLoadingAirports &&
+											airports.map((airport) => (
+												<option key={airport.code} value={airport.name}>
+													{airport.name} ({airport.code}) - {airport.city}
 												</option>
 											))}
 									</select>
@@ -241,16 +239,16 @@ const AddFlight = () => {
 								<div className="input-group">
 									<select
 										className="form-control"
-										name="arrivalPlace"
-										value={flightDetails.arrivalPlace}
+										name="arrivalAirportName"
+										value={flightDetails.arrivalAirportName}
 										onChange={handleFlightDetailsChange}
 										required
 									>
-										<option value="">Select Arrival City</option>
-										{!isLoadingCities &&
-											cities.map((city) => (
-												<option key={city} value={city}>
-													{city}
+										<option value="">Select Arrival Airport</option>
+										{!isLoadingAirports &&
+											airports.map((airport) => (
+												<option key={airport.code} value={airport.name}>
+													{airport.name} ({airport.code}) - {airport.city}
 												</option>
 											))}
 									</select>

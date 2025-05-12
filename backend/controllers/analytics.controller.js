@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { Booking } from '../models/booking.model.js';
 import { Flight } from '../models/flight.model.js';
 import { Ticket } from '../models/ticket.model.js';
+import { getCache, setCache } from '../utils/redisUtils.js';
 
 // ------------------------------------------------------------------------------------------------
 // Admin Analytics Functions
@@ -20,24 +21,26 @@ import { Ticket } from '../models/ticket.model.js';
  */
 const topDepartureFlightsByNumberOfTickets = async (req, res) => {
 	try {
-		
 		const num = parseInt(req.query.num) || 5;
 
 		const topFlights = await Booking.aggregate([
-			
 			{ $unwind: '$tickets' },
-			
+
 			{
 				$group: {
 					_id: '$tickets.departureFlight._id',
 					flightNo: { $first: '$tickets.departureFlight.flightNo' },
 					airline: { $first: '$tickets.departureFlight.airline' },
-					departurePlace: { $first: '$tickets.departureFlight.departurePlace' },
-					arrivalPlace: { $first: '$tickets.departureFlight.arrivalPlace' },
+					departureCity: {
+						$first: '$tickets.departureFlight.departureAirport.city',
+					},
+					arrivalCity: {
+						$first: '$tickets.departureFlight.arrivalAirport.city',
+					},
 					count: { $sum: 1 },
 				},
 			},
-			
+
 			{ $sort: { count: -1 } },
 
 			{ $limit: num },
@@ -74,9 +77,9 @@ const topAirlinesByNumberOfFlights = async (req, res) => {
 		const topAirlines = await Flight.aggregate([
 			{
 				$group: {
-					_id: '$airlineDetails._id',
+					_id: '$airline._id',
 					// Since all flights are from the same airline, we can just take the first one
-					airlineName: { $first: '$airlineDetails.airlineName' },
+					airlineName: { $first: '$airline.airlineName' },
 					count: { $sum: 1 },
 				},
 			},
@@ -119,7 +122,7 @@ const topCitiesByNumberOfFlights = async (req, res) => {
 		const topCities = await Flight.aggregate([
 			{
 				$group: {
-					_id: '$departurePlace',
+					_id: '$departureAirport.city',
 					count: { $sum: 1 },
 				},
 			},
@@ -161,9 +164,9 @@ const topPlanesByNumberOfFlights = async (req, res) => {
 		const topPlanes = await Flight.aggregate([
 			{
 				$group: {
-					_id: '$planeDetails._id',
+					_id: '$plane._id',
 					// Since all flights are from the same plane, we can just take the first one
-					planeName: { $first: '$planeDetails.planeName' },
+					planeName: { $first: '$plane.planeName' },
 					count: { $sum: 1 },
 				},
 			},
@@ -211,7 +214,7 @@ const profitableEconomyFlights = async (req, res) => {
 		const profitableFlights = await Flight.aggregate([
 			{
 				$match: {
-					'airlineDetails._id': new mongoose.Types.ObjectId(airlineId),
+					'airline._id': new mongoose.Types.ObjectId(airlineId),
 				},
 			},
 			{
@@ -256,7 +259,7 @@ const profitableBusinessFlights = async (req, res) => {
 		const profitableFlights = await Flight.aggregate([
 			{
 				$match: {
-					'airlineDetails._id': new mongoose.Types.ObjectId(airlineId),
+					'airline._id': new mongoose.Types.ObjectId(airlineId),
 				},
 			},
 			{
@@ -301,7 +304,7 @@ const topDatesByNumberOfFlights = async (req, res) => {
 		const busyDates = await Flight.aggregate([
 			{
 				$match: {
-					'airlineDetails._id': new mongoose.Types.ObjectId(airlineId),
+					'airline._id': new mongoose.Types.ObjectId(airlineId),
 				},
 			},
 			{
@@ -343,7 +346,7 @@ const flightByDuration = async (req, res) => {
 		const tripTypes = await Flight.aggregate([
 			{
 				$match: {
-					'airlineDetails._id': new mongoose.Types.ObjectId(airlineId),
+					'airline._id': new mongoose.Types.ObjectId(airlineId),
 				},
 			},
 			{
@@ -385,17 +388,25 @@ const flightByDuration = async (req, res) => {
  * @param {*} req
  * @param {*} res
  * @description
- * 1. Group the tickets by departure and return flights
- * 2. Unwind both departure and return flights
- * 3. Then, group by arrival place
- * 4. Then, sort by count in descending order
- * 5. Then, lookup city details (doin this because images are not stored in the ticket model)
- * 6. Then, unwind city details
- * 7. Then, project only the city details
+ * 1. Cache the top destinations for 1 hour
+ * 2. Group the tickets by departure and return flights
+ * 3. Extract complete arrival airport details including name, city and image
+ * 4. Sort by popularity (count) in descending order
+ * 5. Return in format expected by the frontend
  */
 const topDestinations = async (req, res) => {
 	try {
-		
+		// Cache key for top destinations
+		const cacheKey = 'top_destinations';
+
+		// Try to get data from cache first
+		const cachedData = await getCache(cacheKey);
+		if (cachedData) {
+			return res.status(200).json(cachedData);
+		}
+
+		console.log('Cache miss for top destinations, querying database');
+
 		const popularDestinations = await Ticket.aggregate([
 			{
 				$facet: {
@@ -403,7 +414,9 @@ const topDestinations = async (req, res) => {
 						{ $match: { 'departureFlight._id': { $exists: true } } },
 						{
 							$group: {
-								_id: '$departureFlight.arrivalPlace',
+								_id: '$departureFlight.arrivalAirport._id',
+								name: { $first: '$departureFlight.arrivalAirport.city' },
+								image: { $first: '$departureFlight.arrivalAirport.image' },
 								count: { $sum: 1 },
 							},
 						},
@@ -411,7 +424,12 @@ const topDestinations = async (req, res) => {
 					returnFlights: [
 						{ $match: { 'returnFlight._id': { $exists: true } } },
 						{
-							$group: { _id: '$returnFlight.arrivalPlace', count: { $sum: 1 } },
+							$group: {
+								_id: '$returnFlight.arrivalAirport._id',
+								name: { $first: '$returnFlight.arrivalAirport.city' },
+								image: { $first: '$returnFlight.arrivalAirport.image' },
+								count: { $sum: 1 },
+							},
 						},
 					],
 				},
@@ -428,6 +446,8 @@ const topDestinations = async (req, res) => {
 			{
 				$group: {
 					_id: '$allDestinations._id',
+					name: { $first: '$allDestinations.name' },
+					image: { $first: '$allDestinations.image' },
 					count: { $sum: '$allDestinations.count' },
 				},
 			},
@@ -437,24 +457,16 @@ const topDestinations = async (req, res) => {
 			{ $limit: 4 },
 
 			{
-				$lookup: {
-					from: 'cities',
-					localField: '_id',
-					foreignField: 'name',
-					as: 'cityDetails',
-				},
-			},
-
-			{ $unwind: '$cityDetails' },
-
-			{
 				$project: {
-					_id: '$cityDetails._id',
-					name: '$cityDetails.name',
-					image: '$cityDetails.image',
+					_id: 1,
+					name: 1,
+					image: 1,
 				},
 			},
 		]);
+
+		// Store the results in Redis cache for 2 minutes (120 seconds)
+		await setCache(cacheKey, popularDestinations, 120);
 
 		res.status(200).json(popularDestinations);
 	} catch (error) {

@@ -1,7 +1,7 @@
 import { Plane } from '../models/plane.model.js';
 import { User } from '../models/user.model.js';
 import { Flight } from '../models/flight.model.js';
-import { City } from '../models/city.model.js';
+import { Airport } from '../models/airport.model.js';
 import { createSeats } from '../utils/seatUtils.js';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -16,17 +16,6 @@ const isValidDate = (dateStr) => {
 	if (!dateRegex.test(dateStr)) return false;
 
 	return true;
-
-	// // convert each part to number
-	// const [year, month, day] = dateStr.split('-').map(Number);
-	// // create a new date object (month is 0-indexed)
-	// const date = new Date(year, month - 1, day);
-	// // check if the date is valid
-	// return (
-	// 	date.getFullYear() === year &&
-	// 	date.getMonth() === month - 1 &&
-	// 	date.getDate() === day
-	// );
 };
 
 /**
@@ -64,10 +53,10 @@ const createFlight = async (req, res) => {
 		const {
 			flightNo,
 			planeName,
-			departurePlace,
+			departureAirportName,
 			departureDate,
 			departureTime,
-			arrivalPlace,
+			arrivalAirportName,
 			arrivalDate,
 			arrivalTime,
 			economyBasePrice,
@@ -137,27 +126,27 @@ const createFlight = async (req, res) => {
 		}
 
 		// validate departure and arrival cities are different
-		if (departurePlace === arrivalPlace) {
+		if (departureAirportName === arrivalAirportName) {
 			return res.status(400).json({
 				message: 'Departure and arrival cities must be different',
 			});
 		}
 
 		// check if both cities exist in the database
-		const [departureCity, arrivalCity] = await Promise.all([
-			City.findOne({ name: departurePlace }),
-			City.findOne({ name: arrivalPlace }),
+		const [departureAirport, arrivalAirport] = await Promise.all([
+			Airport.findOne({ airportName: departureAirportName }),
+			Airport.findOne({ airportName: arrivalAirportName }),
 		]);
 
-		if (!departureCity) {
+		if (!departureAirport) {
 			return res.status(400).json({
-				message: 'Departure city not found in our database',
+				message: 'Departure airport not found in our database',
 			});
 		}
 
-		if (!arrivalCity) {
+		if (!arrivalAirport) {
 			return res.status(400).json({
-				message: 'Arrival city not found in our database',
+				message: 'Arrival airport not found in our database',
 			});
 		}
 
@@ -187,10 +176,10 @@ const createFlight = async (req, res) => {
 		if (
 			!flightNo ||
 			!planeName ||
-			!departurePlace ||
+			!departureAirportName ||
 			!departureDate ||
 			!departureTime ||
-			!arrivalPlace ||
+			!arrivalAirportName ||
 			!arrivalDate ||
 			!arrivalTime ||
 			!economyBasePrice ||
@@ -288,12 +277,12 @@ const createFlight = async (req, res) => {
 		// create flight
 		const flight = new Flight({
 			flightNo,
-			airlineDetails,
-			planeDetails,
-			departurePlace,
+			airline: airlineDetails,
+			plane: planeDetails,
+			departureAirport,
 			departureDate,
 			departureTime,
-			arrivalPlace,
+			arrivalAirport,
 			arrivalDate,
 			arrivalTime,
 			duration,
@@ -381,9 +370,10 @@ const searchFlights = async (req, res) => {
 			});
 		}
 
+		// validate departure and arrival airports are different
 		if (flightFrom === flightTo) {
 			return res.status(400).json({
-				message: 'Departure and arrival cities must be different',
+				message: 'Departure and arrival airports must be different',
 			});
 		}
 
@@ -398,11 +388,29 @@ const searchFlights = async (req, res) => {
 			});
 		}
 
+		// Find departure and arrival airports
+		const [departureAirport, arrivalAirport] = await Promise.all([
+			Airport.findOne({ airportName: flightFrom }),
+			Airport.findOne({ airportName: flightTo }),
+		]);
+
+		if (!departureAirport) {
+			return res.status(400).json({
+				message: 'Departure airport not found',
+			});
+		}
+
+		if (!arrivalAirport) {
+			return res.status(400).json({
+				message: 'Arrival airport not found',
+			});
+		}
+
 		// match stage for departure flights with seat availability check
 		const departureMatchStage = {
 			$match: {
-				departurePlace: flightFrom,
-				arrivalPlace: flightTo,
+				'departureAirport._id': departureAirport._id,
+				'arrivalAirport._id': arrivalAirport._id,
 				departureDate: departureDate,
 				$expr: {
 					$cond: {
@@ -410,10 +418,7 @@ const searchFlights = async (req, res) => {
 						then: {
 							$gte: [
 								{
-									$subtract: [
-										'$planeDetails.economyCapacity',
-										'$economyBookedCount',
-									],
+									$subtract: ['$plane.economyCapacity', '$economyBookedCount'],
 								},
 								passengerCount,
 							],
@@ -422,7 +427,7 @@ const searchFlights = async (req, res) => {
 							$gte: [
 								{
 									$subtract: [
-										'$planeDetails.businessCapacity',
+										'$plane.businessCapacity',
 										'$businessBookedCount',
 									],
 								},
@@ -434,7 +439,7 @@ const searchFlights = async (req, res) => {
 			},
 		};
 
-		// sort stage
+		// sort stage (separate so that it can be removed easily in case best flight is written)
 		const sortStage = {
 			$sort: {
 				economyCurrentPrice: 1,
@@ -473,17 +478,6 @@ const searchFlights = async (req, res) => {
 				});
 			}
 
-			// get the latest arrival time from departure flights
-			const latestDepartureArrival = departureFlights.reduce(
-				(latest, flight) => {
-					const arrivalTime = new Date(
-						`${flight.arrivalDate}T${flight.arrivalTime}`
-					);
-					return arrivalTime > latest ? arrivalTime : latest;
-				},
-				new Date(departureDate + 'T00:00:00')
-			); // start with the departure date at midnight
-
 			// calculate minimum return date (next day)
 			const minReturnDate = new Date(departureDate);
 			minReturnDate.setDate(minReturnDate.getDate() + 1);
@@ -491,8 +485,8 @@ const searchFlights = async (req, res) => {
 
 			const returnMatchStage = {
 				$match: {
-					departurePlace: flightTo,
-					arrivalPlace: flightFrom,
+					'departureAirport._id': arrivalAirport._id,
+					'arrivalAirport._id': departureAirport._id,
 					departureDate: { $gte: minReturnDateStr },
 					$expr: {
 						$cond: {
@@ -501,7 +495,7 @@ const searchFlights = async (req, res) => {
 								$gte: [
 									{
 										$subtract: [
-											'$planeDetails.economyCapacity',
+											'$plane.economyCapacity',
 											'$economyBookedCount',
 										],
 									},
@@ -512,7 +506,7 @@ const searchFlights = async (req, res) => {
 								$gte: [
 									{
 										$subtract: [
-											'$planeDetails.businessCapacity',
+											'$plane.businessCapacity',
 											'$businessBookedCount',
 										],
 									},
@@ -570,14 +564,14 @@ const updateFlightPrice = async (req, res) => {
 
 		// calculate new economy current price
 		const newEconomyCurrentPrice = Math.round(
-			(flight.economyBookedCount / flight.planeDetails.economyCapacity) *
+			(flight.economyBookedCount / flight.plane.economyCapacity) *
 				flight.economyBasePrice +
 				flight.economyBasePrice
 		);
 
 		// calculate new business current price
 		const newBusinessCurrentPrice = Math.round(
-			(flight.businessBookedCount / flight.planeDetails.businessCapacity) *
+			(flight.businessBookedCount / flight.plane.businessCapacity) *
 				flight.businessBasePrice +
 				flight.businessBasePrice
 		);
@@ -641,7 +635,7 @@ const getAllFlightsForAirline = async (req, res) => {
 		const airlineId = req.user._id;
 		const page = parseInt(req.query.page) || 0;
 		const size = parseInt(req.query.size) || 10;
-		const flights = await Flight.find({ 'airlineDetails._id': airlineId })
+		const flights = await Flight.find({ 'airline._id': airlineId })
 			.skip(page * size)
 			.limit(size);
 

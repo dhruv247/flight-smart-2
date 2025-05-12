@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { airlineDetailsSchema, airportDetailsSchema } from './flight.model.js';
 
 const departureFlightSchema = new mongoose.Schema(
 	{
@@ -9,12 +10,12 @@ const departureFlightSchema = new mongoose.Schema(
 			suppressWarning: true,
 		},
 		flightNo: { type: String, required: true },
-		airline: { type: String, required: true },
+		airline: airlineDetailsSchema,
 		plane: { type: String, required: true },
-		departurePlace: { type: String, required: true },
+		departureAirport: airportDetailsSchema,
 		departureDate: { type: String, required: true },
 		departureTime: { type: Number, required: true },
-		arrivalPlace: { type: String, required: true },
+		arrivalAirport: airportDetailsSchema,
 		arrivalDate: { type: String, required: true },
 		arrivalTime: { type: Number, required: true },
 		duration: { type: Number, required: true },
@@ -31,12 +32,12 @@ const returnFlightSchema = new mongoose.Schema(
 			suppressWarning: true,
 		},
 		flightNo: { type: String, required: true },
-		airline: { type: String, required: true },
+		airline: airlineDetailsSchema,
 		plane: { type: String, required: true },
-		departurePlace: { type: String, required: true },
+		departureAirport: airportDetailsSchema,
 		departureDate: { type: String, required: true },
 		departureTime: { type: Number, required: true },
-		arrivalPlace: { type: String, required: true },
+		arrivalAirport: airportDetailsSchema,
 		arrivalDate: { type: String, required: true },
 		arrivalTime: { type: Number, required: true },
 		duration: { type: Number, required: true },
@@ -79,4 +80,4 @@ const ticketSchema = new mongoose.Schema(
 
 const Ticket = mongoose.model('Ticket', ticketSchema);
 
-export { Ticket };
+export { Ticket, departureFlightSchema, returnFlightSchema, userDetailsSchema };

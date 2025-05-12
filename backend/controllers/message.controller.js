@@ -11,13 +11,14 @@ import { Flight } from '../models/flight.model.js';
  */
 const getConversation = async (req, res) => {
 	try {
-
 		// destructure req params
 		const { userId, receiverId } = req.params;
 
 		// validate userId and receiverId
 		if (!userId || !receiverId) {
-			return res.status(400).json({ message: 'User ID and receiver ID are required' });
+			return res
+				.status(400)
+				.json({ message: 'User ID and receiver ID are required' });
 		}
 
 		// get messages between two users
@@ -37,10 +38,10 @@ const getConversation = async (req, res) => {
 				},
 			},
 			{
-				$sort: { timestamp: 1 },
+				$sort: { createdAt: 1 },
 			},
 		]);
-		
+
 		// return messages
 		return res.status(200).json(messages);
 	} catch (error) {
@@ -55,7 +56,6 @@ const getConversation = async (req, res) => {
  */
 const getAirlinesForCustomer = async (req, res) => {
 	try {
-
 		// destructure req user
 		const customer = await User.findById(req.user._id);
 
@@ -83,7 +83,7 @@ const getAirlinesForCustomer = async (req, res) => {
 
 		// get all airline ids from the flights
 		const airlineIds = [
-			...new Set(flights.map((flight) => flight.airlineDetails._id)),
+			...new Set(flights.map((flight) => flight.airline._id)),
 		];
 
 		// get all airlines from the airline ids
@@ -103,7 +103,6 @@ const getAirlinesForCustomer = async (req, res) => {
  */
 const getCustomersForAirline = async (req, res) => {
 	try {
-
 		// destructure req user
 		const airline = await User.findById(req.user._id);
 
@@ -113,7 +112,7 @@ const getCustomersForAirline = async (req, res) => {
 		}
 
 		// get all flights for this airline
-		const flights = await Flight.find({ 'airlineDetails._id': airline._id });
+		const flights = await Flight.find({ 'airline._id': airline._id });
 		const flightIds = flights.map((flight) => flight._id);
 
 		// get all tickets that use these flights

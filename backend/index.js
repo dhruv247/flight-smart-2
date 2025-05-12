@@ -4,12 +4,14 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { setupSocket } from './utils/socket.js';
 import { connectDB } from './utils/connectDB.js';
+import { connectRedis } from './utils/redisUtils.js';
+import { setupQueues } from './utils/sqsUtils.js';
 import { createAdminUser } from './seeds/adminSeed.js';
 import { seedFlights } from './seeds/flightsSeed.js';
 import { router as analyticsRoutes } from './routes/analytics.routes.js';
 import { router as authRoutes } from './routes/auth.routes.js';
 import { router as bookingRoutes } from './routes/booking.routes.js';
-import { router as cityRoutes } from './routes/city.routes.js';
+import { router as airportRoutes } from './routes/airport.routes.js';
 import { router as flightRoutes } from './routes/flight.routes.js';
 import { router as imageRoutes } from './routes/image.routes.js';
 import { router as messageRoutes } from './routes/message.routes.js';
@@ -33,7 +35,7 @@ app.use(cookieParser());
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/bookings', bookingRoutes);
-app.use('/api/cities', cityRoutes);
+app.use('/api/airports', airportRoutes);
 app.use('/api/flights', flightRoutes);
 app.use('/api/images', imageRoutes);
 app.use('/api/messages', messageRoutes);
@@ -53,4 +55,12 @@ server.listen(PORT, () => {
 
 	// connecting to the database
 	connectDB();
+
+	// connecting to Redis
+	connectRedis();
+
+	// Set up SQS queues
+	setupQueues().catch((err) => {
+		console.error('Failed to setup SQS queue:', err);
+	});
 });

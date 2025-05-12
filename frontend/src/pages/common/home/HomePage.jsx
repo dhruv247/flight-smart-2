@@ -1,10 +1,10 @@
 // most parts of this page will need to be converted into components
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFlightContext } from '../../../context/FlightContext';
-import Navbar from '../../../components/customer/HomeNavbar';
-import FlightSearchForm from '../../../components/customer/flightSearch/FlightSearchForm';
+import Navbar from '../../../components/navbars/HomeNavbar';
+import FlightSearchForm from '../../customer/flightSearch/FlightSearchForm';
 import PopularDestinations from './PopularDestinations';
 
 const HomePage = () => {

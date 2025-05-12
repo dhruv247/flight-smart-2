@@ -159,7 +159,9 @@ const BookingCard = ({ booking }) => {
 					<div className="col-12 col-md-4 d-flex flex-column gap-3">
 						<div className="d-flex justify-content-between align-items-center">
 							<div className="d-flex flex-column align-items-center">
-								<p>{booking.tickets[0].departureFlight?.departurePlace}</p>
+								<p>
+									{booking.tickets[0].departureFlight?.departureAirport.city}
+								</p>
 								<p>{booking.tickets[0].departureFlight?.departureDate}</p>
 								<p>
 									{formatHHMM(
@@ -171,7 +173,7 @@ const BookingCard = ({ booking }) => {
 								<p>-</p>
 							</div>
 							<div className="d-flex flex-column align-items-center">
-								<p>{booking.tickets[0].departureFlight?.arrivalPlace}</p>
+								<p>{booking.tickets[0].departureFlight?.arrivalAirport.city}</p>
 								<p>{booking.tickets[0].departureFlight?.arrivalDate}</p>
 								<p>
 									{formatHHMM(booking.tickets[0].departureFlight?.arrivalTime)}
@@ -180,7 +182,7 @@ const BookingCard = ({ booking }) => {
 						</div>
 						<div className="d-flex justify-content-between align-items-center">
 							<div className="d-flex flex-column align-items-center">
-								<p>{booking.tickets[0].returnFlight?.departurePlace}</p>
+								<p>{booking.tickets[0].returnFlight?.departureAirport.city}</p>
 								<p>{booking.tickets[0].returnFlight?.departureDate}</p>
 								<p>
 									{formatHHMM(booking.tickets[0].returnFlight?.departureTime)}
@@ -190,7 +192,7 @@ const BookingCard = ({ booking }) => {
 								<p>-</p>
 							</div>
 							<div className="d-flex flex-column align-items-center">
-								<p>{booking.tickets[0].returnFlight?.arrivalPlace}</p>
+								<p>{booking.tickets[0].returnFlight?.arrivalAirport.city}</p>
 								<p>{booking.tickets[0].returnFlight?.arrivalDate}</p>
 								<p>
 									{formatHHMM(booking.tickets[0].returnFlight?.arrivalTime)}
@@ -242,7 +244,7 @@ const BookingCard = ({ booking }) => {
 				</div>
 				<div className="col-12 col-md-4 d-flex justify-content-between align-items-center">
 					<div className="d-flex flex-column align-items-center">
-						<p>{booking.tickets[0].departureFlight?.departurePlace}</p>
+						<p>{booking.tickets[0].departureFlight?.departureAirport.city}</p>
 						<p>{booking.tickets[0].departureFlight?.departureDate}</p>
 						<p>
 							{formatHHMM(booking.tickets[0].departureFlight?.departureTime)}
@@ -252,7 +254,7 @@ const BookingCard = ({ booking }) => {
 						<p>-</p>
 					</div>
 					<div className="d-flex flex-column align-items-center">
-						<p>{booking.tickets[0].departureFlight?.arrivalPlace}</p>
+						<p>{booking.tickets[0].departureFlight?.arrivalAirport.city}</p>
 						<p>{booking.tickets[0].departureFlight?.arrivalDate}</p>
 						<p>{formatHHMM(booking.tickets[0].departureFlight?.arrivalTime)}</p>
 					</div>

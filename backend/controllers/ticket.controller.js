@@ -29,7 +29,6 @@ const isValidDateOfBirth = (dob) => {
  */
 const createTicket = async (req, res) => {
 	try {
-
 		// destructure req body
 		const {
 			departureFlightId,
@@ -76,12 +75,12 @@ const createTicket = async (req, res) => {
 		const departureFlightDetails = {
 			_id: departureFlightId,
 			flightNo: departureFlight.flightNo,
-			airline: departureFlight.airlineDetails.airlineName,
-			plane: departureFlight.planeDetails.planeName,
-			departurePlace: departureFlight.departurePlace,
+			airline: departureFlight.airline,
+			plane: departureFlight.plane.planeName,
+			departureAirport: departureFlight.departureAirport,
 			departureDate: departureFlight.departureDate,
 			departureTime: departureFlight.departureTime,
-			arrivalPlace: departureFlight.arrivalPlace,
+			arrivalAirport: departureFlight.arrivalAirport,
 			arrivalDate: departureFlight.arrivalDate,
 			arrivalTime: departureFlight.arrivalTime,
 			duration: departureFlight.duration,
@@ -122,7 +121,6 @@ const createTicket = async (req, res) => {
 
 		// check if return flight and seat are provided
 		if (returnFlightId && returnFlightSeatNumber) {
-
 			// get return flight
 			returnFlight = await Flight.findById(returnFlightId);
 
@@ -137,12 +135,12 @@ const createTicket = async (req, res) => {
 			returnFlightDetails = {
 				_id: returnFlightId,
 				flightNo: returnFlight.flightNo,
-				airline: returnFlight.airlineDetails.airlineName,
-				plane: returnFlight.planeDetails.planeName,
-				departurePlace: returnFlight.departurePlace,
+				airline: returnFlight.airline,
+				plane: returnFlight.plane.planeName,
+				departureAirport: returnFlight.departureAirport,
 				departureDate: returnFlight.departureDate,
 				departureTime: returnFlight.departureTime,
-				arrivalPlace: returnFlight.arrivalPlace,
+				arrivalAirport: returnFlight.arrivalAirport,
 				arrivalDate: returnFlight.arrivalDate,
 				arrivalTime: returnFlight.arrivalTime,
 				duration: returnFlight.duration,
@@ -265,7 +263,6 @@ const createTicket = async (req, res) => {
  */
 const getTicketById = async (req, res) => {
 	try {
-
 		// destructure req params
 		const { id } = req.params;
 

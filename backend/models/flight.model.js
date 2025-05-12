@@ -28,15 +28,33 @@ const planeDetailsSchema = new mongoose.Schema(
 	{ _id: false }
 );
 
+const airportDetailsSchema = new mongoose.Schema(
+	{
+		_id: {
+			type: mongoose.Schema.Types.ObjectId,
+			required: true,
+			ref: 'Airport',
+			suppressWarning: true,
+		},
+		airportName: { type: String, required: true },
+		airportCode: { type: String, required: true },
+		city: { type: String, required: true },
+		state: { type: String, required: true },
+		country: { type: String, required: true, default: 'India' },
+		image: { type: String, required: true },
+	},
+	{ _id: false }
+);
+
 const flightSchema = new mongoose.Schema(
 	{
 		flightNo: { type: String, required: true, unique: true },
-		airlineDetails: airlineDetailsSchema,
-		planeDetails: planeDetailsSchema,
-		departurePlace: { type: String, required: true },
+		airline: airlineDetailsSchema,
+		plane: planeDetailsSchema,
+		departureAirport: airportDetailsSchema,
 		departureDate: { type: String, required: true }, // Stored as YYYY-MM-DD
 		departureTime: { type: Number, required: true }, // Store as number in 24h format 1850 (Formatted in the frontend as 18:50)
-		arrivalPlace: { type: String, required: true },
+		arrivalAirport: airportDetailsSchema,
 		arrivalDate: { type: String, required: true }, // Stored as YYYY-MM-DD
 		arrivalTime: { type: Number, required: true }, // Store as number in 24h format 1850 (Formatted in the frontend as 18:50)
 		duration: { type: Number, required: true }, // Stored in minutes and converted to (2:09) using a utility function on the frontend
@@ -56,4 +74,4 @@ const flightSchema = new mongoose.Schema(
 
 const Flight = mongoose.model('Flight', flightSchema);
 
-export { Flight };
+export { airlineDetailsSchema, airportDetailsSchema, Flight };

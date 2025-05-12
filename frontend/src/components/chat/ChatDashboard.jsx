@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import CustomerChatBox from '../../../../components/customer/chat/CustomerChatBox';
-import CustomerUserList from '../../../../components/customer/chat/CustomerUserList';
+import ChatBox from './ChatBox';
+import UserList from './UserList';
 
-const CustomerDashboardChat = () => {
+const ChatDashboard = ({ userType, sidebarTitle, emptyStateText }) => {
 	const [selectedUser, setSelectedUser] = useState(null);
 	const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -14,7 +14,7 @@ const CustomerDashboardChat = () => {
 	return (
 		<div className="h-100">
 			<div className="d-flex h-100">
-				{/* Sidebar Toggle Button */}
+				{/* Sidebar Toggle Button - Only visible on mobile */}
 				<button
 					className="btn btn-primary d-lg-none position-fixed start-0 top-50 translate-middle-y rounded-end"
 					onClick={() => setIsSidebarOpen(true)}
@@ -25,9 +25,11 @@ const CustomerDashboardChat = () => {
 
 				{/* Sidebar - Regular view on desktop, offcanvas on mobile */}
 				<div className={`d-none d-lg-block h-100`}>
-					<CustomerUserList
+					<UserList
 						onSelectUser={handleSelectUser}
 						selectedUser={selectedUser}
+						userType={userType}
+						title={sidebarTitle}
 					/>
 				</div>
 
@@ -40,7 +42,7 @@ const CustomerDashboardChat = () => {
 					style={{ width: '280px' }}
 				>
 					<div className="offcanvas-header">
-						<h5 className="offcanvas-title">Airlines</h5>
+						<h5 className="offcanvas-title">{sidebarTitle}</h5>
 						<button
 							type="button"
 							className="btn-close"
@@ -48,18 +50,20 @@ const CustomerDashboardChat = () => {
 						></button>
 					</div>
 					<div className="offcanvas-body p-0">
-						<CustomerUserList
+						<UserList
 							onSelectUser={handleSelectUser}
 							selectedUser={selectedUser}
+							userType={userType}
+							title={sidebarTitle}
 						/>
 					</div>
 				</div>
 
 				{/* Main Chat Area */}
-				<CustomerChatBox selectedUser={selectedUser} />
+				<ChatBox selectedUser={selectedUser} emptyStateText={emptyStateText} />
 			</div>
 		</div>
 	);
 };
 
-export default CustomerDashboardChat;
+export default ChatDashboard;

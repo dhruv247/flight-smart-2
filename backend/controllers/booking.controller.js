@@ -4,7 +4,7 @@ import { Ticket } from '../models/ticket.model.js';
 import { User } from '../models/user.model.js';
 import { Flight } from '../models/flight.model.js';
 import { Seat } from '../models/seat.model.js';
-import { sendBookingConfirmationEmail } from '../utils/emailUtils.js';
+import { sendToEmailQueue } from '../utils/sqsUtils.js';
 
 /**
  * Calculate age from date of birth
@@ -33,9 +33,7 @@ const calculateAge = (dateOfBirth) => {
  * @param {*} res
  */
 const createBooking = async (req, res) => {
-	
 	try {
-
 		// destructure req body
 		const { tickets } = req.body;
 
@@ -99,14 +97,28 @@ const createBooking = async (req, res) => {
 
 		await booking.save();
 
-		// send confirmation email
-		await sendBookingConfirmationEmail(user, booking);
+		// Send booking confirmation email via SQS
+		try {
+			await sendToEmailQueue({
+				user: {
+					email: user.email,
+					username: user.username,
+				},
+				booking: {
+					_id: booking._id.toString(),
+					bookingPrice: booking.bookingPrice,
+					createdAt: booking.createdAt,
+				},
+			});
+		} catch (emailError) {
+			console.error('Error queuing confirmation email:', emailError);
+			// The booking is still successful even if email queuing fails (solves the past error)
+		}
 
 		return res.status(201).json({
 			message: 'Booking saved successfully!',
 		});
 	} catch (error) {
-
 		return res.status(500).json({
 			message: error.message,
 		});
@@ -121,7 +133,6 @@ const createBooking = async (req, res) => {
  */
 const getBookingsForCustomer = async (req, res) => {
 	try {
-
 		// destructure req user
 		const userId = req.user._id;
 
@@ -161,7 +172,6 @@ const getBookingsForCustomer = async (req, res) => {
  */
 const cancelBooking = async (req, res) => {
 	try {
-
 		// destructure req params
 		const bookingId = req.params.id;
 
@@ -182,7 +192,7 @@ const cancelBooking = async (req, res) => {
 		await booking.save();
 
 		// get tickets
-		const tickets = booking.tickets;	
+		const tickets = booking.tickets;
 
 		// loop through tickets
 		for (let ticket of tickets) {

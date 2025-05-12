@@ -60,7 +60,7 @@ const TicketsModal = ({
 													<div className="d-flex justify-content-between align-items-center mb-2">
 														<div>
 															<div className="fs-5 fw-medium">
-																{departureFlight?.departurePlace}
+																{departureFlight?.departureAirport.city}
 															</div>
 															<div className="text-muted">
 																{formatHHMM(departureFlight?.departureTime)}
@@ -71,7 +71,7 @@ const TicketsModal = ({
 														</div>
 														<div className="text-end">
 															<div className="fs-5 fw-medium">
-																{departureFlight?.arrivalPlace}
+																{departureFlight?.arrivalAirport.city}
 															</div>
 															<div className="text-muted">
 																{formatHHMM(departureFlight?.arrivalTime)}
@@ -86,7 +86,7 @@ const TicketsModal = ({
 													<div className="d-flex flex-column gap-2">
 														<div>
 															<strong>Airline:</strong>{' '}
-															{departureFlight?.airline}
+															{departureFlight?.airline.airlineName}
 														</div>
 														<div>
 															<strong>Flight Number:</strong>{' '}
@@ -114,7 +114,7 @@ const TicketsModal = ({
 														<div className="d-flex justify-content-between align-items-center mb-2">
 															<div>
 																<div className="fs-5 fw-medium">
-																	{returnFlight?.departurePlace}
+																	{returnFlight?.departureAirport.city}
 																</div>
 																<div className="text-muted">
 																	{formatHHMM(returnFlight?.departureTime)}
@@ -125,7 +125,7 @@ const TicketsModal = ({
 															</div>
 															<div className="text-end">
 																<div className="fs-5 fw-medium">
-																	{returnFlight?.arrivalPlace}
+																	{returnFlight?.arrivalAirport.city}
 																</div>
 																<div className="text-muted">
 																	{formatHHMM(returnFlight?.arrivalTime)}
@@ -140,7 +140,7 @@ const TicketsModal = ({
 														<div className="d-flex flex-column gap-2">
 															<div>
 																<strong>Airline:</strong>{' '}
-																{returnFlight?.airline}
+																{returnFlight?.airline.airlineName}
 															</div>
 															<div>
 																<strong>Flight Number:</strong>{' '}

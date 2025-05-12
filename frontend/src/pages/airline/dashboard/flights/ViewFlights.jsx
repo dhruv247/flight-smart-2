@@ -82,17 +82,17 @@ const ViewFlights = () => {
 						<p>{flight.flightNo}</p>
 					</div>
 					<div className="col-12 col-md-1">
-						<p>{flight.planeDetails.planeName}</p>
+						<p>{flight.plane.planeName}</p>
 					</div>
 					<div className="col-12 col-md-3 d-flex justify-content-evenly align-items-center">
 						<div className="align-items-center">
-							<p>{flight.departurePlace}</p>
+							<p>{flight.departureAirport.city}</p>
 							<p>{formatTime(flight.departureTime)}</p>
 							<p>{flight.departureDate}</p>
 						</div>
 						<p>-</p>
 						<div className="align-items-center">
-							<p>{flight.arrivalPlace}</p>
+							<p>{flight.arrivalAirport.city}</p>
 							<p>{formatTime(flight.arrivalTime)}</p>
 							<p>{flight.arrivalDate}</p>
 						</div>
@@ -127,13 +127,13 @@ const ViewFlights = () => {
 				<button
 					onClick={() => setCurrentPage((prev) => prev - 1)}
 					disabled={currentPage === 0}
-				className="btn btn-primary"
-			>
-				Previous
-			</button>
-			<button
-				onClick={() => setCurrentPage((prev) => prev + 1)}
-				className="btn btn-primary"
+					className="btn btn-primary"
+				>
+					Previous
+				</button>
+				<button
+					onClick={() => setCurrentPage((prev) => prev + 1)}
+					className="btn btn-primary"
 				>
 					Next
 				</button>

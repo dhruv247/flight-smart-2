@@ -1,42 +1,63 @@
-// most of this page will be converted to components
-
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useFlightContext } from '../../../context/FlightContext';
 import FlightCard from './FlightCard';
-import Navbar from '../../../components/customer/HomeNavbar';
-import FlightSearchForm from '../../../components/customer/flightSearch/FlightSearchForm';
-import FlightSorting from '../../../components/customer/flightSearch/FlightSorting';
+import Navbar from '../../../components/navbars/HomeNavbar';
+import FlightSearchForm from './FlightSearchForm';
+import FlightSorting from './FlightSorting';
 import { showErrorToast } from '../../../utils/toast';
 
-const ReturnFlights = () => {
+const DepartureFlights = () => {
 	// For the list of searched flights
-	const [returnFlightsList, setReturnFlightsList] = useState([]);
-	const { flightSearchData } = useFlightContext();
+	const [departureFlightsList, setDepartureFlightsList] = useState([]);
+	const { flightSearchData, setFlightSearchData } = useFlightContext();
 	const [isLoading, setIsLoading] = useState(true);
 
-	// Automatically search for return flights on component mount
+	/**
+	 * Load the flights when the page loades
+	 */
 	useEffect(() => {
-		if (flightSearchData.returnDate) {
+		if (flightSearchData) {
 			handleSearch(flightSearchData);
 		}
 	}, []);
 
+	/**
+	 * Handles the flight search functionality on the departureFlight page
+	 * @param {*} formData
+	 * 1. update the flightSearchDetails variable in the context
+	 * 2. send an api request to the backend for getting the list of flights
+	 * 3. Set the list of returned flights to
+	 */
 	const handleSearch = async (formData) => {
 		try {
 			setIsLoading(true);
+			const updatedFormData = {
+				...formData,
+				// If it's a round trip but no return date is set,
+				// default it to a date one day after departure (to prevent errors)
+				returnDate:
+					formData.tripType === 'roundTrip' && !formData.returnDate
+						? getDefaultReturnDate(formData.departureDate)
+						: formData.returnDate,
+			};
+
+			setFlightSearchData(updatedFormData);
+
 			const response = await axios.post(
 				'http://localhost:8000/api/flights/search-flights',
 				{
-					flightFrom: flightSearchData.flightTo,
-					flightTo: flightSearchData.flightFrom,
-					departureDate: formData.returnDate,
-					returnDate: null,
+					flightFrom: formData.flightFrom,
+					flightTo: formData.flightTo,
+					departureDate: formData.departureDate,
+					returnDate:
+						formData.tripType === 'roundTrip' ? formData.returnDate : null,
 					travelClass: formData.travelClass,
 					passengers: formData.passengers,
-				}
+				},
+				{ withCredentials: true }
 			);
-			setReturnFlightsList(response.data.departureFlights);
+			setDepartureFlightsList(response.data.departureFlights);
 			setIsLoading(false);
 		} catch (error) {
 			setIsLoading(false);
@@ -50,26 +71,35 @@ const ReturnFlights = () => {
 					if (message === 'All fields are required') {
 						showErrorToast('Please fill in all required fields');
 					} else if (message === 'Cannot search for flights in the past') {
+						showErrorToast('Please select a future date for your flight');
+					} else if (
+						message === 'Cannot search for return flights in the past'
+					) {
 						showErrorToast(
 							'Please select a future date for your return flight'
 						);
+					} else if (
+						message === 'Return date cannot be before departure date'
+					) {
+						showErrorToast('Return date must be after departure date');
 					} else if (message === 'Passenger count must be between 1 and 5') {
 						showErrorToast('Please select between 1 and 5 passengers');
 					} else if (
-						message ===
-						'No return flights available that are at least 4 hours after your departure flight lands'
+						message === 'Departure airport not found' ||
+						message === 'Arrival airport not found'
 					) {
-						const earliestReturnTime = new Date(details.earliestReturnTime);
+						showErrorToast('Please select valid airports from the list');
+					} else if (
+						message === 'Departure and arrival airports must be different'
+					) {
 						showErrorToast(
-							`Please select a return flight that departs after ${earliestReturnTime.toLocaleTimeString()} on ${earliestReturnTime.toLocaleDateString()}`
+							'Please select different airports for departure and arrival'
 						);
 					} else {
 						showErrorToast(message);
 					}
 				} else {
-					showErrorToast(
-						'An error occurred while searching for return flights'
-					);
+					showErrorToast('An error occurred while searching for flights');
 				}
 			} else {
 				showErrorToast('Network error. Please try again later');
@@ -77,8 +107,28 @@ const ReturnFlights = () => {
 		}
 	};
 
+	/**
+	 * // Helper function to get a default return date (1 day after departure)
+	 * @param {*} departureDate
+	 * @returns
+	 */
+	const getDefaultReturnDate = (departureDate) => {
+		if (!departureDate) {
+			return '';
+		}
+		const date = new Date(departureDate);
+		date.setDate(date.getDate() + 1);
+		return date.toISOString().split('T')[0];
+	};
+
+	/**
+	 * Resets the list of departure flights with a sorted version
+	 * @param {*} value
+	 * 1. The current implementation only uses economy price because business is just 2.5 times economy
+	 * 2. Add a separate sort for considering business class in the future
+	 */
 	const handleSort = (value) => {
-		setReturnFlightsList((prevFlights) => {
+		setDepartureFlightsList((prevFlights) => {
 			const sortedFlights = [...prevFlights];
 			if (value === 'price') {
 				sortedFlights.sort(
@@ -94,46 +144,28 @@ const ReturnFlights = () => {
 	return (
 		<div className="bg-light vh-100 text-center">
 			<Navbar />
-			<div className="my-4">
-				<h3>Select Your Return Flight</h3>
-				<p>
-					Your departure flight has been selected. Now choose your return
-					flight.
-				</p>
-			</div>
 			<FlightSearchForm
 				onSubmit={handleSearch}
-				initialValues={{
-					flightFrom: flightSearchData.flightTo,
-					flightTo: flightSearchData.flightFrom,
-					departureDate: flightSearchData.departureDate,
-					returnDate: flightSearchData.returnDate,
-					passengers: flightSearchData.passengers,
-					travelClass: flightSearchData.travelClass,
-					tripType: 'roundTrip', // Force roundTrip for return flights page
-				}}
-				initialTripType="roundTrip"
-				isReadOnly={true}
-				showReturnDate={true}
+				initialValues={flightSearchData}
+				initialTripType={flightSearchData.tripType}
 			/>
-
 			{/* Display Flight Section */}
 			<div
 				id="displayFlightsSection"
 				className="container d-flex flex-column mt-5"
 			>
 				<FlightSorting onSort={handleSort} />
-
 				{isLoading ? (
 					<div className="text-center my-5">
 						<div className="spinner-border text-primary" role="status">
-							<span className="visually-hidden">Loading...</span>
+							{/* <span className="visually-hidden">Loading...</span> */}
 						</div>
-						<p className="mt-2">Searching for return flights...</p>
+						<p className="mt-2">Searching for flights...</p>
 					</div>
-				) : returnFlightsList.length === 0 ? (
+				) : departureFlightsList.length === 0 ? (
 					<div className="alert alert-info my-4" role="alert">
-						No return flights found for this route on the selected date.
+						No flights found for this route. Please try different dates or
+						destinations.
 					</div>
 				) : (
 					<div id="sampleFlights">
@@ -163,14 +195,14 @@ const ReturnFlights = () => {
 								<p className="mb-0">Price</p>
 							</div>
 						</div>
-						{returnFlightsList.map((flight, index) => (
+						{departureFlightsList.map((flight, index) => (
 							<FlightCard
 								key={index}
 								flight={flight}
 								travelClass={flightSearchData.travelClass}
 								passengers={flightSearchData.passengers}
-								tripType="roundTrip"
-								isReturnFlight={true}
+								tripType={flightSearchData.tripType}
+								isReturnFlight={false}
 							/>
 						))}
 					</div>
@@ -180,4 +212,4 @@ const ReturnFlights = () => {
 	);
 };
 
-export default ReturnFlights;
+export default DepartureFlights;

@@ -70,15 +70,15 @@ const FlightCard = ({
 
 			// Store complete booking data in context
 			setCurrentBooking(bookingData);
-			navigate('/customer/bookings/details');
+			navigate('/customer/passengerDetails');
 		} else if (tripType === 'oneWay') {
 			// Store one-way booking data in context
 			setCurrentBooking(selectedFlight);
-			navigate('/customer/bookings/details');
+			navigate('/customer/passengerDetails');
 		} else {
 			// For round trip departure flight, just store the flight in context
 			setSelectedDepartureFlight(selectedFlight);
-			navigate('/customer/searchFlights/return');
+			navigate('/customer/returnFlights');
 		}
 	};
 
@@ -88,20 +88,20 @@ const FlightCard = ({
 				<p>{flight.flightNo}</p>
 			</div>
 			<div className="col-12 col-md-1">
-				<p>{flight.airlineDetails.airlineName}</p>
+				<p>{flight.airline.airlineName}</p>
 			</div>
 			<div className="col-12 col-md-1">
-				<p>{flight.planeDetails.planeName}</p>
+				<p>{flight.plane.planeName}</p>
 			</div>
 			<div className="col-12 col-md-3 d-flex justify-content-evenly align-items-center">
 				<div className="align-items-center">
-					<p>{flight.departurePlace}</p>
+					<p>{flight.departureAirport.city}</p>
 					<p>{formatTime(flight.departureTime)}</p>
 					<p>{flight.departureDate}</p>
 				</div>
 				<p>-</p>
 				<div className="align-items-center">
-					<p>{flight.arrivalPlace}</p>
+					<p>{flight.arrivalAirport.city}</p>
 					<p>{formatTime(flight.arrivalTime)}</p>
 					<p>{flight.arrivalDate}</p>
 				</div>

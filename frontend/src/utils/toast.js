@@ -2,7 +2,7 @@ import { toast } from 'react-toastify';
 
 /**
  * Shows a toast notification with the specified type and message
- * @param {string} type - The type of toast ('success', 'error', 'info', 'warning')
+ * @param {string} type - The type of toast ('success', 'error')
  * @param {string} message - The message to display in the toast
  */
 export const showToast = (type, message) => {
@@ -23,12 +23,6 @@ export const showToast = (type, message) => {
 		case 'error':
 			toast.error(message, options);
 			break;
-		// case 'info':
-		// 	toast.info(message, options);
-		// 	break;
-		// case 'warning':
-		// 	toast.warning(message, options);
-		// 	break;
 		default:
 			toast(message, options);
 	}

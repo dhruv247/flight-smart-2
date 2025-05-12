@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import DashboardNavbar from '../../../components/common/DashboardNavbar';
+import DashboardNavbar from '../../../components/navbars/DashboardNavbar';
 import CustomerDashboardBookings from './bookings/CustomerDashboardBookings';
-import CustomerDashboardProfile from './profile/CustomerDashboardProfile';
-import CustomerDashboardChat from './chat/CustomerDashboardChat';
+import CustomerDashboardProfile from './CustomerDashboardProfile';
+import CustomerDashboardChat from './CustomerDashboardChat';
 
 const CustomerDashboardPage = () => {
 	const [activeComponent, setActiveComponent] = useState('bookings');

@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { useCities } from '../../../hooks/useCities';
+import { useAirports } from '../../../hooks/useAirports';
 import getUserDetails from '../../../utils/getUserDetails';
 import { useNavigate } from 'react-router-dom';
 import { Modal } from 'bootstrap';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 const FlightSearchForm = ({
 	onSubmit,
@@ -12,13 +14,17 @@ const FlightSearchForm = ({
 	showReturnDate = true,
 }) => {
 	const navigate = useNavigate();
-	const { cities, isLoading } = useCities();
+	const { airports, isLoading } = useAirports();
 	const [tripType, setTripType] = useState(initialTripType);
 	const [formData, setFormData] = useState({
 		flightFrom: initialValues.flightFrom || '',
 		flightTo: initialValues.flightTo || '',
-		departureDate: initialValues.departureDate || '',
-		returnDate: initialValues.returnDate || '',
+		departureDate: initialValues.departureDate
+			? new Date(initialValues.departureDate)
+			: null,
+		returnDate: initialValues.returnDate
+			? new Date(initialValues.returnDate)
+			: null,
 		passengers: initialValues.passengers || '',
 		travelClass: initialValues.travelClass || '',
 		...initialValues,
@@ -33,6 +39,13 @@ const FlightSearchForm = ({
 		setFormData((prev) => ({
 			...prev,
 			[name]: value,
+		}));
+	};
+
+	const handleDateChange = (date, name) => {
+		setFormData((prev) => ({
+			...prev,
+			[name]: date,
 		}));
 	};
 
@@ -58,8 +71,16 @@ const FlightSearchForm = ({
 		try {
 			// Check if user is logged in
 			await getUserDetails();
+			// Format dates to YYYY-MM-DD format before submitting
+			const formattedData = {
+				...formData,
+				departureDate: formData.departureDate
+					? formatDate(formData.departureDate)
+					: '',
+				returnDate: formData.returnDate ? formatDate(formData.returnDate) : '',
+			};
 			// If logged in, proceed with search
-			onSubmit({ ...formData, tripType });
+			onSubmit({ ...formattedData, tripType });
 		} catch (error) {
 			// If not logged in, show modal
 			const loginModal = new Modal(
@@ -69,12 +90,32 @@ const FlightSearchForm = ({
 		}
 	};
 
+	// Format date to YYYY-MM-DD
+	const formatDate = (date) => {
+		if (!date) return '';
+		const year = date.getFullYear();
+		const month = String(date.getMonth() + 1).padStart(2, '0');
+		const day = String(date.getDate()).padStart(2, '0');
+		return `${year}-${month}-${day}`;
+	};
+
 	const handleLoginRedirect = () => {
 		const loginModal = Modal.getInstance(
 			document.getElementById('loginRequiredModal')
 		);
 		loginModal.hide();
 		navigate('/login');
+	};
+
+	// Get today's date for min date
+	const today = new Date();
+
+	// Helper function to add days to a date
+	const addDays = (date, days) => {
+		if (!date) return null;
+		const result = new Date(date);
+		result.setDate(result.getDate() + days);
+		return result;
 	};
 
 	return (
@@ -133,8 +174,8 @@ const FlightSearchForm = ({
 							name="flightFrom"
 							id="flightFrom"
 							className="form-control p-4"
-							placeholder="From"
-							list="cityList"
+							placeholder="From (Airport)"
+							list="airportList"
 							autoComplete="off"
 							required
 							value={formData.flightFrom}
@@ -167,47 +208,55 @@ const FlightSearchForm = ({
 							name="flightTo"
 							id="flightTo"
 							className="form-control p-4"
-							placeholder="To"
-							list="cityList"
+							placeholder="To (Airport)"
+							list="airportList"
 							autoComplete="off"
 							required
 							value={formData.flightTo}
 							onChange={handleChange}
 							readOnly={isReadOnly}
 						/>
-						<datalist id="cityList">
+						<datalist id="airportList">
 							{!isLoading &&
-								cities.map((city, index) => (
-									<option key={index} value={city} />
+								airports.map((airport, index) => (
+									<option key={index} value={airport.name}>
+										{airport.name} ({airport.code}) - {airport.city}
+									</option>
 								))}
 						</datalist>
 					</div>
 
 					{/* Date Selection */}
 					<div className="d-flex gap-2">
-						<input
-							type="date"
-							name="departureDate"
-							id="departureDate"
-							className="form-control p-4"
-							required
-							value={formData.departureDate}
-							onChange={handleChange}
-							readOnly={isReadOnly}
-						/>
-						{showReturnDate && (
-							<input
-								type="date"
-								name="returnDate"
-								id="returnDate"
-								className={`form-control p-4 ${
-									tripType === 'roundTrip' ? '' : 'd-none'
-								}`}
-								value={formData.returnDate}
-								onChange={handleChange}
-								readOnly={isReadOnly}
-								required={tripType === 'roundTrip'}
+						<div className="form-control p-0">
+							<DatePicker
+								selected={formData.departureDate}
+								onChange={(date) => handleDateChange(date, 'departureDate')}
+								className="form-control p-4 border-0"
+								placeholderText="Departure Date"
+								dateFormat="yyyy-MM-dd"
+								minDate={today}
+								required
+								disabled={isReadOnly}
 							/>
+						</div>
+						{showReturnDate && tripType === 'roundTrip' && (
+							<div className="form-control p-0">
+								<DatePicker
+									selected={formData.returnDate}
+									onChange={(date) => handleDateChange(date, 'returnDate')}
+									className="form-control p-4 border-0"
+									placeholderText="Return Date"
+									dateFormat="yyyy-MM-dd"
+									minDate={
+										formData.departureDate
+											? addDays(formData.departureDate, 1)
+											: addDays(today, 1)
+									}
+									required
+									disabled={isReadOnly}
+								/>
+							</div>
 						)}
 					</div>
 

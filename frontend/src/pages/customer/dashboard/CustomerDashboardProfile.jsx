@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import getUserDetails from '../../../../utils/getUserDetails';
-import ChangePasswordModal from '../../../../components/common/ChangePasswordModal';
-import ChangeProfileModal from '../../../../components/common/ChangeProfileModal';
+import getUserDetails from '../../../utils/getUserDetails';
+import ChangePasswordModal from '../../../components/profileModals/ChangePasswordModal';
+import ChangeProfileModal from '../../../components/profileModals/ChangeProfileModal';
 
-const AirlineDashboardProfile = () => {
+const CustomerDashboardProfile = () => {
 	const [user, setUser] = useState(null);
 	const [isLoading, setIsLoading] = useState(true);
 	const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
@@ -51,7 +51,7 @@ const AirlineDashboardProfile = () => {
 					</button>
 
 					<p className="my-3">
-						<span className="fw-bold">Airline Name:</span> {user.username}
+						<span className="fw-bold">Customer Name:</span> {user.username}
 					</p>
 					<p className="my-3">
 						<span className="fw-bold">Email:</span> {user.email}
@@ -78,4 +78,4 @@ const AirlineDashboardProfile = () => {
 	);
 };
 
-export default AirlineDashboardProfile;
+export default CustomerDashboardProfile;

@@ -7,7 +7,7 @@ import SeatMap from './SeatMap';
 import { Modal } from 'bootstrap';
 import { showErrorToast, showSuccessToast } from '../../../utils/toast';
 
-const BookingDetails = () => {
+const PassengerDetails = () => {
 	const navigate = useNavigate();
 	const { currentBooking, setCurrentBooking } = useFlightContext();
 
@@ -553,4 +553,4 @@ const BookingDetails = () => {
 	);
 };
 
-export default BookingDetails;
+export default PassengerDetails;

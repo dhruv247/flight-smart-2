@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema(
 		profilePicture: {
 			type: String,
 			default:
-				'https://flight-smart-1-images.s3.amazonaws.com/1746506363869-download%20%281%29.jpeg',
+				"https://flight-smart-1-images.s3.amazonaws.com/1746975947571-default.jpeg",
 		},
 		verificationStatus: { type: Boolean, required: true, default: true },
 	},

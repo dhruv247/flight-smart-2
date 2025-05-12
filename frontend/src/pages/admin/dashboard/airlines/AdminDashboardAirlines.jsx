@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import DashboardNavbar from '../../../../components/common/DashboardNavbar';
 import UnverifiedAirlineList from './UnverifiedAirlineList';
 import VerifiedAirlineList from './VerifiedAirlineList';
 

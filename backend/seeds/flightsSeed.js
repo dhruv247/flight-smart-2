@@ -1,38 +1,8 @@
 import { Flight } from '../models/flight.model.js';
 import { Plane } from '../models/plane.model.js';
-import { City } from '../models/city.model.js';
+import { Airport } from '../models/airport.model.js';
 import { User } from '../models/user.model.js';
 import { createSeats } from '../utils/seatUtils.js';
-
-/**
- * Validates if a string is a valid date in YYYY-MM-DD format
- * @param {string} dateStr - Date string to validate
- * @returns {boolean} - True if valid, false otherwise
- */
-const isValidDate = (dateStr) => {
-	const dateRegex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/;
-	if (!dateRegex.test(dateStr)) return false;
-
-	return true;
-
-	// const [year, month, day] = dateStr.split('-').map(Number);
-	// const date = new Date(year, month - 1, day);
-	// return (
-	// 	date.getFullYear() === year &&
-	// 	date.getMonth() === month - 1 &&
-	// 	date.getDate() === day
-	// );
-};
-
-/**
- * Validates if a string is a valid time in 24-hour format (0000-2359)
- * @param {string} timeStr - Time string to validate
- * @returns {boolean} - True if valid, false otherwise
- */
-const isValidTime = (timeStr) => {
-	const timeRegex = /^([01][0-9]|2[0-3])[0-5][0-9]$/;
-	return timeRegex.test(timeStr);
-};
 
 /**
  * Generates a random date between today and 2025-05-11
@@ -41,7 +11,7 @@ const isValidTime = (timeStr) => {
 const generateRandomDate = () => {
 	const startDate = new Date(); // Current Day
 	startDate.setHours(0, 0, 0, 0); // Set to start of day to ensure we don't miss today
-	const endDate = new Date('2025-05-14');
+	const endDate = new Date('2025-05-19');
 	const randomDate = new Date(
 		startDate.getTime() +
 			Math.random() * (endDate.getTime() - startDate.getTime())
@@ -68,13 +38,12 @@ const seedFlights = async () => {
 	try {
 		const planes = await Plane.find({});
 		const airlines = await User.find({ userType: 'airline' });
-		const cityDocuments = await City.find({});
-		const cities = cityDocuments.map((city) => city.name);
+		const airports = await Airport.find({});
 
 		// Validate required data exists
-		if (planes.length === 0 || airlines.length === 0 || cities.length === 0) {
+		if (planes.length === 0 || airlines.length === 0 || airports.length === 0) {
 			throw new Error(
-				'No planes or airlines or cities found in the database. Please seed planes, cities, and airlines first.'
+				'No planes, airlines, or airports found in the database. Please seed planes, airports, and airlines first.'
 			);
 		}
 
@@ -85,7 +54,7 @@ const seedFlights = async () => {
 		);
 
 		const flights = [];
-		const numberOfFlights = 10; // Generate 5 random flights
+		const numberOfFlights = 490; // Generate 490 random flights
 
 		for (let i = 0; i < numberOfFlights; i++) {
 			const plane = planes[Math.floor(Math.random() * planes.length)];
@@ -96,12 +65,15 @@ const seedFlights = async () => {
 				continue;
 			}
 
-			// Generate random (different) departure and arrival cities
-			let departureCity, arrivalCity;
+			// Generate random (different) departure and arrival airports
+			let departureAirport, arrivalAirport;
 			do {
-				departureCity = cities[Math.floor(Math.random() * cities.length)];
-				arrivalCity = cities[Math.floor(Math.random() * cities.length)];
-			} while (departureCity === arrivalCity);
+				departureAirport =
+					airports[Math.floor(Math.random() * airports.length)];
+				arrivalAirport = airports[Math.floor(Math.random() * airports.length)];
+			} while (
+				departureAirport._id.toString() === arrivalAirport._id.toString()
+			);
 
 			// Generate valid dates and times
 			const departureDate = generateRandomDate();
@@ -151,20 +123,36 @@ const seedFlights = async () => {
 
 			const flight = new Flight({
 				flightNo: flightNo,
-				airlineDetails: {
+				airline: {
 					_id: airline._id.toString(),
 					airlineName: airline.username,
 				},
-				planeDetails: {
+				plane: {
 					_id: plane._id.toString(),
 					planeName: plane.planeName,
 					economyCapacity: plane.economyCapacity,
 					businessCapacity: plane.businessCapacity,
 				},
-				departurePlace: departureCity,
+				departureAirport: {
+					_id: departureAirport._id.toString(),
+					airportName: departureAirport.airportName,
+					airportCode: departureAirport.airportCode,
+					city: departureAirport.city,
+					state: departureAirport.state,
+					country: departureAirport.country,
+					image: departureAirport.image,
+				},
 				departureDate: departureDate,
 				departureTime: departureTime,
-				arrivalPlace: arrivalCity,
+				arrivalAirport: {
+					_id: arrivalAirport._id.toString(),
+					airportName: arrivalAirport.airportName,
+					airportCode: arrivalAirport.airportCode,
+					city: arrivalAirport.city,
+					state: arrivalAirport.state,
+					country: arrivalAirport.country,
+					image: arrivalAirport.image,
+				},
 				arrivalDate: formattedArrivalDate,
 				arrivalTime: calculatedArrivalTime,
 				duration: durationMinutes,

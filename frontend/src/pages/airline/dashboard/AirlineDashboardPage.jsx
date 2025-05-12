@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import DashboardNavbar from '../../../components/common/DashboardNavbar';
-import AirlineDashboardChat from './chat/AirlineDashboardChat';
+import DashboardNavbar from '../../../components/navbars/DashboardNavbar';
+import AirlineDashboardChat from './AirlineDashboardChat';
 import AirlineDashboardFlights from './flights/AirlineDashboardFlights';
-import AirlineDashboardProfile from './profile/AirlineDashboardProfile';
-import AirlineDashboardAirline from './analytics/AirlineDashboardAnalytics';
+import AirlineDashboardProfile from './AirlineDashboardProfile';
+import AirlineDashboardAnalytics from './analytics/AirlineDashboardAnalytics';
 
 const AirlineDashboardPage = () => {
+	
 	const [activeComponent, setActiveComponent] = useState('analytics');
 
 	const airlineNavItems = [
@@ -24,7 +25,7 @@ const AirlineDashboardPage = () => {
 			case 'profile':
 				return <AirlineDashboardProfile />;
 			case 'analytics':
-				return <AirlineDashboardAirline />;
+				return <AirlineDashboardAnalytics />;
 			default:
 				return <div>Welcome to Airline Dashboard</div>;
 		}
