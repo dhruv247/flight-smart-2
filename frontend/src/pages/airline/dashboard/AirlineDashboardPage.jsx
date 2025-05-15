@@ -4,14 +4,15 @@ import AirlineDashboardChat from './AirlineDashboardChat';
 import AirlineDashboardFlights from './flights/AirlineDashboardFlights';
 import AirlineDashboardProfile from './AirlineDashboardProfile';
 import AirlineDashboardAnalytics from './analytics/AirlineDashboardAnalytics';
+import BookingsDashboard from '../../../components/bookings/BookingsDashboard';
 
 const AirlineDashboardPage = () => {
-	
 	const [activeComponent, setActiveComponent] = useState('analytics');
 
 	const airlineNavItems = [
 		{ id: 'analytics', label: 'Analytics', icon: 'bi-bar-chart' },
 		{ id: 'flights', label: 'Flights', icon: 'bi-airplane' },
+		{ id: 'bookings', label: 'Bookings', icon: 'bi-calendar-check' },
 		{ id: 'chat', label: 'Chat', icon: 'bi-chat' },
 		{ id: 'profile', label: 'Profile', icon: 'bi-person' },
 	];
@@ -24,6 +25,8 @@ const AirlineDashboardPage = () => {
 				return <AirlineDashboardFlights />;
 			case 'profile':
 				return <AirlineDashboardProfile />;
+			case 'bookings':
+				return <BookingsDashboard type="airline" />;
 			case 'analytics':
 				return <AirlineDashboardAnalytics />;
 			default:

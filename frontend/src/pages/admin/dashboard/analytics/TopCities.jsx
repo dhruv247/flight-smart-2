@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import Loading from '../../../../components/Loading';
+import { analyticsService } from '../../../../services/analytics.service';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -59,14 +60,13 @@ const TopCities = ({ noOfTopCities }) => {
 	useEffect(() => {
 		const getTopCities = async () => {
 			try {
-				const response = await axios.get(
-					`http://localhost:8000/api/analytics/top-cities-by-number-of-flights?num=${noOfTopCities}`,
-					{ withCredentials: true }
+				const response = await analyticsService.getTopCitiesByNumberOfFlights(
+					noOfTopCities
 				);
-				setTopCitiesList(response.data);
+				setTopCitiesList(response);
 
-				const labels = response.data.map((city) => city.city);
-				const dataset = response.data.map((city) => city.count);
+				const labels = response.map((city) => city.city);
+				const dataset = response.map((city) => city.count);
 
 				// Generate random colors for each city
 				const backgroundColors = labels.map(() => generateRandomColor());
@@ -108,14 +108,7 @@ const TopCities = ({ noOfTopCities }) => {
 	}
 
 	if (isLoading) {
-		return (
-			<div className="text-center p-4">
-				<div className="spinner-border text-primary" role="status">
-					<span className="visually-hidden">Loading...</span>
-				</div>
-				<p className="text-muted mt-2">Loading city data...</p>
-			</div>
-		);
+		return <Loading />;
 	}
 
 	return (

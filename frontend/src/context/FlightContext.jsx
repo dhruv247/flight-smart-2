@@ -1,20 +1,58 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useState, useEffect } from 'react';
 
 // Create context
-const FlightContext = createContext();
+export const FlightContext = createContext();
 
 // Provider component
 export const FlightProvider = ({ children }) => {
-	// States
-	const [flightSearchData, setFlightSearchData] = useState(null);
-	const [selectedDepartureFlight, setSelectedDepartureFlight] = useState(null);
-	const [currentBooking, setCurrentBooking] = useState(null);
+	// States with localStorage initialization
+	const [flightSearchData, setFlightSearchData] = useState(() => {
+		const saved = localStorage.getItem('flightSearchData');
+		return saved ? JSON.parse(saved) : null;
+	});
+	const [selectedDepartureFlight, setSelectedDepartureFlight] = useState(() => {
+		const saved = localStorage.getItem('selectedDepartureFlight');
+		return saved ? JSON.parse(saved) : null;
+	});
+	const [currentBooking, setCurrentBooking] = useState(() => {
+		const saved = localStorage.getItem('currentBooking');
+		return saved ? JSON.parse(saved) : null;
+	});
+
+	// Update localStorage when state changes
+	useEffect(() => {
+		if (flightSearchData) {
+			localStorage.setItem(
+				'flightSearchData',
+				JSON.stringify(flightSearchData)
+			);
+		}
+	}, [flightSearchData]);
+
+	useEffect(() => {
+		if (selectedDepartureFlight) {
+			localStorage.setItem(
+				'selectedDepartureFlight',
+				JSON.stringify(selectedDepartureFlight)
+			);
+		}
+	}, [selectedDepartureFlight]);
+
+	useEffect(() => {
+		if (currentBooking) {
+			localStorage.setItem('currentBooking', JSON.stringify(currentBooking));
+		}
+	}, [currentBooking]);
 
 	// Clear all flight-related data
 	const clearFlightData = () => {
 		setFlightSearchData(null);
 		setSelectedDepartureFlight(null);
 		setCurrentBooking(null);
+		// Also clear from localStorage
+		localStorage.removeItem('flightSearchData');
+		localStorage.removeItem('selectedDepartureFlight');
+		localStorage.removeItem('currentBooking');
 	};
 
 	// Context value
@@ -31,13 +69,4 @@ export const FlightProvider = ({ children }) => {
 	return (
 		<FlightContext.Provider value={value}>{children}</FlightContext.Provider>
 	);
-};
-
-// Custom hook to use the flight context
-export const useFlightContext = () => {
-	const context = useContext(FlightContext);
-	if (!context) {
-		throw new Error('useFlightContext must be used within a FlightProvider');
-	}
-	return context;
 };

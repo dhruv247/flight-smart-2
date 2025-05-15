@@ -43,10 +43,10 @@ const processMessage = async (message) => {
 
 		if (messageType === 'BookingConfirmation') {
 			console.log(
-				`Processing booking confirmation email for booking: ${body.booking._id}`
+				`Processing booking confirmation email for booking: ${body._id}`
 			);
-			await sendBookingConfirmationEmail(body.user, body.booking);
-			console.log(`Email sent successfully for booking: ${body.booking._id}`);
+			await sendBookingConfirmationEmail(body);
+			console.log(`Email sent successfully for booking: ${body._id}`);
 		} else {
 			console.warn(`Unknown message type: ${messageType}`);
 		}

@@ -1,15 +1,14 @@
 import React from 'react';
-import axios from 'axios';
+import {
+	verifyAirline,
+	deleteAirline,
+} from '../../../../services/auth.service';
 import { showSuccessToast, showErrorToast } from '../../../../utils/toast';
 
 const UnverifiedAirlineCard = ({ airline }) => {
 	const handleVerify = async () => {
 		try {
-			await axios.post(
-				'http://localhost:8000/api/auth/verify-airline',
-				{ airlineId: airline._id },
-				{ withCredentials: true }
-			);
+			await verifyAirline(airline._id);
 			showSuccessToast('Airline verified successfully!');
 			window.location.reload(); // refresh needed to fetch new list
 		} catch (error) {
@@ -20,11 +19,7 @@ const UnverifiedAirlineCard = ({ airline }) => {
 
 	const handleReject = async () => {
 		try {
-			await axios.post(
-				'http://localhost:8000/api/auth/delete-airline',
-				{ airlineId: airline._id },
-				{ withCredentials: true }
-			);
+			await deleteAirline(airline._id);
 			showSuccessToast('Airline rejected successfully!');
 			// Refresh the page to update the list
 			window.location.reload();

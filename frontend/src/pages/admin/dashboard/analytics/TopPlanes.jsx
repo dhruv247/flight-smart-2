@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Line } from 'react-chartjs-2';
 import {
 	Chart as ChartJS,
@@ -11,6 +10,8 @@ import {
 	Tooltip,
 	Legend,
 } from 'chart.js';
+import Loading from '../../../../components/Loading';
+import { analyticsService } from '../../../../services/analytics.service';
 
 ChartJS.register(
 	CategoryScale,
@@ -73,14 +74,13 @@ const TopPlanes = ({ noOfTopPlanes }) => {
 	useEffect(() => {
 		const getTopPlanes = async () => {
 			try {
-				const response = await axios.get(
-					`http://localhost:8000/api/analytics/top-planes-by-number-of-flights?num=${noOfTopPlanes}`,
-					{ withCredentials: true }
+				const response = await analyticsService.getTopPlanesByNumberOfFlights(
+					noOfTopPlanes
 				);
-				setTopPlanesList(response.data);
+				setTopPlanesList(response);
 
-				const labels = response.data.map((plane) => plane.planeName);
-				const dataset = response.data.map((plane) => plane.count);
+				const labels = response.map((plane) => plane.planeName);
+				const dataset = response.map((plane) => plane.count);
 
 				setData({
 					labels: labels,
@@ -121,14 +121,7 @@ const TopPlanes = ({ noOfTopPlanes }) => {
 	}
 
 	if (isLoading) {
-		return (
-			<div className="text-center p-4">
-				<div className="spinner-border text-primary" role="status">
-					<span className="visually-hidden">Loading...</span>
-				</div>
-				<p className="text-muted mt-2">Loading plane data...</p>
-			</div>
-		);
+		return <Loading />;
 	}
 
 	return (

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import Loading from '../../../components/Loading';
 
 const SeatMap = ({ flightId, seatType, onSeatSelect, blockedSeats = [] }) => {
 	const [seats, setSeats] = useState([]);
@@ -43,15 +44,7 @@ const SeatMap = ({ flightId, seatType, onSeatSelect, blockedSeats = [] }) => {
 		}
 	};
 
-	if (loading)
-		return (
-			<div className="text-center p-4">
-				<div className="spinner-border text-primary" role="status">
-					<span className="visually-hidden">Loading seats...</span>
-				</div>
-				<p className="mt-2">Loading seats...</p>
-			</div>
-		);
+	if (loading) return <Loading />;
 
 	if (error) return <div className="text-center text-danger p-4">{error}</div>;
 

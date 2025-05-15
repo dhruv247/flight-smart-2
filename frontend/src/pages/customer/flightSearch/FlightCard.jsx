@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useFlightContext } from '../../../context/FlightContext';
+import { useFlightContext } from '../../../hooks/useFlightContext';
 
 const FlightCard = ({
 	flight,
@@ -70,11 +70,11 @@ const FlightCard = ({
 
 			// Store complete booking data in context
 			setCurrentBooking(bookingData);
-			navigate('/customer/passengerDetails');
+			navigate('/customer/bookingDetails');
 		} else if (tripType === 'oneWay') {
 			// Store one-way booking data in context
 			setCurrentBooking(selectedFlight);
-			navigate('/customer/passengerDetails');
+			navigate('/customer/bookingDetails');
 		} else {
 			// For round trip departure flight, just store the flight in context
 			setSelectedDepartureFlight(selectedFlight);

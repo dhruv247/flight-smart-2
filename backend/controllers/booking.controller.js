@@ -5,6 +5,7 @@ import { User } from '../models/user.model.js';
 import { Flight } from '../models/flight.model.js';
 import { Seat } from '../models/seat.model.js';
 import { sendToEmailQueue } from '../utils/sqsUtils.js';
+import { sendBookingCancellationEmail } from '../utils/emailUtils.js';
 
 /**
  * Calculate age from date of birth
@@ -99,17 +100,7 @@ const createBooking = async (req, res) => {
 
 		// Send booking confirmation email via SQS
 		try {
-			await sendToEmailQueue({
-				user: {
-					email: user.email,
-					username: user.username,
-				},
-				booking: {
-					_id: booking._id.toString(),
-					bookingPrice: booking.bookingPrice,
-					createdAt: booking.createdAt,
-				},
-			});
+			await sendToEmailQueue(booking);
 		} catch (emailError) {
 			console.error('Error queuing confirmation email:', emailError);
 			// The booking is still successful even if email queuing fails (solves the past error)
@@ -117,42 +108,6 @@ const createBooking = async (req, res) => {
 
 		return res.status(201).json({
 			message: 'Booking saved successfully!',
-		});
-	} catch (error) {
-		return res.status(500).json({
-			message: error.message,
-		});
-	}
-};
-
-/**
- * Get bookings for logged in user
- * @param {*} req
- * @param {*} res
- * @returns
- */
-const getBookingsForCustomer = async (req, res) => {
-	try {
-		// destructure req user
-		const userId = req.user._id;
-
-		// get bookings
-		const bookings = await Booking.aggregate([
-			{
-				$match: {
-					'userDetails._id': new mongoose.Types.ObjectId(userId),
-				},
-			},
-			{
-				$sort: {
-					createdAt: -1,
-				},
-			},
-		]);
-
-		return res.status(200).json({
-			message: 'Bookings retrieved successfully',
-			bookings,
 		});
 	} catch (error) {
 		return res.status(500).json({
@@ -252,6 +207,15 @@ const cancelBooking = async (req, res) => {
 			await returnFlight.save();
 		}
 
+		// Send booking cancellation email via SQS
+		try {
+			await sendBookingCancellationEmail(booking);
+		} catch (emailError) {
+			return res.status(500).json({
+				message: 'Error sending booking cancellation email:',
+				error: emailError.message,
+			});
+		}
 		// return success message
 		return res.status(200).json({
 			message: 'Booking cancelled successfully',
@@ -263,4 +227,303 @@ const cancelBooking = async (req, res) => {
 	}
 };
 
-export { createBooking, getBookingsForCustomer, cancelBooking };
+/**
+ * Search bookings
+ * @param {*} req
+ * @param {*} res
+ * @returns
+ */
+const searchBookingsForCustomer = async (req, res) => {
+	const user = req.user._id;
+
+	try {
+		const {
+			bookingId,
+			departureAirportName,
+			arrivalAirportName,
+			roundTrip,
+			seatType,
+			status,
+			confirmed,
+		} = req.query;
+
+		// Get pagination parameters
+		const page = parseInt(req.query.page) || 0;
+		const size = parseInt(req.query.size) || 10;
+
+		// Convert roundTrip to boolean since query params come as strings
+		let isRoundTrip;
+		let isConfirmed;
+		if (roundTrip !== null) {
+			isRoundTrip = roundTrip === 'true';
+		}
+		if (confirmed !== null) {
+			isConfirmed = confirmed === 'true';
+		}
+
+		// Build match criteria dynamically
+		const matchCriteria = {};
+
+		if (bookingId) {
+			try {
+				matchCriteria._id = new mongoose.Types.ObjectId(bookingId);
+			} catch (error) {
+				return res.status(200).json({ booking: [], total: 0 });
+			}
+		}
+
+		if (departureAirportName) {
+			matchCriteria['tickets.departureFlight.departureAirport.airportName'] = {
+				// $regex: new RegExp(departureAirportName, 'i'),
+				$eq: departureAirportName,
+			};
+		}
+
+		if (arrivalAirportName) {
+			matchCriteria['tickets.departureFlight.arrivalAirport.airportName'] = {
+				// $regex: new RegExp(arrivalAirportName, 'i'),
+				$eq: arrivalAirportName,
+			};
+		}
+
+		if (roundTrip !== undefined) {
+			matchCriteria['tickets.roundTrip'] = isRoundTrip;
+		}
+
+		if (seatType) {
+			matchCriteria['tickets.seatType'] = seatType;
+		}
+
+		if (status === 'future') {
+			matchCriteria['tickets.departureFlight.departureDate'] = {
+				$gt: new Date().toISOString().split('T')[0],
+			};
+		} else if (status === 'past') {
+			matchCriteria['tickets.departureFlight.departureDate'] = {
+				$lt: new Date().toISOString().split('T')[0],
+			};
+		}
+
+		if (confirmed !== undefined) {
+			matchCriteria['confirmed'] = isConfirmed;
+		}
+
+		let booking;
+		let total;
+
+		try {
+			// Get total count first
+			const countResult = await Booking.aggregate([
+				{
+					$match: {
+						...matchCriteria,
+						'userDetails._id': new mongoose.Types.ObjectId(user),
+					},
+				},
+				{
+					$count: 'total',
+				},
+			]);
+
+			total = countResult[0]?.total || 0;
+
+			// Get paginated results
+			booking = await Booking.aggregate([
+				{
+					$match: {
+						...matchCriteria,
+						'userDetails._id': new mongoose.Types.ObjectId(user),
+					},
+				},
+				{
+					$sort: {
+						createdAt: -1,
+					},
+				},
+				{
+					$skip: page * size,
+				},
+				{
+					$limit: size,
+				},
+			]);
+		} catch (error) {
+			console.error('Search error:', error);
+			return res.status(200).json({ booking: [], total: 0 });
+		}
+
+		// return booking with total count
+		return res.status(200).json({
+			message: 'Booking retrieved successfully',
+			booking,
+			total,
+		});
+	} catch (error) {
+		console.error('Search error:', error);
+		return res.status(500).json({ message: error.message });
+	}
+};
+
+/**
+ * Search bookings for airlines
+ * @param {*} req
+ * @param {*} res
+ * @returns
+ */
+const searchBookingsForAirlines = async (req, res) => {
+	const user = req.user._id;
+
+	try {
+		const {
+			bookingId,
+			departureAirportName,
+			arrivalAirportName,
+			roundTrip,
+			seatType,
+			status,
+			confirmed,
+		} = req.query;
+
+		// Get pagination parameters
+		const page = parseInt(req.query.page) || 0;
+		const size = parseInt(req.query.size) || 10;
+
+		// Convert roundTrip to boolean since query params come as strings
+		let isRoundTrip;
+		let isConfirmed;
+		if (roundTrip !== null) {
+			isRoundTrip = roundTrip === 'true';
+		}
+		if (confirmed !== null) {
+			isConfirmed = confirmed === 'true';
+		}
+
+		// Build match criteria dynamically
+		const matchCriteria = {};
+
+		if (bookingId) {
+			try {
+				matchCriteria._id = new mongoose.Types.ObjectId(bookingId);
+			} catch (error) {
+				return res.status(200).json({ booking: [], total: 0 });
+			}
+		}
+
+		if (departureAirportName) {
+			matchCriteria['tickets.departureFlight.departureAirport.airportName'] = {
+				// $regex: new RegExp(departureAirportName, 'i'),
+				$eq: departureAirportName,
+			};
+		}
+
+		if (arrivalAirportName) {
+			matchCriteria['tickets.departureFlight.arrivalAirport.airportName'] = {
+				// $regex: new RegExp(arrivalAirportName, 'i'),
+				$eq: arrivalAirportName,
+			};
+		}
+
+		if (roundTrip !== undefined) {
+			matchCriteria['tickets.roundTrip'] = isRoundTrip;
+		}
+
+		if (seatType) {
+			matchCriteria['tickets.seatType'] = seatType;
+		}
+
+		if (status === 'future') {
+			matchCriteria['tickets.departureFlight.departureDate'] = {
+				$gt: new Date().toISOString().split('T')[0],
+			};
+		} else if (status === 'past') {
+			matchCriteria['tickets.departureFlight.departureDate'] = {
+				$lt: new Date().toISOString().split('T')[0],
+			};
+		}
+
+		if (confirmed !== undefined) {
+			matchCriteria['confirmed'] = isConfirmed;
+		}
+
+		let booking;
+		let total;
+
+		try {
+			// Get total count first
+			const countResult = await Booking.aggregate([
+				{
+					$match: {
+						...matchCriteria,
+						$or: [
+							{
+								'tickets.departureFlight.airline._id':
+									new mongoose.Types.ObjectId(user),
+							},
+							{
+								'tickets.returnFlight.airline._id': new mongoose.Types.ObjectId(
+									user
+								),
+							},
+						],
+					},
+				},
+				{
+					$count: 'total',
+				},
+			]);
+
+			total = countResult[0]?.total || 0;
+
+			// Get paginated results
+			booking = await Booking.aggregate([
+				{
+					$match: {
+						...matchCriteria,
+						$or: [
+							{
+								'tickets.departureFlight.airline._id':
+									new mongoose.Types.ObjectId(user),
+							},
+							{
+								'tickets.returnFlight.airline._id': new mongoose.Types.ObjectId(
+									user
+								),
+							},
+						],
+					},
+				},
+				{
+					$sort: {
+						createdAt: -1,
+					},
+				},
+				{
+					$skip: page * size,
+				},
+				{
+					$limit: size,
+				},
+			]);
+		} catch (error) {
+			console.error('Search error:', error);
+			return res.status(200).json({ booking: [], total: 0 });
+		}
+
+		// return booking with total count
+		return res.status(200).json({
+			message: 'Booking retrieved successfully',
+			booking,
+			total,
+		});
+	} catch (error) {
+		// console.error('Search error:', error);
+		return res.status(500).json({ message: error.message });
+	}
+};
+
+export {
+	createBooking,
+	cancelBooking,
+	searchBookingsForCustomer,
+	searchBookingsForAirlines,
+};

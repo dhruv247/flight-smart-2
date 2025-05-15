@@ -1,9 +1,10 @@
 import express from 'express';
-import { verifyCustomer } from '../middlewares/auth.middlewares.js';
+import { verifyAirline, verifyCustomer } from '../middlewares/auth.middlewares.js';
 import {
 	createBooking,
-	getBookingsForCustomer,
+	searchBookingsForAirlines,
 	cancelBooking,
+	searchBookingsForCustomer,
 } from '../controllers/booking.controller.js';
 
 const router = express.Router();
@@ -14,15 +15,22 @@ router.post(
 	verifyCustomer,
 	createBooking
 );
-router.get(
-	'/get-bookings-for-customer',
-	verifyCustomer,
-	getBookingsForCustomer
-);
 router.patch(
 	'/cancel-booking/:id',
 	verifyCustomer,
 	cancelBooking
 );
+router.get(
+	'/search-bookings-for-customer',
+	verifyCustomer,
+	searchBookingsForCustomer
+);
+
+// Airline Routes
+router.get(
+	'/search-bookings-for-airline',
+	verifyAirline,
+	searchBookingsForAirlines
+)
 
 export { router };

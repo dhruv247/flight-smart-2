@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { showSuccessToast, showErrorToast } from '../../../../utils/toast';
+import Loading from '../../../../components/Loading';
 
 const ViewPlane = () => {
 	const [planesList, setPlanesList] = useState([]);
@@ -32,14 +33,7 @@ const ViewPlane = () => {
 	}, []);
 
 	if (isLoading) {
-		return (
-			<div className="text-center my-5">
-				<div className="spinner-border text-primary" role="status">
-					<span className="visually-hidden">Loading...</span>
-				</div>
-				<p className="mt-2">Loading Planes...</p>
-			</div>
-		);
+		return <Loading />;
 	}
 
 	return (

@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { showSuccessToast, showErrorToast } from '../../../../utils/toast';
 import { useAirports } from '../../../../hooks/useAirports';
-import getUserDetails from '../../../../utils/getUserDetails';
+import useGetUserDetails from '../../../../hooks/useGetUserDetails';
+import Loading from '../../../../components/Loading';
+import { flightService } from '../../../../services/flight.service';
+import { planeService } from '../../../../services/plane.service';
 
 const AddFlight = () => {
 	const { airports, isLoading: isLoadingAirports } = useAirports();
+	const { user: airlineDetails, isLoading: isLoadingUser } =
+		useGetUserDetails();
 	const [planes, setPlanes] = useState([]);
-	const [airlineDetails, setAirlineDetails] = useState(null);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [flightDetails, setFlightDetails] = useState({
 		flightNo: '',
@@ -23,31 +26,10 @@ const AddFlight = () => {
 	});
 
 	useEffect(() => {
-		const fetchAirlineDetails = async () => {
-			try {
-				const details = await getUserDetails();
-				setAirlineDetails(details);
-			} catch (error) {
-				console.error('Error fetching airline details:', error);
-				showErrorToast('Failed to fetch airline details');
-			}
-		};
-
-		fetchAirlineDetails();
-	}, []);
-
-	useEffect(() => {
 		const fetchPlanes = async () => {
 			try {
-				const response = await axios.get(
-					'http://localhost:8000/api/planes/get-all-planes',
-					{
-						withCredentials: true,
-					}
-				);
-				if (response.status === 200) {
-					setPlanes(response.data.planes);
-				}
+				const response = await planeService.getAllPlanes();
+				setPlanes(response.planes);
 			} catch (error) {
 				console.error('Error fetching planes:', error);
 				showErrorToast('Failed to fetch planes');
@@ -99,18 +81,12 @@ const AddFlight = () => {
 				flightDetails.arrivalTime
 			);
 
-			const response = await axios.post(
-				'http://localhost:8000/api/flights/create-flight',
-				{
-					...flightDetails,
-					flightNo: fullFlightNo,
-					departureTime: formattedDepartureTime,
-					arrivalTime: formattedArrivalTime,
-				},
-				{
-					withCredentials: true,
-				}
-			);
+			const response = await flightService.createFlight({
+				...flightDetails,
+				flightNo: fullFlightNo,
+				departureTime: formattedDepartureTime,
+				arrivalTime: formattedArrivalTime,
+			});
 
 			if (response.status === 201) {
 				showSuccessToast('Flight added successfully!');
@@ -140,14 +116,7 @@ const AddFlight = () => {
 
 	return (
 		<div className="mt-5">
-			{isSubmitting && (
-				<div className="text-center my-5">
-					<div className="spinner-border text-primary" role="status">
-						<span className="visually-hidden">Adding flight...</span>
-					</div>
-					<p className="mt-2">Adding flight...</p>
-				</div>
-			)}
+			{isSubmitting && <Loading />}
 			{!isSubmitting && (
 				<form onSubmit={handleAddFlight}>
 					<div className="row">

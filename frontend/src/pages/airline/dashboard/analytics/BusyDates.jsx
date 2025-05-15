@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Bar } from 'react-chartjs-2';
 import {
 	Chart as ChartJS,
@@ -10,6 +9,8 @@ import {
 	Tooltip,
 	Legend,
 } from 'chart.js';
+import Loading from '../../../../components/Loading';
+import { analyticsService } from '../../../../services/analytics.service';
 
 ChartJS.register(
 	CategoryScale,
@@ -64,17 +65,12 @@ const BusyDates = () => {
 	useEffect(() => {
 		const getBusyDates = async () => {
 			try {
-				const response = await axios.get(
-					'http://localhost:8000/api/analytics/top-dates-by-number-of-flights',
-					{
-						withCredentials: true,
-					}
-				);
+				const response = await analyticsService.getTopDatesByNumberOfFlights();
 
-				const dates = response.data.map((item) =>
+				const dates = response.map((item) =>
 					new Date(item.date).toLocaleDateString()
 				);
-				const counts = response.data.map((item) => item.flightCount);
+				const counts = response.map((item) => item.flightCount);
 
 				setData({
 					labels: dates,
@@ -110,14 +106,7 @@ const BusyDates = () => {
 	}
 
 	if (isLoading) {
-		return (
-			<div className="text-center p-4">
-				<div className="spinner-border text-primary" role="status">
-					<span className="visually-hidden">Loading...</span>
-				</div>
-				<p className="text-muted mt-2">Loading busy dates data...</p>
-			</div>
-		);
+		return <Loading />;
 	}
 
 	return (

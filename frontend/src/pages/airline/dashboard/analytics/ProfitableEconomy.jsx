@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Line } from 'react-chartjs-2';
 import {
 	Chart as ChartJS,
@@ -11,6 +10,8 @@ import {
 	Tooltip,
 	Legend,
 } from 'chart.js';
+import Loading from '../../../../components/Loading';
+import { analyticsService } from '../../../../services/analytics.service';
 
 ChartJS.register(
 	CategoryScale,
@@ -67,15 +68,12 @@ const ProfitableEconomy = () => {
 	useEffect(() => {
 		const getProfitableEconomyFlights = async () => {
 			try {
-				const response = await axios.get(
-					`http://localhost:8000/api/analytics/profitable-economy-flights?limit=${numFlights}`,
-					{
-						withCredentials: true,
-					}
+				const response = await analyticsService.getProfitableEconomyFlights(
+					numFlights
 				);
 
-				const flightNumbers = response.data.map((item) => item.flightNo);
-				const profitScores = response.data.map((item) => item.profitScore);
+				const flightNumbers = response.map((item) => item.flightNo);
+				const profitScores = response.map((item) => item.profitScore);
 
 				setData({
 					labels: flightNumbers,
@@ -132,14 +130,7 @@ const ProfitableEconomy = () => {
 				</select>
 			</div>
 			{isLoading ? (
-				<div className="text-center p-4">
-					<div className="spinner-border text-primary" role="status">
-						<span className="visually-hidden">Loading...</span>
-					</div>
-					<p className="text-muted mt-2">
-						Loading profitable economy flights data...
-					</p>
-				</div>
+				<Loading />
 			) : (
 				<div style={{ height: '400px' }}>
 					<Line data={data} options={options} />

@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useFlightContext } from '../../../context/FlightContext';
+import { useFlightContext } from '../../../hooks/useFlightContext';
 import FlightCard from './FlightCard';
 import Navbar from '../../../components/navbars/HomeNavbar';
 import FlightSorting from './FlightSorting';
 import { showErrorToast } from '../../../utils/toast';
+import Loading from '../../../components/Loading';
 
 const ReturnFlights = () => {
 	// For the list of searched flights
@@ -22,16 +23,35 @@ const ReturnFlights = () => {
 	const searchReturnFlights = async () => {
 		try {
 			setIsLoading(true);
+
+			// Format date to ensure consistent format for API
+			const formatDate = (date) => {
+				if (!date) return null;
+
+				// If already a string in YYYY-MM-DD format, use it directly
+				if (typeof date === 'string' && date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+					return date;
+				}
+
+				// Otherwise convert Date object to YYYY-MM-DD string
+				const dateObj = new Date(date);
+				const year = dateObj.getFullYear();
+				const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+				const day = String(dateObj.getDate()).padStart(2, '0');
+				return `${year}-${month}-${day}`;
+			};
+
 			const response = await axios.post(
 				'http://localhost:8000/api/flights/search-flights',
 				{
 					flightFrom: flightSearchData.flightTo,
 					flightTo: flightSearchData.flightFrom,
-					departureDate: flightSearchData.returnDate,
+					departureDate: formatDate(flightSearchData.returnDate),
 					returnDate: null,
 					travelClass: flightSearchData.travelClass,
 					passengers: flightSearchData.passengers,
-				}
+				},
+				{ withCredentials: true } // Add credentials for authentication
 			);
 			setReturnFlightsList(response.data.departureFlights);
 			setIsLoading(false);
@@ -110,15 +130,11 @@ const ReturnFlights = () => {
 				<FlightSorting onSort={handleSort} />
 
 				{isLoading ? (
-					<div className="text-center my-5">
-						<div className="spinner-border text-primary" role="status">
-							<span className="visually-hidden">Loading...</span>
-						</div>
-						<p className="mt-2">Searching for return flights...</p>
-					</div>
+					<Loading />
 				) : returnFlightsList.length === 0 ? (
 					<div className="alert alert-info my-4" role="alert">
-						No return flights found for this route on the selected date.
+						No return flights found for this route on the selected date. Please
+						go back and select a different return date.
 					</div>
 				) : (
 					<div id="sampleFlights">

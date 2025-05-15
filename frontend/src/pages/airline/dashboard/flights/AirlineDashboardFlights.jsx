@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import AddFlight from './AddFlight';
-import ViewFlights from './ViewFlights';
+import ViewFlights from './ViewFlightsDuplicate';
 
 const AirlineDashboardFlights = () => {
 	const [dashboardOption, setDashboardOption] = useState('addFlight');

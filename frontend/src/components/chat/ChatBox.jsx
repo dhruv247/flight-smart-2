@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useChat } from '../../context/ChatContext';
+import Loading from '../Loading';
 
 const ChatBox = ({ selectedUser, emptyStateText }) => {
 	const [newMessage, setNewMessage] = useState('');
@@ -156,11 +157,7 @@ const ChatBox = ({ selectedUser, emptyStateText }) => {
 
 			<div className="flex-grow-1 overflow-auto px-3">
 				{loading ? (
-					<div className="text-center py-4">
-						<div className="spinner-border text-primary" role="status">
-							<span className="visually-hidden">Loading messages...</span>
-						</div>
-					</div>
+					<Loading />
 				) : (
 					<div className="py-3">
 						{filteredMessages.length === 0 ? (
@@ -193,7 +190,7 @@ const ChatBox = ({ selectedUser, emptyStateText }) => {
 										<div
 											className={`small ${
 												msg.sender === user?._id
-													? 'text-white-50'
+													? 'text-white-50 text-end'
 													: 'text-muted'
 											} mt-1`}
 										>

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Doughnut } from 'react-chartjs-2';
+import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import Loading from '../../../../components/Loading';
+import { analyticsService } from '../../../../services/analytics.service';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -60,14 +61,13 @@ const TopAirlines = ({ noOfTopAirlines }) => {
 	useEffect(() => {
 		const getTopAirlines = async () => {
 			try {
-				const response = await axios.get(
-					`http://localhost:8000/api/analytics/top-airlines-by-number-of-flights?num=${noOfTopAirlines}`,
-					{ withCredentials: true }
+				const response = await analyticsService.getTopAirlinesByNumberOfFlights(
+					noOfTopAirlines
 				);
-				setTopAirlinesList(response.data);
+				setTopAirlinesList(response);
 
-				const labels = response.data.map((airline) => airline.airlineName);
-				const dataset = response.data.map((airline) => airline.count);
+				const labels = response.map((airline) => airline.airlineName);
+				const dataset = response.map((airline) => airline.count);
 
 				// Generate random colors for each airline
 				const backgroundColors = labels.map(() => generateRandomColor());
@@ -109,19 +109,12 @@ const TopAirlines = ({ noOfTopAirlines }) => {
 	}
 
 	if (isLoading) {
-		return (
-			<div className="text-center p-4">
-				<div className="spinner-border text-primary" role="status">
-					<span className="visually-hidden">Loading...</span>
-				</div>
-				<p className="text-muted mt-2">Loading airline data...</p>
-			</div>
-		);
+		return <Loading />;
 	}
 
 	return (
 		<div style={{ height: '400px' }}>
-			<Doughnut data={data} options={options} />
+			<Pie data={data} options={options} />
 		</div>
 	);
 };

@@ -1,50 +1,27 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Navigate } from 'react-router-dom';
-import getUserDetails from '../../utils/getUserDetails';
+import useGetUserDetails from '../../hooks/useGetUserDetails';
+import Loading from '../../components/Loading';
 
 /**
- * 
- * @param {*} param0 
- * @returns 
- * @description
- * Provides front end route protection against logged in users
- *  - If a user is logged in, they are not able to navigate to pages restrcited by this function
+ * Protected route for public pages
+ * @param {React.ReactNode} children - The child components to be protected
+ * @returns {React.ReactNode} The protected content or a loading indicator
  */
 const ProtectedPublicRoute = ({ children }) => {
-	const [isLoggedIn, setIsLoggedIn] = useState(false);
-	const [isLoading, setIsLoading] = useState(true);
-
-	useEffect(() => {
-		const checkAuthStatus = async () => {
-			try {
-				await getUserDetails();
-				setIsLoggedIn(true);
-			} catch (error) {
-				// If error the user is not logged in
-				setIsLoggedIn(false);
-			} finally {
-				setIsLoading(false);
-			}
-		};
-		checkAuthStatus();
-	}, []);
+	const { user, isLoading, error } = useGetUserDetails();
 
 	// Show loading state while checking authentication
 	if (isLoading) {
-		return (
-			<div className="text-center my-5">
-				<div className="spinner-border text-primary" role="status"></div>
-				{/* <p className="mt-2">Authenticating...</p> */}
-			</div>
-		);
+		return <Loading />;
 	}
 
-	// If logged in redirect to home page
-	if (isLoggedIn) {
+	// If user is logged in, redirect to home page
+	if (user) {
 		return <Navigate to="/" />;
 	}
 
-	// If not logged in render the children (login/signup pages)
+	// If not logged in, render the children (login/signup pages)
 	return children;
 };
 

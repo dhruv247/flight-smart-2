@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAirports } from '../../../hooks/useAirports';
-import getUserDetails from '../../../utils/getUserDetails';
+import useGetUserDetails from '../../../hooks/useGetUserDetails';
 import { useNavigate } from 'react-router-dom';
 import { Modal } from 'bootstrap';
 import DatePicker from 'react-datepicker';
@@ -14,8 +14,9 @@ const FlightSearchForm = ({
 	showReturnDate = true,
 }) => {
 	const navigate = useNavigate();
-	const { airports, isLoading } = useAirports();
+	const { airports, isLoading: airportsLoading } = useAirports();
 	const [tripType, setTripType] = useState(initialTripType);
+	const { user, isLoading: userLoading } = useGetUserDetails();
 	const [formData, setFormData] = useState({
 		flightFrom: initialValues.flightFrom || '',
 		flightTo: initialValues.flightTo || '',
@@ -25,9 +26,9 @@ const FlightSearchForm = ({
 		returnDate: initialValues.returnDate
 			? new Date(initialValues.returnDate)
 			: null,
-		passengers: initialValues.passengers || '',
-		travelClass: initialValues.travelClass || '',
-		...initialValues,
+		passengers: initialValues.passengers || 1,
+		travelClass: initialValues.travelClass || 1,
+		tripType: initialTripType,
 	});
 
 	// Determine if this is the return flight search form
@@ -70,7 +71,9 @@ const FlightSearchForm = ({
 		e.preventDefault();
 		try {
 			// Check if user is logged in
-			await getUserDetails();
+			if (!user && !userLoading) {
+				throw new Error('User not logged in');
+			}
 			// Format dates to YYYY-MM-DD format before submitting
 			const formattedData = {
 				...formData,
@@ -166,9 +169,9 @@ const FlightSearchForm = ({
 				</div>
 
 				{/* Flight Details Input Fields */}
-				<div className="d-flex flex-column flex-md-row justify-content-between gap-2">
+				<div className="row">
 					{/* To / From Input Fields */}
-					<div className="d-flex gap-2 flex-grow-1">
+					<div className="col-md-5 col-12 d-flex gap-2 flex-grow-1">
 						<input
 							type="search"
 							name="flightFrom"
@@ -217,7 +220,7 @@ const FlightSearchForm = ({
 							readOnly={isReadOnly}
 						/>
 						<datalist id="airportList">
-							{!isLoading &&
+							{!airportsLoading &&
 								airports.map((airport, index) => (
 									<option key={index} value={airport.name}>
 										{airport.name} ({airport.code}) - {airport.city}
@@ -227,7 +230,7 @@ const FlightSearchForm = ({
 					</div>
 
 					{/* Date Selection */}
-					<div className="d-flex gap-2">
+					<div className="col-md-3 col-12 d-flex gap-2">
 						<div className="form-control p-0">
 							<DatePicker
 								selected={formData.departureDate}
@@ -261,7 +264,7 @@ const FlightSearchForm = ({
 					</div>
 
 					{/* No of Travellers / Travel Class */}
-					<div className="d-flex gap-2">
+					<div className="col-md-3 col-12 d-flex gap-2">
 						<select
 							className="form-select"
 							id="passengers"
@@ -271,9 +274,6 @@ const FlightSearchForm = ({
 							onChange={handleChange}
 							disabled={isReadOnly}
 						>
-							<option value="" disabled>
-								Passengers
-							</option>
 							<option value="1">1</option>
 							<option value="2">2</option>
 							<option value="3">3</option>
@@ -289,22 +289,24 @@ const FlightSearchForm = ({
 							onChange={handleChange}
 							disabled={isReadOnly}
 						>
-							<option value="" disabled>
+							{/* <option value="" disabled>
 								Class
-							</option>
+							</option> */}
 							<option value="1">Economy</option>
 							<option value="2">Business</option>
 						</select>
 					</div>
 
-					{/* Submit Button */}
-					<button
-						type="submit"
-						className="btn btn-primary p-4"
-						disabled={isReadOnly && !isReturnFlightForm}
-					>
-						{isReturnFlightForm ? 'Search Return Flights' : 'Search'}
-					</button>
+					<div className="col-md-1 col-12 d-flex justify-content-center">
+						{/* Submit Button */}
+						<button
+							type="submit"
+							className="btn btn-primary p-4"
+							disabled={isReadOnly && !isReturnFlightForm}
+						>
+							{isReturnFlightForm ? 'Search Return Flights' : 'Search'}
+						</button>
+					</div>
 				</div>
 			</form>
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import DashboardNavbar from '../../../components/navbars/DashboardNavbar';
-import CustomerDashboardBookings from './bookings/CustomerDashboardBookings';
+import BookingsDashboard from '../../../components/bookings/BookingsDashboard';
 import CustomerDashboardProfile from './CustomerDashboardProfile';
 import CustomerDashboardChat from './CustomerDashboardChat';
 
@@ -16,7 +16,7 @@ const CustomerDashboardPage = () => {
 	const renderComponent = () => {
 		switch (activeComponent) {
 			case 'bookings':
-				return <CustomerDashboardBookings />;
+				return <BookingsDashboard type="customer" />;
 			case 'chat':
 				return <CustomerDashboardChat />;
 			case 'profile':

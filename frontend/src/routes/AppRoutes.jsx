@@ -13,7 +13,7 @@ import CustomerDashboardPage from '../pages/customer/dashboard/CustomerDashboard
 import AirlineDashboardPage from '../pages/airline/dashboard/AirlineDashboardPage';
 import DepartureFlights from '../pages/customer/flightSearch/DepartureFlights';
 import ReturnFlights from '../pages/customer/flightSearch/ReturnFlights';
-import PassengerDetails from '../pages/customer/flightSearch/PassengerDetails';
+import BookingDetails from '../pages/customer/flightSearch/BookingDetails';
 
 const AppRoutes = () => {
 	return (
@@ -79,10 +79,10 @@ const AppRoutes = () => {
 			/>
 			{/* passenger details */}
 			<Route
-				path="/customer/passengerDetails"
+				path="/customer/bookingDetails"
 				element={
 					<ProtectedCustomerRoute>
-						<PassengerDetails />
+						<BookingDetails />
 					</ProtectedCustomerRoute>
 				}
 			/>

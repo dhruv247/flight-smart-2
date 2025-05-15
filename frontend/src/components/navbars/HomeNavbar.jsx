@@ -1,26 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import getUserDetails from '../../utils/getUserDetails';
+import useGetUserDetails from '../../hooks/useGetUserDetails';
 
 const Navbar = () => {
-	// user details used for type of dashboard (admin, customer, admin)
-	const [userDetails, setUserDetails] = useState(null);
-	const [isLoading, setIsLoading] = useState(true);
-
-	// for checking if a user if logged in and then saving user details to a variable
-	useEffect(() => {
-		const checkAuthStatus = async () => {
-			try {
-				const details = await getUserDetails();
-				setUserDetails(details);
-			} catch (error) {
-				setUserDetails(null);
-			} finally {
-				setIsLoading(false);
-			}
-		};
-		checkAuthStatus();
-	}, []);
+	const { user, isLoading } = useGetUserDetails();
 
 	return (
 		<nav
@@ -44,7 +27,7 @@ const Navbar = () => {
 				</div>
 
 				<div>
-					{!isLoading && !userDetails && (
+					{!isLoading && !user && (
 						<Link to="/signup">
 							<button
 								className="btn px-4 py-2"
@@ -57,22 +40,8 @@ const Navbar = () => {
 							</button>
 						</Link>
 					)}
-					{/* Admin Dashboard Button */}
-					{/* {!isLoading && userDetails && userDetails.userType === 'admin' && (
-						<Link to="/admin/dashboard">
-							<button
-								className="btn px-4 py-2"
-								style={{
-									backgroundColor: '#2E7D32',
-									color: '#fff',
-								}}
-							>
-								Dashboard
-							</button>
-						</Link>
-					)} */}
 					{/* Customer Dashboard Button */}
-					{!isLoading && userDetails && userDetails.userType === 'customer' && (
+					{!isLoading && user && user.userType === 'customer' && (
 						<Link to="/customer/dashboard">
 							<button
 								className="btn px-4 py-2"
@@ -85,20 +54,6 @@ const Navbar = () => {
 							</button>
 						</Link>
 					)}
-					{/* User Dashboard Button */}
-					{/* {!isLoading && userDetails && userDetails.userType === 'airline' && (
-						<Link to="/airline/dashboard">
-							<button
-								className="btn px-4 py-2"
-								style={{
-									backgroundColor: '#2E7D32',
-									color: '#fff',
-								}}
-							>
-								Dashboard
-							</button>
-						</Link>
-					)} */}
 				</div>
 			</div>
 		</nav>

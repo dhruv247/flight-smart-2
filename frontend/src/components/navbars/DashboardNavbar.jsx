@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useFlightContext } from '../../context/FlightContext';
+import { useFlightContext } from '../../hooks/useFlightContext';
 import axios from 'axios';
-import getUserDetails from '../../utils/getUserDetails';
 
 const DashboardNavbar = ({
 	activeComponent,

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
 import { useChat } from '../../context/ChatContext';
+import messageService from '../../services/message.service';
 
 const UserList = ({ onSelectUser, selectedUser, userType, title }) => {
 	const [users, setUsers] = useState([]);
@@ -13,13 +13,11 @@ const UserList = ({ onSelectUser, selectedUser, userType, title }) => {
 			if (!user) return;
 
 			try {
-				const endpoint =
+				const data =
 					userType === 'airline'
-						? 'http://localhost:8000/api/messages/get-customers-for-airline'
-						: 'http://localhost:8000/api/messages/get-airlines-for-customer';
-
-				const response = await axios.get(endpoint, { withCredentials: true });
-				setUsers(response.data);
+						? await messageService.getCustomersForAirline()
+						: await messageService.getAirlinesForCustomer();
+				setUsers(data);
 				setLoading(false);
 			} catch (error) {
 				setError('Failed to load users');

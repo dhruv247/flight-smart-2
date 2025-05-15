@@ -1,36 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import getUserDetails from '../../../utils/getUserDetails';
-import ChangePasswordModal from '../../../components/profileModals/ChangePasswordModal';
-import ChangeProfileModal from '../../../components/profileModals/ChangeProfileModal';
+import React, { useState } from 'react';
+import useGetUserDetails from '../../../hooks/useGetUserDetails';
+import ChangePasswordModal from '../../../components/profile/ChangePasswordModal';
+import ChangeProfileModal from '../../../components/profile/ChangeProfileModal';
+import Loading from '../../../components/Loading';
 
 const CustomerDashboardProfile = () => {
-	const [user, setUser] = useState(null);
-	const [isLoading, setIsLoading] = useState(true);
+	const { user, isLoading } = useGetUserDetails();
 	const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 	const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
-	useEffect(() => {
-		const fetchUser = async () => {
-			try {
-				const user = await getUserDetails();
-				setUser(user);
-				setIsLoading(false);
-			} catch (error) {
-				setIsLoading(false);
-			}
-		};
-
-		fetchUser();
-	}, []);
-
 	// Show loading state while checking authentication
 	if (isLoading) {
-		return (
-			<div className="text-center my-5">
-				<div className="spinner-border text-primary" role="status"></div>
-				<p className="mt-2">Loading Profile...</p>
-			</div>
-		);
+		return <Loading />;
 	}
 
 	return (

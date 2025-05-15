@@ -4,6 +4,7 @@ import { Flight } from '../models/flight.model.js';
 import { Airport } from '../models/airport.model.js';
 import { createSeats } from '../utils/seatUtils.js';
 import dotenv from 'dotenv';
+import mongoose from 'mongoose';
 dotenv.config();
 
 /**
@@ -487,7 +488,7 @@ const searchFlights = async (req, res) => {
 				$match: {
 					'departureAirport._id': arrivalAirport._id,
 					'arrivalAirport._id': departureAirport._id,
-					departureDate: { $gte: minReturnDateStr },
+					departureDate: returnDate,
 					$expr: {
 						$cond: {
 							if: { $eq: [travelClass, '1'] }, // economy class
@@ -521,11 +522,9 @@ const searchFlights = async (req, res) => {
 			returnFlights = await Flight.aggregate([returnMatchStage, sortStage]);
 
 			if (returnFlights.length === 0) {
-				return res.status(400).json({
-					message: 'No return flights available for the next day or later',
-					details: {
-						earliestReturnDate: minReturnDateStr,
-					},
+				return res.status(200).json({
+					message: 'No return flights available for this route',
+					departureFlights: [],
 				});
 			}
 		}
@@ -533,7 +532,6 @@ const searchFlights = async (req, res) => {
 		return res.status(200).json({
 			message: 'Flights retrieved successfully',
 			departureFlights,
-			returnFlights,
 		});
 	} catch (error) {
 		return res.status(500).json({
@@ -635,6 +633,13 @@ const getAllFlightsForAirline = async (req, res) => {
 		const airlineId = req.user._id;
 		const page = parseInt(req.query.page) || 0;
 		const size = parseInt(req.query.size) || 10;
+
+		// Get total count of flights for this airline
+		const totalFlights = await Flight.countDocuments({
+			'airline._id': airlineId,
+		});
+		const totalPages = Math.ceil(totalFlights / size);
+
 		const flights = await Flight.find({ 'airline._id': airlineId })
 			.skip(page * size)
 			.limit(size);
@@ -643,6 +648,78 @@ const getAllFlightsForAirline = async (req, res) => {
 		return res.status(200).json({
 			message: 'Flights retrieved successfully',
 			flights,
+			totalPages,
+			totalFlights,
+		});
+	} catch (error) {
+		return res.status(500).json({
+			message: error.message,
+		});
+	}
+};
+
+/**
+ * search for flights for an airline
+ * @param {*} req
+ * @param {*} res
+ */
+const searchFlightsForAirline = async (req, res) => {
+	const airlineId = req.user._id;
+
+	try {
+		const {
+			flightNo,
+			departureAirportName,
+			arrivalAirportName,
+			departureDate,
+			arrivalDate,
+		} = req.query;
+
+		// Get pagination parameters
+		const page = parseInt(req.query.page) || 0;
+		const size = parseInt(req.query.size) || 10;
+
+		const matchCriteria = {
+			'airline._id': airlineId,
+		};
+
+		if (flightNo) {
+			matchCriteria.flightNo = flightNo;
+		}
+
+		if (departureAirportName) {
+			matchCriteria['departureAirport.airportName'] = departureAirportName;
+		}
+
+		if (arrivalAirportName) {
+			matchCriteria['arrivalAirport.airportName'] = arrivalAirportName;
+		}
+
+		if (departureDate) {
+			matchCriteria.departureDate = departureDate;
+		}
+
+		if (arrivalDate) {
+			matchCriteria.arrivalDate = arrivalDate;
+		}
+
+		// Get total count of matching flights
+		const totalFlights = await Flight.countDocuments(matchCriteria);
+		const totalPages = Math.ceil(totalFlights / size);
+
+		// Use find() instead of aggregate for simpler querying
+		const flights = await Flight.find(matchCriteria)
+			.skip(page * size)
+			.limit(size)
+			.sort({ departureDate: 1, departureTime: 1 }); // Sort by departure date and time
+
+		return res.status(200).json({
+			message: 'Flights retrieved successfully',
+			flights,
+			totalPages,
+			totalFlights,
+			currentPage: page,
+			pageSize: size,
 		});
 	} catch (error) {
 		return res.status(500).json({
@@ -657,4 +734,5 @@ export {
 	updateFlightPrice,
 	getFlightById,
 	getAllFlightsForAirline,
+	searchFlightsForAirline,
 };

@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useFlightContext } from '../../../context/FlightContext';
+import { useFlightContext } from '../../../hooks/useFlightContext';
 import FlightCard from './FlightCard';
 import Navbar from '../../../components/navbars/HomeNavbar';
 import FlightSearchForm from './FlightSearchForm';
 import FlightSorting from './FlightSorting';
 import { showErrorToast } from '../../../utils/toast';
+import Loading from '../../../components/Loading';
 
 const DepartureFlights = () => {
 	// For the list of searched flights
+	const [responseMessage, setResponseMessage] = useState(null);
 	const [departureFlightsList, setDepartureFlightsList] = useState([]);
 	const { flightSearchData, setFlightSearchData } = useFlightContext();
 	const [isLoading, setIsLoading] = useState(true);
@@ -32,6 +34,24 @@ const DepartureFlights = () => {
 	const handleSearch = async (formData) => {
 		try {
 			setIsLoading(true);
+
+			// Ensure proper date formatting
+			const formatDate = (date) => {
+				if (!date) return null;
+
+				// If already a string in YYYY-MM-DD format, use it directly
+				if (typeof date === 'string' && date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+					return date;
+				}
+
+				// Otherwise convert Date object to YYYY-MM-DD string
+				const dateObj = new Date(date);
+				const year = dateObj.getFullYear();
+				const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+				const day = String(dateObj.getDate()).padStart(2, '0');
+				return `${year}-${month}-${day}`;
+			};
+
 			const updatedFormData = {
 				...formData,
 				// If it's a round trip but no return date is set,
@@ -49,14 +69,17 @@ const DepartureFlights = () => {
 				{
 					flightFrom: formData.flightFrom,
 					flightTo: formData.flightTo,
-					departureDate: formData.departureDate,
+					departureDate: formatDate(formData.departureDate),
 					returnDate:
-						formData.tripType === 'roundTrip' ? formData.returnDate : null,
+						formData.tripType === 'roundTrip'
+							? formatDate(formData.returnDate)
+							: null,
 					travelClass: formData.travelClass,
 					passengers: formData.passengers,
 				},
 				{ withCredentials: true }
 			);
+			setResponseMessage(response.data.message);
 			setDepartureFlightsList(response.data.departureFlights);
 			setIsLoading(false);
 		} catch (error) {
@@ -156,15 +179,15 @@ const DepartureFlights = () => {
 			>
 				<FlightSorting onSort={handleSort} />
 				{isLoading ? (
-					<div className="text-center my-5">
-						<div className="spinner-border text-primary" role="status">
-							{/* <span className="visually-hidden">Loading...</span> */}
-						</div>
-						<p className="mt-2">Searching for flights...</p>
+					<Loading />
+				) : responseMessage === 'No return flights available for this route' ? (
+					<div className="alert alert-info my-4" role="alert">
+						No return flights available for this route. Please try different return
+						dates or destinations.
 					</div>
 				) : departureFlightsList.length === 0 ? (
 					<div className="alert alert-info my-4" role="alert">
-						No flights found for this route. Please try different dates or
+						No departure flights found for this route. Please try different departure dates or
 						destinations.
 					</div>
 				) : (

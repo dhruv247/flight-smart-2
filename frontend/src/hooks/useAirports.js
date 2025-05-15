@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { airportsService } from '../services/airport.service';
 
 export const useAirports = () => {
 	const [airports, setAirports] = useState([]);
@@ -9,17 +9,7 @@ export const useAirports = () => {
 	useEffect(() => {
 		const fetchAirports = async () => {
 			try {
-				const response = await axios.get(
-					'http://localhost:8000/api/airports/get-all-airports',
-					{
-						withCredentials: true,
-					}
-				);
-				const airportsData = response.data.airports.map((airport) => ({
-					name: airport.airportName,
-					city: airport.city,
-					code: airport.airportCode,
-				}));
+				const airportsData = await airportsService.getAllAirports();
 				setAirports(airportsData);
 			} catch (error) {
 				setError(error.message);

@@ -11,7 +11,7 @@ const AdminDashboardPage = () => {
 	const adminNavItems = [
 		{ id: 'analytics', label: 'Analytics', icon: 'bi-graph-up' },
 		{ id: 'airlines', label: 'Airlines', icon: 'bi-airplane-fill' },
-		{ id: 'airports', label: 'Airports', icon: 'bi-airport-terminal' },
+		{ id: 'airports', label: 'Airports', icon: 'bi-building' },
 		{ id: 'planes', label: 'Planes', icon: 'bi-airplane-engines' },
 	];
 

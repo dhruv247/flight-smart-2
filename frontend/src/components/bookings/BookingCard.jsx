@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import TicketsModal from './TicketsModal';
-import { showSuccessToast, showErrorToast } from '../../../../utils/toast';
+import { showSuccessToast, showErrorToast } from '../../utils/toast';
 
 const formatHHMM = (time) => {
 	if (typeof time !== 'number' && typeof time !== 'string') return '';
@@ -13,13 +13,14 @@ const formatHHMM = (time) => {
 	return `${hours}:${minutes}`;
 };
 
-const BookingCard = ({ booking }) => {
+const BookingCard = ({ booking, type }) => {
 	const bookingState = booking.confirmed ? 'Confirmed' : 'Cancelled';
 	// const [tickets, setTickets] = useState([]);
 	// const [departureFlight, setDepartureFlight] = useState(null);
 	// const [returnFlight, setReturnFlight] = useState(null);
 	// const [loading, setLoading] = useState(true);
 	const [isTicketsModalOpen, setIsTicketsModalOpen] = useState(false);
+	const [isCancelling, setIsCancelling] = useState(false);
 
 	// useEffect(() => {
 	// 	const getTicketsFromDB = async () => {
@@ -71,6 +72,7 @@ const BookingCard = ({ booking }) => {
 
 	const handleCancelBooking = async () => {
 		try {
+			setIsCancelling(true);
 			const response = await axios.patch(
 				`http://localhost:8000/api/bookings/cancel-booking/${booking._id}`,
 				{},
@@ -102,6 +104,7 @@ const BookingCard = ({ booking }) => {
 		} catch (error) {
 			console.error('Error cancelling booking:', error);
 			showErrorToast('Failed to cancel booking. Please try again.');
+			setIsCancelling(false);
 		}
 	};
 
@@ -150,12 +153,18 @@ const BookingCard = ({ booking }) => {
 		return (
 			<div className="d-flex flex-column">
 				<div className="row border border rounded m-0 py-2 my-2 align-items-center">
-					<div className="col-12 col-md-4 d-flex justify-content-center align-items-center">
+					<div className="col-12 col-md-3 d-flex justify-content-center align-items-center">
 						<div className="d-flex flex-column align-items-center gap-2">
-							<p className="fw-bold">Id: {booking._id}</p>
+							<p className="fw-bold">{booking._id}</p>
 						</div>
 					</div>
-
+					<div className="col-12 col-md-1 d-flex justify-content-center align-items-center">
+						<div className="d-flex flex-column align-items-center gap-2">
+							<p className="fw-bold">
+								{booking.tickets[0].roundTrip ? 'Round' : 'One Way'}
+							</p>
+						</div>
+					</div>
 					<div className="col-12 col-md-4 d-flex flex-column gap-3">
 						<div className="d-flex justify-content-between align-items-center">
 							<div className="d-flex flex-column align-items-center">
@@ -170,7 +179,7 @@ const BookingCard = ({ booking }) => {
 								</p>
 							</div>
 							<div className="d-flex flex-column align-items-center">
-								<p>-</p>
+								<i className="bi bi-arrow-right"></i>
 							</div>
 							<div className="d-flex flex-column align-items-center">
 								<p>{booking.tickets[0].departureFlight?.arrivalAirport.city}</p>
@@ -189,7 +198,7 @@ const BookingCard = ({ booking }) => {
 								</p>
 							</div>
 							<div className="d-flex flex-column align-items-center">
-								<p>-</p>
+								<i className="bi bi-arrow-right"></i>
 							</div>
 							<div className="d-flex flex-column align-items-center">
 								<p>{booking.tickets[0].returnFlight?.arrivalAirport.city}</p>
@@ -201,34 +210,57 @@ const BookingCard = ({ booking }) => {
 						</div>
 					</div>
 
-					<div className="col-6 col-md-2 d-flex justify-content-center align-items-center ">
-						<button
-							className="btn btn-success px-3 py-2"
-							onClick={() => setIsTicketsModalOpen(true)}
-						>
-							Tickets
-						</button>
-					</div>
-					<div className="col-6 col-md-2 d-flex justify-content-center align-items-center">
-						{bookingState === 'Confirmed' ? (
+					{type === 'customer' && (
+						<>
+							<div className="col-6 col-md-2 d-flex justify-content-center align-items-center ">
+								<button
+									className="btn btn-success px-3 py-2"
+									onClick={() => setIsTicketsModalOpen(true)}
+								>
+									View Tickets
+								</button>
+							</div>
+							<div className="col-6 col-md-2 d-flex justify-content-center align-items-center">
+								{bookingState === 'Confirmed' ? (
+									<button
+										className="btn btn-danger px-3 py-2"
+										onClick={handleCancelBooking}
+										disabled={isCancelling}
+									>
+										{isCancelling ? (
+											<>
+												<span
+													className="spinner-border spinner-border-sm me-2"
+													role="status"
+													aria-hidden="true"
+												></span>
+												Cancelling...
+											</>
+										) : (
+											'Cancel Booking'
+										)}
+									</button>
+								) : (
+									<h6 className="text-danger fw-bold text-xl">Cancelled</h6>
+								)}
+							</div>
+						</>
+					)}
+					{type === 'airline' && (
+						<div className="col-12 col-md-4 d-flex justify-content-center align-items-center ">
 							<button
-								className="btn btn-danger px-3 py-2"
-								onClick={handleCancelBooking}
+								className="btn btn-success px-3 py-2"
+								onClick={() => setIsTicketsModalOpen(true)}
 							>
-								Cancel
+								View Tickets
 							</button>
-						) : (
-							<h6 className="text-danger fw-bold text-xl">Cancelled</h6>
-						)}
-					</div>
+						</div>
+					)}
 				</div>
 				<TicketsModal
 					isOpen={isTicketsModalOpen}
 					onClose={() => setIsTicketsModalOpen(false)}
 					booking={booking}
-					tickets={booking.tickets}
-					departureFlight={booking.tickets[0].departureFlight}
-					returnFlight={booking.tickets[0].returnFlight}
 				/>
 			</div>
 		);
@@ -237,9 +269,16 @@ const BookingCard = ({ booking }) => {
 	return (
 		<div className="d-flex flex-column">
 			<div className="row border border rounded m-0 py-2 my-2 align-items-center">
-				<div className="col-12 col-md-4 d-flex justify-content-center align-items-center">
+				<div className="col-12 col-md-3 d-flex justify-content-center align-items-center">
 					<div className="d-flex flex-column align-items-center gap-2">
-						<p className="fw-bold">Id: {booking._id}</p>
+						<p className="fw-bold">{booking._id}</p>
+					</div>
+				</div>
+				<div className="col-12 col-md-1 d-flex justify-content-center align-items-center">
+					<div className="d-flex flex-column align-items-center gap-2">
+						<p className="fw-bold">
+							{booking.tickets[0].roundTrip ? 'Round Trip' : 'One Way'}
+						</p>
 					</div>
 				</div>
 				<div className="col-12 col-md-4 d-flex justify-content-between align-items-center">
@@ -251,7 +290,7 @@ const BookingCard = ({ booking }) => {
 						</p>
 					</div>
 					<div className="d-flex flex-column align-items-center">
-						<p>-</p>
+						<i className="bi bi-arrow-right"></i>
 					</div>
 					<div className="d-flex flex-column align-items-center">
 						<p>{booking.tickets[0].departureFlight?.arrivalAirport.city}</p>
@@ -260,26 +299,52 @@ const BookingCard = ({ booking }) => {
 					</div>
 				</div>
 
-				<div className="col-6 col-md-2 d-flex justify-content-center align-items-center ">
-					<button
-						className="btn btn-success px-3 py-2"
-						onClick={() => setIsTicketsModalOpen(true)}
-					>
-						Tickets
-					</button>
-				</div>
-				<div className="col-6 col-md-2 d-flex justify-content-center align-items-center">
-					{bookingState === 'Confirmed' ? (
+				{type === 'customer' && (
+					<>
+						<div className="col-6 col-md-2 d-flex justify-content-center align-items-center">
+							<button
+								className="btn btn-success px-3 py-2"
+								onClick={() => setIsTicketsModalOpen(true)}
+							>
+								View Tickets
+							</button>
+						</div>
+						<div className="col-6 col-md-2 d-flex justify-content-center align-items-center">
+							{bookingState === 'Confirmed' ? (
+								<button
+									className="btn btn-danger px-3 py-2"
+									onClick={handleCancelBooking}
+									disabled={isCancelling}
+								>
+									{isCancelling ? (
+										<>
+											<span
+												className="spinner-border spinner-border-sm me-2"
+												role="status"
+												aria-hidden="true"
+											></span>
+											Cancelling...
+										</>
+									) : (
+										'Cancel Booking'
+									)}
+								</button>
+							) : (
+								<h6 className="text-danger fw-bold text-xl">Cancelled</h6>
+							)}
+						</div>
+					</>
+				)}
+				{type === 'airline' && (
+					<div className="col-12 col-md-4 d-flex justify-content-center align-items-center ">
 						<button
-							className="btn btn-danger px-3 py-2"
-							onClick={handleCancelBooking}
+							className="btn btn-success px-3 py-2"
+							onClick={() => setIsTicketsModalOpen(true)}
 						>
-							Cancel
+							View Tickets
 						</button>
-					) : (
-						<h6 className="text-danger fw-bold text-xl">Cancelled</h6>
-					)}
-				</div>
+					</div>
+				)}
 			</div>
 			<TicketsModal
 				isOpen={isTicketsModalOpen}

@@ -7,32 +7,19 @@ import {
 } from 'react';
 import { io } from 'socket.io-client';
 import axios from 'axios';
-import getUserDetails from '../utils/getUserDetails';
+import useGetUserDetails from '../hooks/useGetUserDetails';
+import messageService from '../services/message.service';
 
 const ChatContext = createContext();
 
 export const ChatProvider = ({ children }) => {
-	const [user, setUser] = useState(null);
+	const { user, isLoading } = useGetUserDetails();
 	const [socket, setSocket] = useState(null);
 	const [allConversations, setAllConversations] = useState({});
 	const [unreadMessages, setUnreadMessages] = useState({});
 	const [activeChat, setActiveChat] = useState(null);
 	const [isConnected, setIsConnected] = useState(false);
 	const [lastError, setLastError] = useState(null);
-
-	// Initialize user data
-	useEffect(() => {
-		const fetchUser = async () => {
-			try {
-				const userData = await getUserDetails();
-				setUser(userData);
-			} catch (error) {
-				setLastError('Failed to load user details');
-			}
-		};
-
-		fetchUser();
-	}, []);
 
 	// Fetch all available conversations for this user when they log in
 	useEffect(() => {
@@ -41,20 +28,13 @@ export const ChatProvider = ({ children }) => {
 		const fetchAllConversations = async () => {
 			try {
 				// Fetch conversation list based on user type
-				const endpoint =
+				const contacts =
 					user.userType === 'airline'
-						? 'http://localhost:8000/api/messages/get-customers-for-airline'
-						: 'http://localhost:8000/api/messages/get-airlines-for-customer';
-
-				const response = await axios.get(endpoint, {
-					withCredentials: true,
-					headers: {
-						Authorization: `Bearer ${user.token}`,
-					},
-				});
+						? await messageService.getCustomersForAirline()
+						: await messageService.getAirlinesForCustomer();
 
 				// For each contact, fetch conversation history
-				const conversationPromises = response.data.map((contact) =>
+				const conversationPromises = contacts.map((contact) =>
 					fetchConversationHistory(user._id, contact._id)
 				);
 
@@ -62,7 +42,7 @@ export const ChatProvider = ({ children }) => {
 
 				// Organize conversations by user ID
 				const conversationsMap = {};
-				response.data.forEach((contact, index) => {
+				contacts.forEach((contact, index) => {
 					conversationsMap[contact._id] = conversations[index];
 				});
 
@@ -158,18 +138,11 @@ export const ChatProvider = ({ children }) => {
 	// Helper function to fetch conversation history
 	const fetchConversationHistory = async (userId, otherUserId) => {
 		try {
-			const config = {
-				headers: {
-					Authorization: `Bearer ${user?.token}`,
-				},
-			};
-
-			const response = await axios.get(
-				`http://localhost:8000/api/messages/get-conversation/${userId}/${otherUserId}`,
-				config
+			return await messageService.getConversation(
+				userId,
+				otherUserId,
+				user?.token
 			);
-
-			return response.data;
 		} catch (error) {
 			return [];
 		}

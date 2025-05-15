@@ -1,42 +1,25 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Navigate } from 'react-router-dom';
-import getUserDetails from '../../utils/getUserDetails';
+import useGetUserDetails from '../../hooks/useGetUserDetails';
+import Loading from '../../components/Loading';
 
+/**
+ * Protected route for admin users
+ * @param {React.ReactNode} children - The child components to be protected
+ * @returns {React.ReactNode} The protected content or a loading indicator
+ */
 const ProtectedAdminRoute = ({ children }) => {
-	const [isLoggedIn, setIsLoggedIn] = useState(false);
-	const [isLoading, setIsLoading] = useState(true);
-
-	useEffect(() => {
-		const checkAuthStatus = async () => {
-			try {
-				const details = await getUserDetails();
-
-				if (details.userType === 'admin') {
-					setIsLoggedIn(true);
-				} else {
-					setIsLoggedIn(false);
-				}
-			} catch (error) {
-				setIsLoggedIn(false);
-			} finally {
-				setIsLoading(false);
-			}
-		};
-		checkAuthStatus();
-	}, []);
+	
+	// Get user details
+	const { user, isLoading, error } = useGetUserDetails();
 
 	// Show loading state while checking authentication
 	if (isLoading) {
-		return (
-			<div className="text-center my-5">
-				<div className="spinner-border text-primary" role="status"></div>
-				{/* <p className="mt-2">Authenticating...</p> */}
-			</div>
-		);
+		return <Loading />;
 	}
 
-	// If not logged in as admin, redirect to home page
-	if (!isLoggedIn) {
+	// If not logged in as admin or there's an error, redirect to home page
+	if (error || !user || user.userType !== 'admin') {
 		return <Navigate to="/" />;
 	}
 

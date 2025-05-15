@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import Loading from '../../../../components/Loading';
+import { analyticsService } from '../../../../services/analytics.service';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -56,15 +57,10 @@ const FlightByDuration = () => {
 	useEffect(() => {
 		const getFlightsByDuration = async () => {
 			try {
-				const response = await axios.get(
-					'http://localhost:8000/api/analytics/flights-by-duration',
-					{
-						withCredentials: true,
-					}
-				);
+				const response = await analyticsService.getFlightsByDuration();
 
-				const labels = response.data.map((item) => item.durationRange);
-				const counts = response.data.map((item) => item.flightCount);
+				const labels = response.map((item) => item.durationRange);
+				const counts = response.map((item) => item.flightCount);
 
 				const backgroundColors = labels.map(() => generateRandomColor());
 				const borderColors = backgroundColors.map((color) =>
@@ -105,14 +101,7 @@ const FlightByDuration = () => {
 	}
 
 	if (isLoading) {
-		return (
-			<div className="text-center p-4">
-				<div className="spinner-border text-primary" role="status">
-					<span className="visually-hidden">Loading...</span>
-				</div>
-				<p className="text-muted mt-2">Loading flights by duration data...</p>
-			</div>
-		);
+		return <Loading />;
 	}
 
 	return (
