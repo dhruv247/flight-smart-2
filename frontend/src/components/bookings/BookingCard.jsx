@@ -15,10 +15,6 @@ const formatHHMM = (time) => {
 
 const BookingCard = ({ booking, type }) => {
 	const bookingState = booking.confirmed ? 'Confirmed' : 'Cancelled';
-	// const [tickets, setTickets] = useState([]);
-	// const [departureFlight, setDepartureFlight] = useState(null);
-	// const [returnFlight, setReturnFlight] = useState(null);
-	// const [loading, setLoading] = useState(true);
 	const [isTicketsModalOpen, setIsTicketsModalOpen] = useState(false);
 	const [isCancelling, setIsCancelling] = useState(false);
 
@@ -222,24 +218,29 @@ const BookingCard = ({ booking, type }) => {
 							</div>
 							<div className="col-6 col-md-2 d-flex justify-content-center align-items-center">
 								{bookingState === 'Confirmed' ? (
-									<button
-										className="btn btn-danger px-3 py-2"
-										onClick={handleCancelBooking}
-										disabled={isCancelling}
-									>
-										{isCancelling ? (
-											<>
-												<span
-													className="spinner-border spinner-border-sm me-2"
-													role="status"
-													aria-hidden="true"
-												></span>
-												Cancelling...
-											</>
-										) : (
-											'Cancel Booking'
-										)}
-									</button>
+									new Date(booking.tickets[0].departureFlight.departureDate) <=
+									new Date() ? (
+										<h6 className="text-success fw-bold text-xl">Completed</h6>
+									) : (
+										<button
+											className="btn btn-danger px-3 py-2"
+											onClick={handleCancelBooking}
+											disabled={isCancelling}
+										>
+											{isCancelling ? (
+												<>
+													<span
+														className="spinner-border spinner-border-sm me-2"
+														role="status"
+														aria-hidden="true"
+													></span>
+													Cancelling...
+												</>
+											) : (
+												'Cancel Booking'
+											)}
+										</button>
+									)
 								) : (
 									<h6 className="text-danger fw-bold text-xl">Cancelled</h6>
 								)}
@@ -311,24 +312,29 @@ const BookingCard = ({ booking, type }) => {
 						</div>
 						<div className="col-6 col-md-2 d-flex justify-content-center align-items-center">
 							{bookingState === 'Confirmed' ? (
-								<button
-									className="btn btn-danger px-3 py-2"
-									onClick={handleCancelBooking}
-									disabled={isCancelling}
-								>
-									{isCancelling ? (
-										<>
-											<span
-												className="spinner-border spinner-border-sm me-2"
-												role="status"
-												aria-hidden="true"
-											></span>
-											Cancelling...
-										</>
-									) : (
-										'Cancel Booking'
-									)}
-								</button>
+								new Date(booking.tickets[0].departureFlight.departureDate) <=
+								new Date() ? (
+									<h6 className="text-success fw-bold text-xl">Completed</h6>
+								) : (
+									<button
+										className="btn btn-danger px-3 py-2"
+										onClick={handleCancelBooking}
+										disabled={isCancelling}
+									>
+										{isCancelling ? (
+											<>
+												<span
+													className="spinner-border spinner-border-sm me-2"
+													role="status"
+													aria-hidden="true"
+												></span>
+												Cancelling...
+											</>
+										) : (
+											'Cancel Booking'
+										)}
+									</button>
+								)
 							) : (
 								<h6 className="text-danger fw-bold text-xl">Cancelled</h6>
 							)}
@@ -350,9 +356,9 @@ const BookingCard = ({ booking, type }) => {
 				isOpen={isTicketsModalOpen}
 				onClose={() => setIsTicketsModalOpen(false)}
 				booking={booking}
-				tickets={booking.tickets}
-				departureFlight={booking.tickets[0].departureFlight}
-				returnFlight={booking.tickets[0].returnFlight}
+				// tickets={booking.tickets}
+				// departureFlight={booking.tickets[0].departureFlight}
+				// returnFlight={booking.tickets[0].returnFlight}
 			/>
 		</div>
 	);

@@ -4,7 +4,6 @@ import { Flight } from '../models/flight.model.js';
 import { Airport } from '../models/airport.model.js';
 import { createSeats } from '../utils/seatUtils.js';
 import dotenv from 'dotenv';
-import mongoose from 'mongoose';
 dotenv.config();
 
 /**
@@ -671,8 +670,7 @@ const searchFlightsForAirline = async (req, res) => {
 			flightNo,
 			departureAirportName,
 			arrivalAirportName,
-			departureDate,
-			arrivalDate,
+			departureDate
 		} = req.query;
 
 		// Get pagination parameters
@@ -699,27 +697,19 @@ const searchFlightsForAirline = async (req, res) => {
 			matchCriteria.departureDate = departureDate;
 		}
 
-		if (arrivalDate) {
-			matchCriteria.arrivalDate = arrivalDate;
-		}
-
 		// Get total count of matching flights
-		const totalFlights = await Flight.countDocuments(matchCriteria);
-		const totalPages = Math.ceil(totalFlights / size);
+		const total = await Flight.countDocuments(matchCriteria);
 
 		// Use find() instead of aggregate for simpler querying
 		const flights = await Flight.find(matchCriteria)
 			.skip(page * size)
 			.limit(size)
-			.sort({ departureDate: 1, departureTime: 1 }); // Sort by departure date and time
+			.sort({ createdAt: -1 }); // Sort by departure date and time
 
 		return res.status(200).json({
 			message: 'Flights retrieved successfully',
 			flights,
-			totalPages,
-			totalFlights,
-			currentPage: page,
-			pageSize: size,
+			total
 		});
 	} catch (error) {
 		return res.status(500).json({

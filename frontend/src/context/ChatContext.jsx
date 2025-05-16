@@ -15,44 +15,33 @@ const ChatContext = createContext();
 export const ChatProvider = ({ children }) => {
 	const { user, isLoading } = useGetUserDetails();
 	const [socket, setSocket] = useState(null);
-	const [allConversations, setAllConversations] = useState({});
+	const [conversations, setConversations] = useState([]);
+	const [activeConversation, setActiveConversation] = useState(null);
+	const [messages, setMessages] = useState({});
 	const [unreadMessages, setUnreadMessages] = useState({});
-	const [activeChat, setActiveChat] = useState(null);
 	const [isConnected, setIsConnected] = useState(false);
 	const [lastError, setLastError] = useState(null);
 
-	// Fetch all available conversations for this user when they log in
+	// Fetch all conversations when user logs in
 	useEffect(() => {
 		if (!user) return;
 
-		const fetchAllConversations = async () => {
+		const fetchConversations = async () => {
 			try {
-				// Fetch conversation list based on user type
-				const contacts =
+				console.log('Fetching conversations for user:', user);
+				const data =
 					user.userType === 'airline'
-						? await messageService.getCustomersForAirline()
-						: await messageService.getAirlinesForCustomer();
-
-				// For each contact, fetch conversation history
-				const conversationPromises = contacts.map((contact) =>
-					fetchConversationHistory(user._id, contact._id)
-				);
-
-				const conversations = await Promise.all(conversationPromises);
-
-				// Organize conversations by user ID
-				const conversationsMap = {};
-				contacts.forEach((contact, index) => {
-					conversationsMap[contact._id] = conversations[index];
-				});
-
-				setAllConversations(conversationsMap);
+						? await messageService.getAirlineConversations()
+						: await messageService.getConversations();
+				console.log('Fetched conversations:', data);
+				setConversations(data);
 			} catch (error) {
+				console.error('Error fetching conversations:', error);
 				setLastError('Failed to load conversations');
 			}
 		};
 
-		fetchAllConversations();
+		fetchConversations();
 	}, [user]);
 
 	// Initialize socket connection
@@ -66,7 +55,6 @@ export const ChatProvider = ({ children }) => {
 
 		newSocket.on('connect', () => {
 			setIsConnected(true);
-			// Join user's room when socket connects
 			newSocket.emit('join', user._id);
 		});
 
@@ -90,33 +78,28 @@ export const ChatProvider = ({ children }) => {
 		if (!socket || !user) return;
 
 		const handleReceiveMessage = (message) => {
-			// Add message to the appropriate conversation
-			const otherUserId =
-				message.sender === user._id ? message.receiver : message.sender;
-
-			setAllConversations((prev) => {
-				const conversationMessages = prev[otherUserId] || [];
-
-				// Check if message already exists to prevent duplicates
+			setMessages((prev) => {
+				const conversationMessages = prev[message.conversation] || [];
 				const messageExists = conversationMessages.some(
 					(msg) => msg._id === message._id
 				);
 
-				if (messageExists) {
-					return prev;
-				}
+				if (messageExists) return prev;
 
 				return {
 					...prev,
-					[otherUserId]: [...conversationMessages, message],
+					[message.conversation]: [...conversationMessages, message],
 				};
 			});
 
-			// Mark message as unread if it's not from the active chat and not from current user
-			if (activeChat !== otherUserId && message.sender !== user._id) {
+			// Mark as unread if not the active conversation
+			if (
+				activeConversation !== message.conversation &&
+				message.sender !== user._id
+			) {
 				setUnreadMessages((prev) => ({
 					...prev,
-					[otherUserId]: (prev[otherUserId] || 0) + 1,
+					[message.conversation]: (prev[message.conversation] || 0) + 1,
 				}));
 			}
 		};
@@ -126,86 +109,74 @@ export const ChatProvider = ({ children }) => {
 		return () => {
 			socket.off('receiveMessage', handleReceiveMessage);
 		};
-	}, [socket, user, activeChat]);
+	}, [socket, user, activeConversation]);
 
-	// Fetch conversation when active chat changes
+	// Fetch messages when active conversation changes
 	useEffect(() => {
-		if (!user || !activeChat) return;
+		if (!user || !activeConversation) return;
 
-		fetchConversationForActiveChat();
-	}, [activeChat, user]);
+		const fetchMessages = async () => {
+			try {
+				const data = await messageService.getMessages(activeConversation);
+				setMessages((prev) => ({
+					...prev,
+					[activeConversation]: data,
+				}));
+				// Clear unread messages
+				setUnreadMessages((prev) => ({
+					...prev,
+					[activeConversation]: 0,
+				}));
+			} catch (error) {
+				setLastError('Failed to load messages');
+			}
+		};
 
-	// Helper function to fetch conversation history
-	const fetchConversationHistory = async (userId, otherUserId) => {
-		try {
-			return await messageService.getConversation(
-				userId,
-				otherUserId,
-				user?.token
-			);
-		} catch (error) {
-			return [];
-		}
-	};
-
-	// Function to fetch conversation for active chat
-	const fetchConversationForActiveChat = useCallback(async () => {
-		if (!user || !activeChat) return;
-
-		try {
-			const messages = await fetchConversationHistory(user._id, activeChat);
-
-			setAllConversations((prev) => ({
-				...prev,
-				[activeChat]: messages,
-			}));
-
-			// Clear unread messages when chat becomes active
-			setUnreadMessages((prev) => ({
-				...prev,
-				[activeChat]: 0,
-			}));
-		} catch (error) {
-			setLastError('Failed to load messages');
-		}
-	}, [user, activeChat]);
+		fetchMessages();
+	}, [activeConversation, user]);
 
 	const sendMessage = useCallback(
-		(text, receiverId, imageUrl = null) => {
-			if (!socket || (!text.trim() && !imageUrl) || !receiverId || !user) {
+		(text, conversationId, imageUrl = null) => {
+			if (!socket || (!text.trim() && !imageUrl) || !conversationId || !user) {
 				return;
 			}
+
+			const conversation = conversations.find((c) => c._id === conversationId);
+			if (!conversation) return;
+
+			// Get receiver ID from the embedded customer/airline object
+			const receiverId =
+				user.userType === 'airline'
+					? conversation.customer._id
+					: conversation.airline._id;
 
 			const messageData = {
 				sender: user._id,
 				receiver: receiverId,
+				conversation: conversationId,
 				messageType: imageUrl ? 'image' : 'text',
 			};
 
-			// Add image URL if it's an image message
 			if (imageUrl) {
 				messageData.imageUrl = imageUrl;
-				messageData.text = text.trim() || ''; // Optional caption with image
+				messageData.text = text.trim() || '';
 			} else {
 				messageData.text = text.trim();
 			}
 
-			// Send message through socket
 			socket.emit('sendMessage', messageData);
 		},
-		[socket, user]
+		[socket, user, conversations]
 	);
 
 	const sendImageMessage = useCallback(
-		async (file, text, receiverId) => {
-			if (!file || !receiverId || !user) return;
+		async (file, text, conversationId) => {
+			if (!file || !conversationId || !user) return;
 
 			try {
-				// Create FormData for image upload
 				const formData = new FormData();
 				formData.append('image', file);
 
-				// Upload image to AWS S3
 				const response = await axios.post(
 					'http://localhost:8000/api/images/upload-image',
 					formData,
@@ -216,8 +187,7 @@ export const ChatProvider = ({ children }) => {
 				);
 
 				if (response.data && response.data.url) {
-					// Send message with image URL
-					sendMessage(text, receiverId, response.data.url);
+					sendMessage(text, conversationId, response.data.url);
 					return true;
 				}
 				return false;
@@ -229,38 +199,35 @@ export const ChatProvider = ({ children }) => {
 		[user, sendMessage]
 	);
 
-	const setActiveChatUser = useCallback((userId) => {
-		setActiveChat(userId);
-
-		// Clear unread messages when chat becomes active
-		setUnreadMessages((prev) => ({
-			...prev,
-			[userId]: 0,
-		}));
-	}, []);
-
-	// Force refresh active conversation
-	const refreshActiveConversation = useCallback(() => {
-		if (activeChat) {
-			fetchConversationForActiveChat();
+	const startNewConversation = async (airlineId, bookingId) => {
+		try {
+			const response = await messageService.startConversation(
+				airlineId,
+				bookingId
+			);
+			setConversations((prev) => [...prev, response.conversation]);
+			return response.conversation;
+		} catch (error) {
+			setLastError('Failed to start conversation');
+			return null;
 		}
-	}, [activeChat, fetchConversationForActiveChat]);
+	};
 
 	return (
 		<ChatContext.Provider
 			value={{
 				user,
 				socket,
-				activeChat,
-				setActiveChat: setActiveChatUser,
-				allConversations,
+				conversations,
+				activeConversation,
+				setActiveConversation,
+				messages,
 				unreadMessages,
 				sendMessage,
 				sendImageMessage,
-				getConversation: (userId) => allConversations[userId] || [],
+				startNewConversation,
 				isConnected,
 				lastError,
-				refreshActiveConversation,
 			}}
 		>
 			{children}

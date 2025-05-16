@@ -1,7 +1,9 @@
 import React from 'react';
 
 const Pagination = ({ searchParams, handlePageChange, totalPages }) => {
+	
 	const currentPage = searchParams.page;
+	
 	const pageNumbers = [];
 
 	if (totalPages <= 3) {
@@ -10,21 +12,21 @@ const Pagination = ({ searchParams, handlePageChange, totalPages }) => {
 		}
 	} else {
 		if (currentPage < 3) {
-			// Show first 5 pages
+			// Show first 3 pages
 			for (let i = 0; i < 3; i++) {
 				pageNumbers.push(i);
 			}
 			pageNumbers.push('ellipsis');
 			pageNumbers.push(totalPages - 1);
 		} else if (currentPage >= totalPages - 3) {
-			// Show last 5 pages
+			// Show last 3 pages
 			pageNumbers.push(0);
 			pageNumbers.push('ellipsis');
 			for (let i = totalPages - 3; i < totalPages; i++) {
 				pageNumbers.push(i);
 			}
 		} else {
-			// Show current, 2 before and 2 after
+			// Show current, 1 before and 1 after
 			pageNumbers.push(0);
 			pageNumbers.push('ellipsis');
 			for (let i = currentPage - 1; i <= currentPage + 1; i++) {

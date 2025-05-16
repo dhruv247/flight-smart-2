@@ -27,6 +27,10 @@ const messageSchema = new mongoose.Schema(
 				return this.messageType === 'image';
 			},
 		},
+		conversation: {
+			type: mongoose.Schema.Types.ObjectId,
+			required: true,
+		}
 	},
 	{
 		timestamps: true,

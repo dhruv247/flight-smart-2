@@ -18,6 +18,7 @@ import { router as messageRoutes } from './routes/message.routes.js';
 import { router as planeRoutes } from './routes/plane.routes.js';
 import { router as seatRoutes } from './routes/seat.routes.js';
 import { router as ticketRoutes } from './routes/ticket.routes.js';
+import { router as conversationRoutes } from './routes/conversation.routes.js';
 
 const app = express();
 const server = http.createServer(app);
@@ -34,8 +35,9 @@ app.use(cookieParser());
 
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/auth', authRoutes);
-app.use('/api/bookings', bookingRoutes);
 app.use('/api/airports', airportRoutes);
+app.use('/api/conversations', conversationRoutes);
+app.use('/api/bookings', bookingRoutes);
 app.use('/api/flights', flightRoutes);
 app.use('/api/images', imageRoutes);
 app.use('/api/messages', messageRoutes);

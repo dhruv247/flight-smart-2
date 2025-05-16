@@ -39,9 +39,16 @@ const setupSocket = (server) => {
 
 		socket.on(
 			'sendMessage',
-			async ({ sender, receiver, text, messageType, imageUrl }) => {
+			async ({
+				sender,
+				receiver,
+				text,
+				messageType,
+				imageUrl,
+				conversation,
+			}) => {
 				try {
-					const messageData = { sender, receiver };
+					const messageData = { sender, receiver, conversation };
 
 					if (messageType === 'image') {
 						messageData.messageType = 'image';

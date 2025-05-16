@@ -2,47 +2,26 @@ import { useState, useEffect, useRef } from 'react';
 import { useChat } from '../../context/ChatContext';
 import Loading from '../Loading';
 
-const ChatBox = ({ selectedUser, emptyStateText }) => {
+const ChatBox = ({ selectedConversation, emptyStateText }) => {
 	const [newMessage, setNewMessage] = useState('');
 	const [loading, setLoading] = useState(false);
 	const [selectedImage, setSelectedImage] = useState(null);
 	const [isUploading, setIsUploading] = useState(false);
 	const fileInputRef = useRef(null);
-	const {
-		user,
-		sendMessage,
-		sendImageMessage,
-		getConversation,
-		isConnected,
-		refreshActiveConversation,
-	} = useChat();
+	const { user, sendMessage, sendImageMessage, messages, isConnected } =
+		useChat();
 
 	const messagesEndRef = useRef(null);
 
 	// Get messages for the selected conversation
-	const messages = selectedUser ? getConversation(selectedUser._id) : [];
-
-	// Periodically refresh active conversation to ensure messages are up to date
-	useEffect(() => {
-		if (!selectedUser) return;
-
-		// Initial load
-		setLoading(true);
-		refreshActiveConversation();
-		setLoading(false);
-
-		// Set up regular refresh
-		const intervalId = setInterval(() => {
-			refreshActiveConversation();
-		}, 30000); // Refresh every 30 seconds
-
-		return () => clearInterval(intervalId);
-	}, [selectedUser, refreshActiveConversation]);
+	const conversationMessages = selectedConversation
+		? messages[selectedConversation._id] || []
+		: [];
 
 	// Scroll to bottom when messages change
 	useEffect(() => {
 		messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-	}, [messages]);
+	}, [conversationMessages]);
 
 	const handleSendMessage = (e) => {
 		e.preventDefault();
@@ -52,10 +31,10 @@ const ChatBox = ({ selectedUser, emptyStateText }) => {
 			return;
 		}
 
-		if (!newMessage.trim() || !selectedUser || !isConnected) return;
+		if (!newMessage.trim() || !selectedConversation || !isConnected) return;
 
 		// Send message through context
-		sendMessage(newMessage.trim(), selectedUser._id);
+		sendMessage(newMessage.trim(), selectedConversation._id);
 		setNewMessage('');
 	};
 
@@ -66,14 +45,14 @@ const ChatBox = ({ selectedUser, emptyStateText }) => {
 	};
 
 	const handleSendImageMessage = async () => {
-		if (!selectedImage || !selectedUser || !isConnected) return;
+		if (!selectedImage || !selectedConversation || !isConnected) return;
 
 		setIsUploading(true);
 		try {
 			const success = await sendImageMessage(
 				selectedImage,
 				newMessage.trim(),
-				selectedUser._id
+				selectedConversation._id
 			);
 
 			if (success) {
@@ -96,22 +75,23 @@ const ChatBox = ({ selectedUser, emptyStateText }) => {
 	};
 
 	// Filter out duplicate messages before rendering
-	const filteredMessages = messages.filter((message, index, self) => {
-		// Filter out any message that has the same text, sender, and is within a few seconds of another message
-		return (
-			index ===
-			self.findIndex(
-				(m) =>
-					m.text === message.text &&
-					m.sender === message.sender &&
-					m.receiver === message.receiver &&
-					(!m.createdAt ||
-						!message.createdAt ||
-						Math.abs(new Date(m.createdAt) - new Date(message.createdAt)) <
-							3000)
-			)
-		);
-	});
+	const filteredMessages = conversationMessages.filter(
+		(message, index, self) => {
+			return (
+				index ===
+				self.findIndex(
+					(m) =>
+						m.text === message.text &&
+						m.sender === message.sender &&
+						m.receiver === message.receiver &&
+						(!m.createdAt ||
+							!message.createdAt ||
+							Math.abs(new Date(m.createdAt) - new Date(message.createdAt)) <
+								3000)
+				)
+			);
+		}
+	);
 
 	// Display message content based on message type
 	const renderMessageContent = (message) => {
@@ -131,24 +111,34 @@ const ChatBox = ({ selectedUser, emptyStateText }) => {
 		return message.text;
 	};
 
-	if (!selectedUser) {
+	if (!selectedConversation) {
 		return (
 			<div className="flex-grow-1 d-flex align-items-center justify-content-center bg-white border-start">
 				<div className="text-center text-muted">
 					<i className="bi bi-chat-dots fs-1 mb-3 d-block opacity-50"></i>
 					<p className="mb-0">
-						{emptyStateText || 'Select a user to start chatting'}
+						{emptyStateText || 'Select a conversation to start chatting'}
 					</p>
 				</div>
 			</div>
 		);
 	}
 
+	const otherUser =
+		user.userType === 'airline'
+			? selectedConversation.customer
+			: selectedConversation.airline;
+
 	return (
 		<div className="flex-grow-1 d-flex flex-column bg-white border-start">
 			<div className="p-3 border-bottom shadow-sm">
 				<div className="d-flex justify-content-between align-items-center">
-					<h5 className="mb-0 fw-bold">{selectedUser.username}</h5>
+					<div>
+						<h5 className="mb-0 fw-bold">{otherUser.username}</h5>
+						<small className="text-muted">
+							Booking #{selectedConversation.bookingId}
+						</small>
+					</div>
 					{!isConnected && (
 						<span className="badge bg-warning">Connection Issue</span>
 					)}

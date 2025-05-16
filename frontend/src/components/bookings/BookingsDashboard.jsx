@@ -27,6 +27,8 @@ const BookingsDashboard = ({ type }) => {
 		const getBookingsFromDB = async () => {
 			try {
 				const queryParams = new URLSearchParams();
+
+				// add search params to query params
 				Object.entries(searchParams).forEach(([key, value]) => {
 					if (value !== '' && value !== false && value !== null) {
 						queryParams.append(key, value);
@@ -41,8 +43,8 @@ const BookingsDashboard = ({ type }) => {
 				);
 
 				setBookingsList(bookings.data.booking);
-				// Assuming the API returns total count in the response
-				// If not, you'll need to modify the backend to return total count
+
+				// set total pages
 				setTotalPages(Math.ceil(bookings.data.total / searchParams.size));
 				setLoading(false);
 			} catch (error) {
@@ -55,10 +57,9 @@ const BookingsDashboard = ({ type }) => {
 	}, [searchParams]);
 
 	const handleChange = (e) => {
-		const { name, value, type, checked } = e.target;
-		const newValue = type === 'checkbox' ? checked : value;
+		const { name, value } = e.target;
 		// Reset page to 0 when search parameters change
-		setSearchParams({ ...searchParams, [name]: newValue, page: 0 });
+		setSearchParams({ ...searchParams, [name]: value, page: 0 });
 	};
 
 	const handlePageChange = (newPage) => {
@@ -113,18 +114,6 @@ const BookingsDashboard = ({ type }) => {
 						</datalist>
 					</div>
 					<div className="row mt-3">
-						{/* <div className="form-check col-md-4 col-12">
-							<input
-								className="form-check-input"
-								type="checkbox"
-								id="roundTripCheckbox"
-								name="roundTrip"
-								onChange={handleChange}
-							/>
-							<label className="form-check-label" htmlFor="roundTripCheckbox">
-								Round Trip
-							</label>
-						</div> */}
 						<div className="col-md-3 col-6">
 							<select
 								name="roundTrip"
@@ -191,9 +180,6 @@ const BookingsDashboard = ({ type }) => {
 					<p className="mb-0">Flight From</p>
 					<p className="mb-0">Flight To</p>
 				</div>
-				{/* <div className="col-12 col-md-2 d-flex justify-content-center align-items-center">
-					<p className="mb-0">Flight To</p>
-				</div> */}
 			</div>
 			{bookingsList.length === 0 ? (
 				<div className="text-center my-5 p-4">

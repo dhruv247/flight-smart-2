@@ -371,9 +371,11 @@ const searchBookingsForCustomer = async (req, res) => {
  * @returns
  */
 const searchBookingsForAirlines = async (req, res) => {
+
 	const user = req.user._id;
 
 	try {
+		
 		const {
 			bookingId,
 			departureAirportName,

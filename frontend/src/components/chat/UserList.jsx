@@ -1,45 +1,45 @@
 import { useEffect, useState } from 'react';
 import { useChat } from '../../context/ChatContext';
-import messageService from '../../services/message.service';
+import ChooseBookingModal from './ChooseBookingModal';
 
-const UserList = ({ onSelectUser, selectedUser, userType, title }) => {
-	const [users, setUsers] = useState([]);
+const UserList = ({ onSelectConversation, selectedConversation, userType }) => {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState('');
-	const { user, unreadMessages, setActiveChat } = useChat();
+	const { user, conversations, unreadMessages, setActiveConversation } =
+		useChat();
+	const [isChooseBookingModalOpen, setIsChooseBookingModalOpen] =
+		useState(false);
 
 	useEffect(() => {
-		const fetchUsers = async () => {
-			if (!user) return;
+		console.log('Conversations:', conversations);
+		setLoading(false);
+	}, [conversations]);
 
-			try {
-				const data =
-					userType === 'airline'
-						? await messageService.getCustomersForAirline()
-						: await messageService.getAirlinesForCustomer();
-				setUsers(data);
-				setLoading(false);
-			} catch (error) {
-				setError('Failed to load users');
-				setLoading(false);
-			}
-		};
+	const handleSelectConversation = (conversation) => {
+		onSelectConversation(conversation);
+		setActiveConversation(conversation._id);
+	};
 
-		if (user) {
-			fetchUsers();
-		}
-	}, [user, userType]);
-
-	const handleSelectUser = (u) => {
-		onSelectUser(u);
-		setActiveChat(u._id);
+	const getOtherUser = (conversation) => {
+		if (!conversation) return null;
+		return user.userType === 'airline'
+			? conversation.customer
+			: conversation.airline;
 	};
 
 	return (
 		<div className="h-100" style={{ width: '280px' }}>
 			<div className="d-flex flex-column h-100 bg-white border-end">
-				<div className="d-lg-block d-none p-3 border-bottom">
-					<h5 className="mb-0 fw-bold">{title}</h5>
+				<div className="p-3 border-bottom d-flex justify-content-between align-items-center">
+					<h5 className="mb-0 fw-bold">Conversations</h5>
+					{userType === 'customer' && (
+						<button
+							className="btn btn-primary"
+							onClick={() => setIsChooseBookingModalOpen(true)}
+						>
+							<i className="bi bi-plus"></i>
+						</button>
+					)}
 				</div>
 
 				<div className="overflow-auto flex-grow-1">
@@ -49,7 +49,9 @@ const UserList = ({ onSelectUser, selectedUser, userType, title }) => {
 								className="spinner-border spinner-border-sm text-primary"
 								role="status"
 							>
-								<span className="visually-hidden">Loading users...</span>
+								<span className="visually-hidden">
+									Loading conversations...
+								</span>
 							</div>
 						</div>
 					)}
@@ -61,40 +63,59 @@ const UserList = ({ onSelectUser, selectedUser, userType, title }) => {
 					)}
 
 					<div className="list-group list-group-flush">
-						{users.map((u) => (
-							<button
-								key={u._id}
-								className={`list-group-item list-group-item-action py-3 border-bottom position-relative ${
-									selectedUser && selectedUser._id === u._id ? 'active' : ''
-								}`}
-								onClick={() => handleSelectUser(u)}
-							>
-								<div className="d-flex align-items-center">
-									<img
-										src={u.profilePicture}
-										alt="Profile"
-										className="rounded-circle me-2"
-										style={{ width: '30px', height: '30px' }}
-									/>
-									<span>{u.username}</span>
+						{conversations &&
+							conversations.map((conversation) => {
+								const otherUser = getOtherUser(conversation);
+								if (!otherUser) return null;
 
-									{unreadMessages[u._id] > 0 && (
-										<span className="position-absolute top-50 end-0 translate-middle-y badge rounded-pill bg-danger me-2">
-											{unreadMessages[u._id]}
-										</span>
-									)}
-								</div>
-							</button>
-						))}
+								return (
+									<button
+										key={conversation._id}
+										className={`list-group-item list-group-item-action py-3 border-bottom position-relative ${
+											selectedConversation &&
+											selectedConversation._id === conversation._id
+												? 'active'
+												: ''
+										}`}
+										onClick={() => handleSelectConversation(conversation)}
+									>
+										<div className="d-flex align-items-center">
+											<img
+												src={otherUser.profilePicture}
+												alt="Profile"
+												className="rounded-circle me-2"
+												style={{ width: '30px', height: '30px' }}
+											/>
+											<div className="flex-grow-1">
+												<div className="d-flex justify-content-between align-items-center">
+													<span>{otherUser.username}</span>
+													{unreadMessages[conversation._id] > 0 && (
+														<span className="badge rounded-pill bg-danger">
+															{unreadMessages[conversation._id]}
+														</span>
+													)}
+												</div>
+												<small className="text-muted">
+													Booking #{conversation.bookingId}
+												</small>
+											</div>
+										</div>
+									</button>
+								);
+							})}
 
-						{!loading && users.length === 0 && (
+						{!loading && (!conversations || conversations.length === 0) && (
 							<div className="text-center text-muted p-3">
-								No {title.toLowerCase()} available
+								No conversations available
 							</div>
 						)}
 					</div>
 				</div>
 			</div>
+			<ChooseBookingModal
+				isOpen={isChooseBookingModalOpen}
+				onClose={() => setIsChooseBookingModalOpen(false)}
+			/>
 		</div>
 	);
 };

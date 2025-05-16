@@ -9,7 +9,7 @@ const CustomerDashboardPage = () => {
 
 	const customerNavItems = [
 		{ id: 'bookings', label: 'Bookings', icon: 'bi-calendar-check' },
-		{ id: 'chat', label: 'Chat', icon: 'bi-chat-dots' },
+		{ id: 'help', label: 'Help', icon: 'bi-chat-dots' },
 		{ id: 'profile', label: 'Profile', icon: 'bi-person' },
 	];
 
@@ -17,7 +17,7 @@ const CustomerDashboardPage = () => {
 		switch (activeComponent) {
 			case 'bookings':
 				return <BookingsDashboard type="customer" />;
-			case 'chat':
+			case 'help':
 				return <CustomerDashboardChat />;
 			case 'profile':
 				return <CustomerDashboardProfile />;

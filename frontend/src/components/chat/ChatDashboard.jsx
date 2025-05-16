@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import ChatBox from './ChatBox';
 import UserList from './UserList';
 
-const ChatDashboard = ({ userType, sidebarTitle, emptyStateText }) => {
-	const [selectedUser, setSelectedUser] = useState(null);
+const ChatDashboard = ({ userType, emptyStateText }) => {
+	const [selectedConversation, setSelectedConversation] = useState(null);
 	const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-	const handleSelectUser = (user) => {
-		setSelectedUser(user);
+	const handleSelectConversation = (conversation) => {
+		setSelectedConversation(conversation);
 		setIsSidebarOpen(false); // Close sidebar after selection on mobile
 	};
 
@@ -26,10 +26,9 @@ const ChatDashboard = ({ userType, sidebarTitle, emptyStateText }) => {
 				{/* Sidebar - Regular view on desktop, offcanvas on mobile */}
 				<div className={`d-none d-lg-block h-100`}>
 					<UserList
-						onSelectUser={handleSelectUser}
-						selectedUser={selectedUser}
+						onSelectConversation={handleSelectConversation}
+						selectedConversation={selectedConversation}
 						userType={userType}
-						title={sidebarTitle}
 					/>
 				</div>
 
@@ -42,7 +41,7 @@ const ChatDashboard = ({ userType, sidebarTitle, emptyStateText }) => {
 					style={{ width: '280px' }}
 				>
 					<div className="offcanvas-header">
-						<h5 className="offcanvas-title">{sidebarTitle}</h5>
+						<h5 className="offcanvas-title">Conversations</h5>
 						<button
 							type="button"
 							className="btn-close"
@@ -51,16 +50,18 @@ const ChatDashboard = ({ userType, sidebarTitle, emptyStateText }) => {
 					</div>
 					<div className="offcanvas-body p-0">
 						<UserList
-							onSelectUser={handleSelectUser}
-							selectedUser={selectedUser}
+							onSelectConversation={handleSelectConversation}
+							selectedConversation={selectedConversation}
 							userType={userType}
-							title={sidebarTitle}
 						/>
 					</div>
 				</div>
 
 				{/* Main Chat Area */}
-				<ChatBox selectedUser={selectedUser} emptyStateText={emptyStateText} />
+				<ChatBox
+					selectedConversation={selectedConversation}
+					emptyStateText={emptyStateText}
+				/>
 			</div>
 		</div>
 	);
