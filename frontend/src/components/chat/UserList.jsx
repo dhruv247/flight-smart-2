@@ -5,15 +5,26 @@ import ChooseBookingModal from './ChooseBookingModal';
 const UserList = ({ onSelectConversation, selectedConversation, userType }) => {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState('');
-	const { user, conversations, unreadMessages, setActiveConversation } =
-		useChat();
+	const {
+		user,
+		conversations,
+		unreadMessages,
+		setActiveConversation,
+		lastError,
+	} = useChat();
 	const [isChooseBookingModalOpen, setIsChooseBookingModalOpen] =
 		useState(false);
 
 	useEffect(() => {
-		console.log('Conversations:', conversations);
-		setLoading(false);
-	}, [conversations]);
+		// Set loading to false only when we have conversations or an error
+		if (conversations !== undefined) {
+			setLoading(false);
+		}
+		if (lastError) {
+			setError(lastError);
+			setLoading(false);
+		}
+	}, [conversations, lastError]);
 
 	const handleSelectConversation = (conversation) => {
 		onSelectConversation(conversation);

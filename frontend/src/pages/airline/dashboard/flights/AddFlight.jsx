@@ -77,6 +77,7 @@ const AddFlight = () => {
 			const formattedDepartureTime = formatTimeForSubmission(
 				flightDetails.departureTime
 			);
+
 			const formattedArrivalTime = formatTimeForSubmission(
 				flightDetails.arrivalTime
 			);

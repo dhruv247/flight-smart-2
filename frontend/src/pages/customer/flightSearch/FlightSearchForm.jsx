@@ -185,6 +185,7 @@ const FlightSearchForm = ({
 							onChange={handleChange}
 							readOnly={isReadOnly}
 						/>
+
 						<button
 							type="button"
 							className="btn btn-outline-secondary btn-sm align-self-center"
@@ -206,6 +207,7 @@ const FlightSearchForm = ({
 								/>
 							</svg>
 						</button>
+
 						<input
 							type="search"
 							name="flightTo"
@@ -219,6 +221,7 @@ const FlightSearchForm = ({
 							onChange={handleChange}
 							readOnly={isReadOnly}
 						/>
+
 						<datalist id="airportList">
 							{!airportsLoading &&
 								airports.map((airport, index) => (

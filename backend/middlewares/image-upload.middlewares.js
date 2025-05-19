@@ -2,14 +2,18 @@ import AWS from 'aws-sdk';
 import multer from 'multer';
 import multerS3 from 'multer-s3';
 
+
+// configure AWS
 AWS.config.update({
 	accessKeyId: process.env.AWS_ACCESS_KEY,
 	secretAccessKey: process.env.AWS_SECRET_KEY,
 	region: process.env.AWS_BUCKET_REGION,
 });
 
+// create S3 instance
 const s3 = new AWS.S3();
 
+// create multer instance
 const upload = multer({
 	storage: multerS3({
 		s3: s3,

@@ -16,7 +16,7 @@ const sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
 /**
  * Send a message to SQS queue
  * @param {Object} messageBody - The message body to send
- * @returns {Promise} - The result of the send operation
+ * @returns {object} - The result of the send operation
  */
 export const sendToEmailQueue = async (messageBody) => {
 	const params = {

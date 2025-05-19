@@ -99,7 +99,7 @@ const FlightCard = ({
 					<p>{formatTime(flight.departureTime)}</p>
 					<p>{flight.departureDate}</p>
 				</div>
-				<p>-</p>
+				<i className="bi bi-arrow-right"></i>
 				<div className="align-items-center">
 					<p>{flight.arrivalAirport.city}</p>
 					<p>{formatTime(flight.arrivalTime)}</p>

@@ -5,7 +5,7 @@ import { Seat } from '../models/seat.model.js';
  * Gets all the seats for a flight using flight id
  * @param {*} req
  * @param {*} res
- * @returns
+ * @returns {Object} seats
  */
 const getSeatsForFlight = async (req, res) => {
 	try {

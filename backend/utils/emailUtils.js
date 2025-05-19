@@ -41,7 +41,7 @@ const sendEmail = async (to, subject, text, html = null) => {
 /**
  * Send airline verification email
  * @param {object} airline - The airline object
- * @returns {Promise<object>} - The email info
+ * @returns {object} - The email info
  */
 const sendAirlineVerificationEmail = async (airline) => {
 	const subject = 'Flight Smart - Airline Verification';
@@ -63,7 +63,7 @@ const sendAirlineVerificationEmail = async (airline) => {
 /**
  * Send airline deletion email
  * @param {object} airline - The airline object
- * @returns {Promise<object>} - The email info
+ * @returns {object} - The email info
  */
 const sendAirlineDeletionEmail = async (airline) => {
 	const subject = 'Flight Smart Registration Request Denied';
@@ -85,7 +85,7 @@ const sendAirlineDeletionEmail = async (airline) => {
 /**
  * Send booking confirmation email
  * @param {object} booking - The booking object
- * @returns {Promise<object>} - The email info
+ * @returns {object} - The email info
  */
 const sendBookingConfirmationEmail = async (booking) => {
 	const subject = 'Flight Smart - Booking Confirmation';
@@ -329,6 +329,11 @@ const sendBookingConfirmationEmail = async (booking) => {
 	return sendEmail(booking.userDetails.email, subject, text, html);
 };
 
+/**
+ * Send booking cancellation email
+ * @param {object} booking - The booking object
+ * @returns {object} - The email info
+ */
 const sendBookingCancellationEmail = async (booking) => {
 	const subject = 'Flight Smart - Booking Cancellation';
 

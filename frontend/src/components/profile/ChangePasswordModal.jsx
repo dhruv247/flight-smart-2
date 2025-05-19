@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { showSuccessToast, showErrorToast } from '../../utils/toast';
+import Modal from '../common/Modal';
 
 const ChangePasswordModal = ({ isOpen, onClose }) => {
 	const [formData, setFormData] = useState({
@@ -47,85 +48,77 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
 		}
 	};
 
-	if (!isOpen) return null;
+	const modalContent = (
+		<form onSubmit={handleSubmit}>
+			<div className="mb-3">
+				<label htmlFor="oldPassword" className="form-label">
+					Current Password
+				</label>
+				<input
+					type="password"
+					className="form-control"
+					id="oldPassword"
+					name="oldPassword"
+					value={formData.oldPassword}
+					onChange={handleChange}
+					required
+				/>
+			</div>
+			<div className="mb-3">
+				<label htmlFor="newPassword" className="form-label">
+					New Password
+				</label>
+				<input
+					type="password"
+					className="form-control"
+					id="newPassword"
+					name="newPassword"
+					value={formData.newPassword}
+					onChange={handleChange}
+					required
+				/>
+			</div>
+			<div className="mb-3">
+				<label htmlFor="confirmPassword" className="form-label">
+					Confirm New Password
+				</label>
+				<input
+					type="password"
+					className="form-control"
+					id="confirmPassword"
+					name="confirmPassword"
+					value={formData.confirmPassword}
+					onChange={handleChange}
+					required
+				/>
+			</div>
+		</form>
+	);
+
+	const modalFooter = (
+		<>
+			<button type="button" className="btn btn-secondary" onClick={onClose}>
+				Cancel
+			</button>
+			<button
+				type="submit"
+				className="btn btn-primary"
+				form="changePasswordForm"
+			>
+				Update Password
+			</button>
+		</>
+	);
 
 	return (
-		<div
-			className="modal show d-block"
-			tabIndex="-1"
-			style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+		<Modal
+			isOpen={isOpen}
+			onClose={onClose}
+			title="Change Password"
+			footer={modalFooter}
 		>
-			<div className="modal-dialog modal-dialog-centered">
-				<div className="modal-content">
-					<div className="modal-header border-bottom">
-						<h5 className="modal-title">Change Password</h5>
-						<button
-							type="button"
-							className="btn-close"
-							onClick={onClose}
-						></button>
-					</div>
-					<div className="modal-body p-4">
-						<form onSubmit={handleSubmit}>
-							<div className="mb-3">
-								<label htmlFor="oldPassword" className="form-label">
-									Current Password
-								</label>
-								<input
-									type="password"
-									className="form-control"
-									id="oldPassword"
-									name="oldPassword"
-									value={formData.oldPassword}
-									onChange={handleChange}
-									required
-								/>
-							</div>
-							<div className="mb-3">
-								<label htmlFor="newPassword" className="form-label">
-									New Password
-								</label>
-								<input
-									type="password"
-									className="form-control"
-									id="newPassword"
-									name="newPassword"
-									value={formData.newPassword}
-									onChange={handleChange}
-									required
-								/>
-							</div>
-							<div className="mb-3">
-								<label htmlFor="confirmPassword" className="form-label">
-									Confirm New Password
-								</label>
-								<input
-									type="password"
-									className="form-control"
-									id="confirmPassword"
-									name="confirmPassword"
-									value={formData.confirmPassword}
-									onChange={handleChange}
-									required
-								/>
-							</div>
-							<div className="modal-footer border-top">
-								<button
-									type="button"
-									className="btn btn-secondary"
-									onClick={onClose}
-								>
-									Cancel
-								</button>
-								<button type="submit" className="btn btn-primary">
-									Update Password
-								</button>
-							</div>
-						</form>
-					</div>
-				</div>
-			</div>
-		</div>
+			{modalContent}
+		</Modal>
 	);
 };
 

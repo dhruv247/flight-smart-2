@@ -17,7 +17,7 @@ const createToken = (user) => {
 	return jwt.sign(
 		{ _id: user._id, userType: user.userType },
 		process.env.JWT_SECRET,
-		{ expiresIn: '1h' }
+		{ expiresIn: '6h' }
 	);
 };
 
@@ -25,11 +25,12 @@ const createToken = (user) => {
  * Register a new customer
  * @param {*} req
  * @param {*} res
+ * @returns {Object} user
  */
 const register = async (req, res) => {
 	try {
 		// destructure request body
-		const { username, email, password, userType } = req.body;
+		const { username, email, password, userType, profilePicture } = req.body;
 
 		// mandatory field check for backend
 		if (!username || !email || !password || !userType) {
@@ -41,7 +42,14 @@ const register = async (req, res) => {
 				});
 		}
 
-		// Validate email format
+		// if user is an airline and no profile picture is provided, throw error
+		if (userType === 'airline' && !profilePicture) {
+			return res
+				.status(400)
+				.json({ message: 'Airline profile picture is required' });
+		}
+
+		// validate email format
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		if (!emailRegex.test(email)) {
 			return res
@@ -49,14 +57,14 @@ const register = async (req, res) => {
 				.json({ message: 'Please provide a valid email address' });
 		}
 
-		// Validate username length
+		// validate username length
 		if (username.length > 30) {
 			return res
 				.status(400)
 				.json({ message: 'Username must be less than 30 characters' });
 		}
 
-		// Validate password complexity
+		// validate password complexity
 		const passwordRegex =
 			/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 		if (!passwordRegex.test(password)) {
@@ -91,12 +99,14 @@ const register = async (req, res) => {
 		// check for duplicate username
 		const duplicateUsername = await User.findOne({ username });
 
+		// if duplicate email, throw error
 		if (duplicateEmail) {
 			return res
 				.status(400)
 				.json({ message: 'User with the same email already exists!' });
 		}
 
+		// if duplicate username, throw error
 		if (duplicateUsername) {
 			return res
 				.status(400)
@@ -110,11 +120,13 @@ const register = async (req, res) => {
 			password,
 			userType,
 			verificationStatus,
+			profilePicture,
 		});
 
 		// save user
 		await user.save();
 
+		// if user is an airline, return success message
 		if (user.userType === 'airline') {
 			return res.status(201).json({
 				message:
@@ -122,6 +134,8 @@ const register = async (req, res) => {
 				...user.toJSON(),
 			});
 		} else {
+
+			// if user is not an airline, return success message
 			return res
 				.status(201)
 				.json({ message: 'User registered', ...user.toJSON() });
@@ -135,6 +149,7 @@ const register = async (req, res) => {
  * Login an user
  * @param {*} req
  * @param {*} res
+ * @returns {Object} user
  */
 const login = async (req, res) => {
 	try {
@@ -214,6 +229,7 @@ const login = async (req, res) => {
  * Logout user
  * @param {*} req
  * @param {*} res
+ * @returns {Object} message
  */
 const logout = (req, res) => {
 	try {
@@ -238,6 +254,7 @@ const logout = (req, res) => {
  * get logged in (current) user details
  * @param {*} req
  * @param {*} res
+ * @returns {Object} user
  */
 const getMe = async (req, res) => {
 	try {
@@ -270,6 +287,7 @@ const getMe = async (req, res) => {
  * Update the password of the logged in user
  * @param {*} req
  * @param {*} res
+ * @returns {Object} message
  */
 const updatePassword = async (req, res) => {
 	try {
@@ -319,44 +337,10 @@ const updatePassword = async (req, res) => {
 };
 
 /**
- * Update the profile picture of the logged in user
- * @param {*} req
- * @param {*} res
- */
-const updateProfilePicture = async (req, res) => {
-	try {
-		// destructure req body
-		const { profilePicture } = req.body;
-
-		// mandatory field check
-		if (!profilePicture) {
-			return res.status(400).json({ message: 'Profile picture is required' });
-		}
-
-		// find user by id
-		const user = await User.findById(req.user._id);
-
-		// if user is not found, throw error
-		if (!user) {
-			return res.status(404).json({ message: 'User not found' });
-		}
-
-		user.profilePicture = profilePicture;
-		await user.save();
-
-		// return success message
-		res.status(200).json({
-			message: 'Profile picture updated successfully',
-		});
-	} catch (error) {
-		res.status(500).json({ message: error.message });
-	}
-};
-
-/**
  * Changes an airline's verification status to true
  * @param {*} req
  * @param {*} res
+ * @returns {Object} message
  */
 const verifyAirline = async (req, res) => {
 	try {
@@ -419,6 +403,7 @@ const verifyAirline = async (req, res) => {
  * Deletes an airline
  * @param {*} req
  * @param {*} res
+ * @returns {Object} message
  */
 const deleteAirline = async (req, res) => {
 	try {
@@ -473,6 +458,7 @@ const deleteAirline = async (req, res) => {
  * Get's airlines from db
  * @param {*} req
  * @param {*} res
+ * @returns {Object} message
  */
 const getAllAirlines = async (req, res) => {
 	try {
@@ -495,7 +481,6 @@ export {
 	logout,
 	getMe,
 	updatePassword,
-	updateProfilePicture,
 	verifyAirline,
 	deleteAirline,
 	getAllAirlines,

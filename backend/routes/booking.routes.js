@@ -5,6 +5,7 @@ import {
 	searchBookingsForAirlines,
 	cancelBooking,
 	searchBookingsForCustomer,
+	getAllBookingsForCustomer
 } from '../controllers/booking.controller.js';
 
 const router = express.Router();
@@ -24,6 +25,11 @@ router.get(
 	'/search-bookings-for-customer',
 	verifyCustomer,
 	searchBookingsForCustomer
+);
+router.get(
+	'/get-all-bookings-for-customer',
+	verifyCustomer,
+	getAllBookingsForCustomer
 );
 
 // Airline Routes

@@ -4,7 +4,7 @@ import { Plane } from '../models/plane.model.js';
  * Create a new plane
  * @param {*} req
  * @param {*} res
- * @returns
+ * @returns {Object} message
  */
 const addPlane = async (req, res) => {
 	try {

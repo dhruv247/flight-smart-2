@@ -12,17 +12,16 @@ import { getCache, setCache } from '../utils/redisUtils.js';
  * Get's the top departure flights by number of tickets
  * @param {*} req
  * @param {*} res
- * @description
- * 1. Unwind the tickets array to work with individual tickets
- * 2. Group by departure flight details
- * 3. Sort by count in descending order
- * 4. Limit the number of flights
- * 5. Project the flight details
+ * @returns {Object} topFlights
  */
 const topDepartureFlightsByNumberOfTickets = async (req, res) => {
+	
 	try {
+		
+		// get number of flights to return
 		const num = parseInt(req.query.num) || 5;
 
+		// get top flights
 		const topFlights = await Booking.aggregate([
 			{ $unwind: '$tickets' },
 
@@ -54,6 +53,7 @@ const topDepartureFlightsByNumberOfTickets = async (req, res) => {
 			},
 		]);
 
+		// return top flights
 		res.status(200).json(topFlights);
 	} catch (error) {
 		res.status(500).json({ message: error.message });
@@ -64,16 +64,15 @@ const topDepartureFlightsByNumberOfTickets = async (req, res) => {
  * Get's the top airlines by number of flights
  * @param {*} req
  * @param {*} res
- * @description
- * 1. Group by airline details
- * 2. Sort by count in descending order
- * 3. Limit the number of airlines
- * 4. Project the airline details
+ * @returns {Object} topAirlines
  */
 const topAirlinesByNumberOfFlights = async (req, res) => {
 	try {
+
+		// get number of airlines to return
 		const num = parseInt(req.query.num) || 5;
 
+		// get top airlines
 		const topAirlines = await Flight.aggregate([
 			{
 				$group: {
@@ -99,6 +98,7 @@ const topAirlinesByNumberOfFlights = async (req, res) => {
 			},
 		]);
 
+		// return top airlines
 		res.status(200).json(topAirlines);
 	} catch (error) {
 		res.status(500).json({ message: error.message });
@@ -109,16 +109,15 @@ const topAirlinesByNumberOfFlights = async (req, res) => {
  * Get's the top cities by number of flights (only departure flights for now - change this in the future to also include return flights)
  * @param {*} req
  * @param {*} res
- * @description
- * 1. Group by departure place
- * 2. Sort by count in descending order
- * 3. Limit the number of cities
- * 4. Project the city details
+ * @returns {Object} topCities
  */
 const topCitiesByNumberOfFlights = async (req, res) => {
 	try {
+
+		// get number of cities to return
 		const num = parseInt(req.query.num) || 5;
 
+		// get top cities
 		const topCities = await Flight.aggregate([
 			{
 				$group: {
@@ -141,6 +140,7 @@ const topCitiesByNumberOfFlights = async (req, res) => {
 			},
 		]);
 
+		// return top cities
 		res.status(200).json(topCities);
 	} catch (error) {
 		res.status(500).json({ message: error.message });
@@ -151,16 +151,15 @@ const topCitiesByNumberOfFlights = async (req, res) => {
  * Get's the top planes by number of flights
  * @param {*} req
  * @param {*} res
- * @description
- * 1. Group by plane details
- * 2. Sort by count in descending order
- * 3. Limit the number of planes
- * 4. Project the plane details
+ * @returns {Object} topPlanes
  */
 const topPlanesByNumberOfFlights = async (req, res) => {
 	try {
+
+		// get number of planes to return
 		const num = parseInt(req.query.num) || 5;
 
+		// get top planes
 		const topPlanes = await Flight.aggregate([
 			{
 				$group: {
@@ -186,6 +185,7 @@ const topPlanesByNumberOfFlights = async (req, res) => {
 			},
 		]);
 
+		// return top planes
 		res.status(200).json(topPlanes);
 	} catch (error) {
 		res.status(500).json({ message: error.message });
@@ -200,17 +200,18 @@ const topPlanesByNumberOfFlights = async (req, res) => {
  * Get's the top profitable economy flights for an airline
  * @param {*} req
  * @param {*} res
- * @description
- * 1. Calculates the profit score for each flight (economyCurrentPrice / duration)
- * 2. Sorts the flights by profit score in descending order
- * 3. Limits the number of flights
- * 4. Returns the top flights
+ * @returns {Object} profitableFlights
  */
 const profitableEconomyFlights = async (req, res) => {
 	try {
+
+		// get airline id
 		const airlineId = req.user._id;
+
+		// get number of flights to return
 		const limit = parseInt(req.query.limit) || 5;
 
+		// get profitable flights
 		const profitableFlights = await Flight.aggregate([
 			{
 				$match: {
@@ -235,6 +236,7 @@ const profitableEconomyFlights = async (req, res) => {
 			},
 		]);
 
+		// return profitable flights
 		res.status(200).json(profitableFlights);
 	} catch (error) {
 		res.status(500).json({ message: 'Error fetching profitable flights data' });
@@ -245,17 +247,18 @@ const profitableEconomyFlights = async (req, res) => {
  * Get's the top profitable business flights
  * @param {*} req
  * @param {*} res
- * @description
- * 1. Calculates the profit score for each flight (businessCurrentPrice / duration)
- * 2. Sorts the flights by profit score in descending order
- * 3. Limits the number of flights to the limit specified in the query
- * 4. Returns the top flights
+ * @returns {Object} profitableFlights
  */
 const profitableBusinessFlights = async (req, res) => {
 	try {
+
+		// get airline id
 		const airlineId = req.user._id;
+
+		// get number of flights to return
 		const limit = parseInt(req.query.limit) || 5;
 
+		// get profitable flights
 		const profitableFlights = await Flight.aggregate([
 			{
 				$match: {
@@ -280,6 +283,7 @@ const profitableBusinessFlights = async (req, res) => {
 			},
 		]);
 
+		// return profitable flights
 		res.status(200).json(profitableFlights);
 	} catch (error) {
 		res.status(500).json({ message: 'Error fetching profitable flights data' });
@@ -290,17 +294,18 @@ const profitableBusinessFlights = async (req, res) => {
  * Get's the busiest dates for an airline
  * @param {*} req
  * @param {*} res
- * @description
- * 1. Group by departure date
- * 2. Sort by count in descending order
- * 3. Limit the number of dates
- * 4. Project the date details
+ * @returns {Object} busyDates
  */
 const topDatesByNumberOfFlights = async (req, res) => {
 	try {
+
+		// get airline id
 		const airlineId = req.user._id;
+
+		// get number of dates to return
 		const limit = parseInt(req.query.limit) || 10;
 
+		// get busy dates
 		const busyDates = await Flight.aggregate([
 			{
 				$match: {
@@ -324,6 +329,7 @@ const topDatesByNumberOfFlights = async (req, res) => {
 			},
 		]);
 
+		// return busy dates
 		res.status(200).json(busyDates);
 	} catch (error) {
 		res.status(500).json({ message: 'Error fetching busy dates data' });
@@ -334,15 +340,15 @@ const topDatesByNumberOfFlights = async (req, res) => {
  * Get's the number of flights by duration for an airline
  * @param {*} req
  * @param {*} res
- * @description
- * 1. Group by duration range
- * 2. Sort by count in descending order
- * 3. Project the duration range and count
+ * @returns {Object} tripTypes
  */
 const flightByDuration = async (req, res) => {
 	try {
+
+		// get airline id
 		const airlineId = req.user._id;
 
+		// get trip types
 		const tripTypes = await Flight.aggregate([
 			{
 				$match: {
@@ -373,6 +379,7 @@ const flightByDuration = async (req, res) => {
 			},
 		]);
 
+		// return trip types
 		res.status(200).json(tripTypes);
 	} catch (error) {
 		res.status(500).json({ message: 'Error fetching trip types data' });
@@ -387,19 +394,15 @@ const flightByDuration = async (req, res) => {
  * Get's the popular destinations for a customer
  * @param {*} req
  * @param {*} res
- * @description
- * 1. Cache the top destinations for 1 hour
- * 2. Group the tickets by departure and return flights
- * 3. Extract complete arrival airport details including name, city and image
- * 4. Sort by popularity (count) in descending order
- * 5. Return in format expected by the frontend
+ * @returns {Object} popularDestinations
  */
 const topDestinations = async (req, res) => {
 	try {
-		// Cache key for top destinations
+
+		// cache key for top destinations
 		const cacheKey = 'top_destinations';
 
-		// Try to get data from cache first
+		// try to get data from cache first
 		const cachedData = await getCache(cacheKey);
 		if (cachedData) {
 			return res.status(200).json(cachedData);
@@ -407,6 +410,7 @@ const topDestinations = async (req, res) => {
 
 		console.log('Cache miss for top destinations, querying database');
 
+		// get popular destinations
 		const popularDestinations = await Ticket.aggregate([
 			{
 				$facet: {
@@ -465,9 +469,10 @@ const topDestinations = async (req, res) => {
 			},
 		]);
 
-		// Store the results in Redis cache for 2 minutes (120 seconds)
+		// store the results in redis cache for 2 minutes (120 seconds)
 		await setCache(cacheKey, popularDestinations, 120);
 
+		// return popular destinations
 		res.status(200).json(popularDestinations);
 	} catch (error) {
 		res.status(500).json({ message: error.message });

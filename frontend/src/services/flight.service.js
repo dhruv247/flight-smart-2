@@ -17,4 +17,16 @@ export const flightService = {
 			throw error;
 		}
 	},
+
+
+	createFlight: async (flightData) => {
+		try {
+			const response = await axios.post(`${API_URL}/create-flight`, flightData, {
+				withCredentials: true,
+			});
+			return response;
+		} catch (error) {
+			throw error;
+		}
+	},
 };

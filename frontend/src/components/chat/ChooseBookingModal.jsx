@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Button } from 'react-bootstrap';
 import { useChat } from '../../context/ChatContext';
 import axios from 'axios';
+import Modal from '../common/Modal';
 
 const ChooseBookingModal = ({ isOpen, onClose }) => {
-  const [bookings, setBookings] = useState([]);
-  const [airlines, setAirlines] = useState([]);
+	const [bookings, setBookings] = useState([]);
+	const [bookingsIds, setBookingsIds] = useState([]);
+	const [selectedBookingId, setSelectedBookingId] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState('');
 	const { startNewConversation } = useChat();
@@ -14,27 +15,32 @@ const ChooseBookingModal = ({ isOpen, onClose }) => {
 		const fetchBookings = async () => {
 			try {
 				const allCustomerBookings = await axios.get(
-					'http://localhost:8000/api/bookings/search-bookings-for-customer',
+					'http://localhost:8000/api/bookings/get-all-bookings-for-customer',
 					{
 						withCredentials: true,
 					}
-        );
+				);
 
 				const conversations = await axios.get(
 					'http://localhost:8000/api/conversations/get-conversations-for-customer',
 					{
 						withCredentials: true,
 					}
-        );
+				);
 
-        const allCustomerBookingsIds = allCustomerBookings.data.bookings.map((booking) => booking._id);
-        
-        const bookings = conversations.data.conversations.filter((conversation) =>
-					allCustomerBookingsIds.includes(conversation.bookingId)
+				const bookings = allCustomerBookings.data.bookings.filter(
+					(b) =>
+						!conversations.data.conversations.some(
+							(conversation) => conversation.bookingId === b._id
+						)
 				);
 
 				setBookings(bookings);
-				setAirlines(conversations.data.conversations);
+
+				const bookingIds = bookings.map((booking) => booking._id);
+
+				setBookingsIds(bookingIds);
+
 				setLoading(false);
 			} catch (error) {
 				setError('Failed to load bookings');
@@ -47,11 +53,17 @@ const ChooseBookingModal = ({ isOpen, onClose }) => {
 		}
 	}, [isOpen]);
 
-	const handleStartConversation = async (booking) => {
+	// console.log(bookingsIds);
+
+	const handleStartConversation = async (e) => {
+		e.preventDefault();
+
+		const selectedBooking = bookings.find((b) => b._id === selectedBookingId);
+
 		try {
 			const conversation = await startNewConversation(
-				booking.tickets[0].departureFlight.airline._id,
-				booking._id
+				selectedBooking.tickets[0].departureFlight.airline._id,
+				selectedBooking._id
 			);
 			if (conversation) {
 				onClose();
@@ -61,49 +73,40 @@ const ChooseBookingModal = ({ isOpen, onClose }) => {
 		}
 	};
 
+	const modalContent = loading ? (
+		<div className="text-center p-3">
+			<div className="spinner-border text-primary" role="status">
+				<span className="visually-hidden">Loading...</span>
+			</div>
+		</div>
+	) : error ? (
+		<div className="alert alert-danger">{error}</div>
+	) : bookingsIds.length === 0 ? (
+		<div className="text-center text-muted p-3">No bookings available</div>
+	) : (
+		<form onSubmit={handleStartConversation} className="text-center">
+			<select
+				className="form-select"
+				name=""
+				id=""
+				onChange={(e) => setSelectedBookingId(e.target.value)}
+			>
+				<option value="">Select a booking</option>
+				{bookingsIds.map((bookingId) => (
+					<option key={bookingId} value={bookingId}>
+						{bookingId}
+					</option>
+				))}
+			</select>
+			<button className="btn btn-primary mt-3" type="submit">
+				Start Conversation
+			</button>
+		</form>
+	);
+
 	return (
-		<Modal show={isOpen} onHide={onClose} centered>
-			<Modal.Header closeButton>
-				<Modal.Title>Choose a Booking</Modal.Title>
-			</Modal.Header>
-			<Modal.Body>
-				{loading ? (
-					<div className="text-center p-3">
-						<div className="spinner-border text-primary" role="status">
-							<span className="visually-hidden">Loading...</span>
-						</div>
-					</div>
-				) : error ? (
-					<div className="alert alert-danger">{error}</div>
-				) : bookings.length === 0 ? (
-					<div className="text-center text-muted p-3">
-						No bookings available
-					</div>
-				) : (
-					<ListGroup>
-						{bookings.map((booking) => (
-							<ListGroup.Item
-								key={booking._id}
-								className="d-flex justify-content-between align-items-center"
-							>
-								<div>
-									<div className="fw-bold">
-										{booking.tickets[0].departureFlight.airline.name}
-									</div>
-									<small className="text-muted">Booking #{booking._id}</small>
-								</div>
-								<Button
-									variant="primary"
-									size="sm"
-									onClick={() => handleStartConversation(booking)}
-								>
-									Start Chat
-								</Button>
-							</ListGroup.Item>
-						))}
-					</ListGroup>
-				)}
-			</Modal.Body>
+		<Modal isOpen={isOpen} onClose={onClose} title="Choose a Booking">
+			{modalContent}
 		</Modal>
 	);
 };

@@ -8,9 +8,9 @@ import { sendToEmailQueue } from '../utils/sqsUtils.js';
 import { sendBookingCancellationEmail } from '../utils/emailUtils.js';
 
 /**
- * Calculate age from date of birth
+ * Utility function to calculate age from date of birth
  * @param {*} dateOfBirth
- * @returns
+ * @returns {Number} age
  */
 const calculateAge = (dateOfBirth) => {
 	const today = new Date();
@@ -18,6 +18,7 @@ const calculateAge = (dateOfBirth) => {
 	let age = today.getFullYear() - birthDate.getFullYear();
 	const monthDiff = today.getMonth() - birthDate.getMonth();
 
+	// if month difference is less than 0 or month difference is 0 and today's date is less than birth date, decrement age
 	if (
 		monthDiff < 0 ||
 		(monthDiff === 0 && today.getDate() < birthDate.getDate())
@@ -35,6 +36,7 @@ const calculateAge = (dateOfBirth) => {
  */
 const createBooking = async (req, res) => {
 	try {
+
 		// destructure req body
 		const { tickets } = req.body;
 
@@ -120,10 +122,7 @@ const createBooking = async (req, res) => {
  * Cancels a booking
  * @param {*} req
  * @param {*} res
- * @returns
- * 1. changes the booking status (confirmed to false)
- * 2. changes the occupied seats to unoccupied
- * 3. reduces the booked seat count of the departure and return flight for economy and business class
+ * @returns {Object} message
  */
 const cancelBooking = async (req, res) => {
 	try {
@@ -181,14 +180,18 @@ const cancelBooking = async (req, res) => {
 			}
 		}
 
+		// get departure flight
 		const departureFlight = await Flight.findById(
 			tickets[0].departureFlight._id
 		);
+
+		// get return flight
 		let returnFlight;
 		if (tickets[0].roundTrip && tickets[0].returnFlight) {
 			returnFlight = await Flight.findById(tickets[0].returnFlight._id);
 		}
 
+		// update departure flight booked count
 		if (departureFlight) {
 			if (tickets[0].seatType === 'economy') {
 				departureFlight.economyBookedCount -= tickets.length;
@@ -523,9 +526,28 @@ const searchBookingsForAirlines = async (req, res) => {
 	}
 };
 
+const getAllBookingsForCustomer = async (req, res) => {
+	const user = req.user._id;
+
+	try {
+
+		const bookings = await Booking.find({
+			'userDetails._id': new mongoose.Types.ObjectId(user),
+		});
+
+		return res.status(200).json({
+			message: 'Bookings retrieved successfully',
+			bookings,
+		});
+	} catch (error) {
+		return res.status(500).json({ message: error.message });
+	}
+};
+
 export {
 	createBooking,
 	cancelBooking,
 	searchBookingsForCustomer,
 	searchBookingsForAirlines,
+	getAllBookingsForCustomer
 };

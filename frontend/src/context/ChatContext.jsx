@@ -28,15 +28,12 @@ export const ChatProvider = ({ children }) => {
 
 		const fetchConversations = async () => {
 			try {
-				console.log('Fetching conversations for user:', user);
 				const data =
 					user.userType === 'airline'
 						? await messageService.getAirlineConversations()
 						: await messageService.getConversations();
-				console.log('Fetched conversations:', data);
 				setConversations(data);
 			} catch (error) {
-				console.error('Error fetching conversations:', error);
 				setLastError('Failed to load conversations');
 			}
 		};
@@ -197,7 +194,7 @@ export const ChatProvider = ({ children }) => {
 			}
 		},
 		[user, sendMessage]
-	);
+	);	
 
 	const startNewConversation = async (airlineId, bookingId) => {
 		try {

@@ -8,7 +8,6 @@ let redisClient = null;
 
 /**
  * Initialize the Redis client and connect to the Redis server
- * @returns {Promise<void>} - A promise that resolves when the connection is successful
  */
 const connectRedis = async () => {
 	try {
@@ -38,7 +37,6 @@ const connectRedis = async () => {
 /**
  * Get data from Redis cache
  * @param {string} key - The cache key
- * @returns {Promise<any>} - The cached data or null if not found
  */
 const getCache = async (key) => {
 	if (!redisClient) return null;
@@ -57,7 +55,6 @@ const getCache = async (key) => {
  * @param {string} key - The cache key
  * @param {any} data - The data to cache
  * @param {number} ttl - Time to live in seconds (default: 2 minutes)
- * @returns {Promise<boolean>} - True if successful, false otherwise
  */
 const setCache = async (key, data, ttl = 120) => {
 	if (!redisClient) return false;

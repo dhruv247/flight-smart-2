@@ -18,7 +18,7 @@ const ViewFlights = () => {
 		arrivalAirportName: '',
 		departureDate: '',
 		page: 0,
-		size: 10,
+		size: 5,
 	});
 
 	useEffect(() => {
@@ -167,12 +167,6 @@ const ViewFlights = () => {
 					</div>
 					<div className="d-flex justify-content-center align-items-center">
 						<p className="fw-bold">Vacant Seats</p>
-					</div>
-				</div>
-				<div className="col-12 d-flex justify-content-center align-items-center mt-2">
-					<div className="border rounded p-2 d-flex justify-content-center align-items-center gap-4">
-						<p className="fw-bold">B: Business</p>
-						<p className="fw-bold">E: Economy</p>
 					</div>
 				</div>
 			</div>

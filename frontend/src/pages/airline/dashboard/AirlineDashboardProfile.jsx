@@ -19,17 +19,12 @@ const AirlineDashboardProfile = () => {
 			<div className="row">
 				<div className="col-1 col-md-4"></div>
 				<div className="border rounded col-10 col-md-4 py-4">
-					<button
-						className="rounded-circle bg-light border p-2"
-						onClick={() => setIsProfileModalOpen(true)}
-					>
 						<img
 							src={user.profilePicture}
 							alt="Profile Picture"
 							className="rounded-circle"
 							style={{ width: '225px', height: '225px' }}
 						/>
-					</button>
 
 					<p className="my-3">
 						<span className="fw-bold">Airline Name:</span> {user.username}

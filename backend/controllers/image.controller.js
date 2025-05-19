@@ -1,8 +1,8 @@
-
 /**
  * Upload an image
  * @param {*} req
  * @param {*} res
+ * @returns {Object} message
  */
 const uploadImage = (req, res) => {
 	try {

@@ -4,11 +4,12 @@ import { Airport } from '../models/airport.model.js';
  * Adds a new airport to the database
  * @param {*} req
  * @param {*} res
- * @returns
+ * @returns {Object} airport
  */
 const addAirport = async (req, res) => {
 	
 	try {
+
 		// destructure req body
 		const { airportName, airportCode, city, state, country, image } = req.body;
 
@@ -28,7 +29,7 @@ const addAirport = async (req, res) => {
 		// return success message
 		return res.status(201).json({
 			message: 'Airport created successfully',
-			data: airport,
+			airport,
 		});
 	} catch (error) {
 		if (error.code === 11000) {

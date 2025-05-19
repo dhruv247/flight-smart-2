@@ -14,6 +14,7 @@ import AirlineDashboardPage from '../pages/airline/dashboard/AirlineDashboardPag
 import DepartureFlights from '../pages/customer/flightSearch/DepartureFlights';
 import ReturnFlights from '../pages/customer/flightSearch/ReturnFlights';
 import BookingDetails from '../pages/customer/flightSearch/BookingDetails';
+import NotFound from '../pages/common/NotFound';
 
 const AppRoutes = () => {
 	return (
@@ -106,6 +107,10 @@ const AppRoutes = () => {
 					</ProtectedAirlineRoute>
 				}
 			/>
+
+			{/* any other route */}
+			<Route path="*" element={<NotFound />} />
+
 		</Routes>
 	);
 };

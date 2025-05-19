@@ -5,7 +5,6 @@ import {
 	logout,
 	getMe,
 	updatePassword,
-	updateProfilePicture,
 	verifyAirline,
 	deleteAirline,
 	getAllAirlines,
@@ -20,7 +19,6 @@ router.post('/login', login);
 router.post('/logout', verifyUser, logout);
 router.get('/me', verifyUser, getMe);
 router.patch('/update-password', verifyUser, updatePassword);
-router.patch('/update-profile-picture', verifyUser, updateProfilePicture);
 
 // Admin Routes (For verifying and blocking airlines)
 router.post('/verify-airline', verifyAdmin, verifyAirline);

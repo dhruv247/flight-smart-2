@@ -37,7 +37,7 @@ const FlightCard = ({ flight }) => {
 				</p>
 			</div>
 			<div className="col-12 col-md-3 d-flex justify-content-around align-items-center">
-				<div className="col-6">
+				<div className="col-6 ">
 					<p>B: ₹{flight.businessBasePrice}</p>
 					<p>E: ₹{flight.economyBasePrice}</p>
 				</div>

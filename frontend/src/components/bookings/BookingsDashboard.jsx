@@ -17,7 +17,7 @@ const BookingsDashboard = ({ type }) => {
 		seatType: '',
 		status: null,
 		page: 0,
-		size: 10,
+		size: 5,
 	});
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
@@ -169,7 +169,7 @@ const BookingsDashboard = ({ type }) => {
 					</div>
 				</form>
 			</div>
-			<div className="row border border-subtle rounded m-0 mb-1 py-2 align-items-center bg-white fw-bold">
+			<div className="row border border-subtle rounded m-0 mb-1 py-2 align-items-center bg-light fw-bold">
 				<div className="col-12 col-md-3 d-flex justify-content-center align-items-center">
 					<p className="mb-0">Booking ID</p>
 				</div>

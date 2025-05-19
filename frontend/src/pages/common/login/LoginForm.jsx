@@ -1,14 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { showSuccessToast, showErrorToast } from '../../../utils/toast';
 
 const LoginForm = () => {
 	const navigate = useNavigate();
+	const [isFormValid, setIsFormValid] = useState(false);
 	const [formData, setFormData] = useState({
 		email: '',
 		password: '',
 	});
+
+	useEffect(() => {
+		const isEmailValid = formData.email.trim() !== '';
+		const isPasswordValid = formData.password.trim() !== '';
+		setIsFormValid(isEmailValid && isPasswordValid);
+	}, [formData.email, formData.password]);
 
 	const handleChange = (e) => {
 		setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -87,7 +94,11 @@ const LoginForm = () => {
 				<div className="row mb-3">
 					<div className="col-1 col-md-4"></div>
 					<div className="col-10 col-md-4">
-						<button type="submit" className="form-control btn btn-primary">
+						<button
+							type="submit"
+							className="form-control btn btn-primary"
+							disabled={!isFormValid}
+						>
 							Login
 						</button>
 					</div>
