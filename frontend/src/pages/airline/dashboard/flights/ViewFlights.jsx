@@ -5,6 +5,7 @@ import FlightCard from './FlightCard';
 import { useAirports } from '../../../../hooks/useAirports';
 import axios from 'axios';
 import DatePicker from 'react-datepicker';
+import Select from 'react-select';
 
 const ViewFlights = () => {
 	const [flightsList, setFlightsList] = useState([]);
@@ -14,12 +15,19 @@ const ViewFlights = () => {
 	const [totalPages, setTotalPages] = useState(0);
 	const [searchParams, setSearchParams] = useState({
 		flightNo: '',
-		departureAirportName: '',
-		arrivalAirportName: '',
+		flightFrom: null,
+		flightTo: null,
 		departureDate: '',
 		page: 0,
 		size: 5,
 	});
+
+	// Transform cities data for react-select
+	const cityOptions =
+		airports?.map((airport) => ({
+			value: airport.city,
+			label: airport.city,
+		})) || [];
 
 	useEffect(() => {
 		const fetchFlights = async () => {
@@ -28,8 +36,18 @@ const ViewFlights = () => {
 
 				// add search params to query params
 				Object.entries(searchParams).forEach(([key, value]) => {
-					if (value !== '' && value !== false && value !== null) {
-						queryParams.append(key, value);
+					if (
+						value !== '' &&
+						value !== false &&
+						value !== null &&
+						!(key === 'flightFrom' && value === null) &&
+						!(key === 'flightTo' && value === null)
+					) {
+						if (key === 'flightFrom' || key === 'flightTo') {
+							queryParams.append(key, value.value);
+						} else {
+							queryParams.append(key, value);
+						}
 					}
 				});
 
@@ -55,6 +73,14 @@ const ViewFlights = () => {
 		setSearchParams({ ...searchParams, [name]: value, page: 0 });
 	};
 
+	const handleSelectChange = (selectedOption, { name }) => {
+		setSearchParams((prev) => ({
+			...prev,
+			[name]: selectedOption,
+			page: 0,
+		}));
+	};
+
 	const handlePageChange = (newPage) => {
 		setSearchParams({ ...searchParams, page: newPage });
 	};
@@ -77,11 +103,12 @@ const ViewFlights = () => {
 
 	return (
 		<div>
-			<div className="text-center border rounded p-2 mb-5">
-				<h3 className="my-3">Search Flights</h3>
-				<form action="" className="">
+			<div className="text-center mt-5 mb-5">
+				<h1 className="my-3">Search Flights</h1>
+				<form action="" className="border rounded p-2">
 					<div className="row">
 						<div className="col-md-3 col-12">
+							<p className="text-start fw-bold">Flight No</p>
 							<input
 								className="form-control"
 								type="text"
@@ -91,35 +118,76 @@ const ViewFlights = () => {
 							/>
 						</div>
 						<div className="col-md-3 col-12">
-							<input
+							{/* <input
 								className="form-control"
 								type="search"
-								name="departureAirportName"
-								placeholder="Departure Airport Name"
+								name="flightFrom"
+								placeholder="Flight From"
 								list="airportList"
 								onChange={handleChange}
+							/> */}
+							<p className="text-start fw-bold">Flight From</p>
+							<Select
+								name="flightFrom"
+								value={searchParams.flightFrom}
+								onChange={(option) =>
+									handleSelectChange(option, { name: 'flightFrom' })
+								}
+								options={cityOptions}
+								placeholder="Flight From"
+								isSearchable
+								isClearable
+								className="flex-grow-1"
+								// styles={{
+								// 	control: (base) => ({
+								// 		...base,
+								// 		minHeight: '39px',
+								// 		height: '39px',
+								// 	}),
+								// }}
 							/>
 						</div>
 						<div className="col-md-3 col-12">
-							<input
+							{/* <input
 								className="form-control"
 								type="search"
-								name="arrivalAirportName"
-								placeholder="Arrival Airport Name"
+								name="flightTo"
+								placeholder="Flight To"
 								list="airportList"
 								onChange={handleChange}
+							/> */}
+							<p className="text-start fw-bold">Flight To</p>
+							<Select
+								name="flightTo"
+								value={searchParams.flightTo}
+								onChange={(option) =>
+									handleSelectChange(option, { name: 'flightTo' })
+								}
+								options={cityOptions}
+								placeholder="Flight To"
+								isSearchable
+								isClearable
+								className="flex-grow-1"
+								// styles={{
+								// 	control: (base) => ({
+								// 		...base,
+								// 		minHeight: '39px',
+								// 		height: '39px',
+								// 	}),
+								// }}
 							/>
 						</div>
-						<datalist id="airportList">
-							{!airportsLoading &&
-								airports.map((airport, index) => (
-									<option key={index} value={airport.name}>
-										{airport.name} ({airport.code}) - {airport.city}
+						{/* <datalist id="airportList">
+							{!citiesLoading &&
+								cities.map((city, index) => (
+									<option key={index} value={city.city}>
+										{city.city}
 									</option>
 								))}
-						</datalist>
+						</datalist> */}
 
 						<div className="col-md-3 col-12">
+							<p className="text-start fw-bold">Departure Date</p>
 							<div className="form-control p-0">
 								<DatePicker
 									selected={searchParams.departureDate}

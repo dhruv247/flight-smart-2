@@ -15,9 +15,7 @@ import { getCache, setCache } from '../utils/redisUtils.js';
  * @returns {Object} topFlights
  */
 const topDepartureFlightsByNumberOfTickets = async (req, res) => {
-	
 	try {
-		
 		// get number of flights to return
 		const num = parseInt(req.query.num) || 5;
 
@@ -68,7 +66,6 @@ const topDepartureFlightsByNumberOfTickets = async (req, res) => {
  */
 const topAirlinesByNumberOfFlights = async (req, res) => {
 	try {
-
 		// get number of airlines to return
 		const num = parseInt(req.query.num) || 5;
 
@@ -113,7 +110,6 @@ const topAirlinesByNumberOfFlights = async (req, res) => {
  */
 const topCitiesByNumberOfFlights = async (req, res) => {
 	try {
-
 		// get number of cities to return
 		const num = parseInt(req.query.num) || 5;
 
@@ -155,7 +151,6 @@ const topCitiesByNumberOfFlights = async (req, res) => {
  */
 const topPlanesByNumberOfFlights = async (req, res) => {
 	try {
-
 		// get number of planes to return
 		const num = parseInt(req.query.num) || 5;
 
@@ -204,7 +199,6 @@ const topPlanesByNumberOfFlights = async (req, res) => {
  */
 const profitableEconomyFlights = async (req, res) => {
 	try {
-
 		// get airline id
 		const airlineId = req.user._id;
 
@@ -251,7 +245,6 @@ const profitableEconomyFlights = async (req, res) => {
  */
 const profitableBusinessFlights = async (req, res) => {
 	try {
-
 		// get airline id
 		const airlineId = req.user._id;
 
@@ -298,7 +291,6 @@ const profitableBusinessFlights = async (req, res) => {
  */
 const topDatesByNumberOfFlights = async (req, res) => {
 	try {
-
 		// get airline id
 		const airlineId = req.user._id;
 
@@ -314,7 +306,12 @@ const topDatesByNumberOfFlights = async (req, res) => {
 			},
 			{
 				$group: {
-					_id: '$departureDate',
+					_id: {
+						$dateToString: {
+							format: '%Y-%m-%d',
+							date: '$departureDateTime',
+						},
+					},
 					flightCount: { $sum: 1 },
 				},
 			},
@@ -344,7 +341,6 @@ const topDatesByNumberOfFlights = async (req, res) => {
  */
 const flightByDuration = async (req, res) => {
 	try {
-
 		// get airline id
 		const airlineId = req.user._id;
 
@@ -398,7 +394,6 @@ const flightByDuration = async (req, res) => {
  */
 const topDestinations = async (req, res) => {
 	try {
-
 		// cache key for top destinations
 		const cacheKey = 'top_destinations';
 

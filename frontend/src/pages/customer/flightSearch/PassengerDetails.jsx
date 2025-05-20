@@ -25,6 +25,9 @@ const PassengerDetails = () => {
 
 	// Today's date for DatePicker max date
 	const today = new Date();
+	const yesterday = new Date(today);
+	yesterday.setDate(yesterday.getDate() - 1);
+	const minDate = new Date(1900, 0, 1); // January 1, 1900
 
 	/**
 	 * Format date to YYYY-MM-DD string format
@@ -345,6 +348,7 @@ const PassengerDetails = () => {
 	const canSubmitForm = passengerDetails.every((passenger) => {
 		const hasRequiredFields =
 			passenger.nameOfFlyer &&
+			passenger.nameOfFlyer.trim() !== '' &&
 			passenger.departureFlightSeatNumber &&
 			passenger.dateOfBirth;
 		const hasReturnSeat = !isRoundTrip || passenger.returnFlightSeatNumber;
@@ -390,7 +394,10 @@ const PassengerDetails = () => {
 					}}
 				>
 					<i className="bi bi-person-lines-fill me-2 fs-4"></i>
-					<h4 className="mb-0">Passenger Details</h4>
+					<div className="d-flex flex-column gap-1">
+						<h4 className="mb-0">Passenger Details</h4>
+						<h6>Atleast 1 adult (18+) must be present</h6>
+					</div>
 				</div>
 				<div className="card-body p-4">
 					<form
@@ -410,6 +417,7 @@ const PassengerDetails = () => {
 									<div className="col-12 col-md-6">
 										<label className="form-label fw-semibold">Full Name</label>
 										<input
+											placeholder="Enter full name"
 											type="text"
 											className="form-control"
 											value={passenger.nameOfFlyer}
@@ -437,7 +445,11 @@ const PassengerDetails = () => {
 												showMonthDropdown
 												showYearDropdown
 												dropdownMode="select"
-												maxDate={today}
+												maxDate={yesterday}
+												minDate={minDate}
+												excludeDateIntervals={[
+													{ start: today, end: new Date(2100, 0, 1) },
+												]}
 												required
 												yearDropdownItemNumber={100}
 												scrollableYearDropdown

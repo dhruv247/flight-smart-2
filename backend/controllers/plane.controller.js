@@ -8,9 +8,12 @@ import { Plane } from '../models/plane.model.js';
  */
 const addPlane = async (req, res) => {
 	try {
-
 		// destructure req body
 		const { planeName, economyCapacity, businessCapacity } = req.body;
+
+		// Convert capacities to numbers
+		const economyCap = Number(economyCapacity);
+		const businessCap = Number(businessCapacity);
 
 		// validate required fields
 		if (!planeName || !economyCapacity || !businessCapacity) {
@@ -28,45 +31,46 @@ const addPlane = async (req, res) => {
 		}
 
 		// validate business class capacity
-		if (businessCapacity < 4 || businessCapacity > 20) {
+		if (businessCap < 4 || businessCap > 20) {
 			return res.status(400).json({
 				message: 'Business class capacity must be between 4 and 20',
 			});
 		}
 
 		// validate business class capacity is even
-		if (businessCapacity % 2 !== 0) {
+		if (businessCap % 2 !== 0) {
 			return res.status(400).json({
 				message: 'Business class capacity must be divisible by 2',
 			});
 		}
 
 		// validate economy class capacity
-		if (economyCapacity < 12 || economyCapacity > 60) {
+		if (economyCap < 12 || economyCap > 60) {
 			return res.status(400).json({
 				message: 'Economy class capacity must be between 12 and 60',
 			});
 		}
 
 		// validate economy class capacity is divisible by 6
-		if (economyCapacity % 6 !== 0) {
+		if (economyCap % 6 !== 0) {
 			return res.status(400).json({
 				message: 'Economy class capacity must be divisible by 6',
 			});
 		}
 
 		// check if economy capacity is greater than business capacity
-		if (economyCapacity <= businessCapacity) {
+		if (economyCap <= businessCap) {
 			return res.status(400).json({
-				message: 'Economy class capacity must be greater than business class capacity',
+				message:
+					'Economy class capacity must be greater than business class capacity',
 			});
 		}
 
 		// create new plane
 		const plane = new Plane({
 			planeName,
-			economyCapacity,
-			businessCapacity,
+			economyCapacity: economyCap,
+			businessCapacity: businessCap,
 		});
 
 		// save plane
@@ -89,7 +93,6 @@ const addPlane = async (req, res) => {
  */
 const getAllPlanes = async (req, res) => {
 	try {
-
 		// get all planes
 		const planes = await Plane.find({});
 

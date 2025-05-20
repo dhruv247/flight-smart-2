@@ -78,11 +78,9 @@ const createTicket = async (req, res) => {
 			airline: departureFlight.airline,
 			plane: departureFlight.plane.planeName,
 			departureAirport: departureFlight.departureAirport,
-			departureDate: departureFlight.departureDate,
-			departureTime: departureFlight.departureTime,
+			departureDateTime: departureFlight.departureDateTime,
 			arrivalAirport: departureFlight.arrivalAirport,
-			arrivalDate: departureFlight.arrivalDate,
-			arrivalTime: departureFlight.arrivalTime,
+			arrivalDateTime: departureFlight.arrivalDateTime,
 			duration: departureFlight.duration,
 		};
 
@@ -138,11 +136,9 @@ const createTicket = async (req, res) => {
 				airline: returnFlight.airline,
 				plane: returnFlight.plane.planeName,
 				departureAirport: returnFlight.departureAirport,
-				departureDate: returnFlight.departureDate,
-				departureTime: returnFlight.departureTime,
+				departureDateTime: returnFlight.departureDateTime,
 				arrivalAirport: returnFlight.arrivalAirport,
-				arrivalDate: returnFlight.arrivalDate,
-				arrivalTime: returnFlight.arrivalTime,
+				arrivalDateTime: returnFlight.arrivalDateTime,
 				duration: returnFlight.duration,
 			};
 

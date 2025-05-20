@@ -34,12 +34,12 @@ const CustomerDashboardProfile = () => {
 					<p className="my-3">
 						<span className="fw-bold">Email:</span> {user.email}
 					</p>
-					<button
+					{/* <button
 						className="btn btn-primary"
 						onClick={() => setIsPasswordModalOpen(true)}
 					>
 						Change Password
-					</button>
+					</button> */}
 				</div>
 				<div className="col-1 col-md-4"></div>
 			</div>

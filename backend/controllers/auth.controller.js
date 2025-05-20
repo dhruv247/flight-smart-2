@@ -10,8 +10,8 @@ dotenv.config();
 
 /**
  * Utility function create a jwt
- * @param {*} airline
- * @returns
+ * @param {*} user
+ * @returns {String} token
  */
 const createToken = (user) => {
 	return jwt.sign(
@@ -299,6 +299,12 @@ const updatePassword = async (req, res) => {
 			return res
 				.status(400)
 				.json({ message: 'Old and new passwords are required' });
+		}
+
+		if (oldPassword === newPassword) {
+			return res
+				.status(400)
+				.json({ message: 'New password cannot be the same as the old password' });
 		}
 
 		// find the user by id

@@ -90,21 +90,21 @@ const sendAirlineDeletionEmail = async (airline) => {
 const sendBookingConfirmationEmail = async (booking) => {
 	const subject = 'Flight Smart - Booking Confirmation';
 
-	const formatHHMM = (time) => {
-		if (typeof time !== 'number' && typeof time !== 'string') return '';
-		const str = time.toString().padStart(4, '0');
-		const hours = str.slice(0, 2);
-		const minutes = str.slice(2, 4);
-		return `${hours}:${minutes}`;
-	};
-
-	const formatDate = (date) => {
-		return new Date(date).toLocaleDateString('en-US', {
-			weekday: 'short',
-			year: 'numeric',
-			month: 'short',
-			day: 'numeric',
-		});
+	const formatDateTime = (dateTime) => {
+		const date = new Date(dateTime);
+		return {
+			time: date.toLocaleTimeString('en-US', {
+				hour: '2-digit',
+				minute: '2-digit',
+				hour12: false,
+			}),
+			date: date.toLocaleDateString('en-US', {
+				weekday: 'short',
+				year: 'numeric',
+				month: 'short',
+				day: 'numeric',
+			}),
+		};
 	};
 
 	const html = `
@@ -127,7 +127,7 @@ const sendBookingConfirmationEmail = async (booking) => {
 								${booking.tickets[0].departureFlight.departureAirport.city}
 							</div>
 							<div style="color: #6c757d; margin-top: 10px;">
-								${formatHHMM(booking.tickets[0].departureFlight.departureTime)}
+								${formatDateTime(booking.tickets[0].departureFlight.departureDateTime).time}
 							</div>
 						</div>
 						<div style="text-align: center; padding: 0 15px;">
@@ -140,12 +140,12 @@ const sendBookingConfirmationEmail = async (booking) => {
 								${booking.tickets[0].departureFlight.arrivalAirport.city}
 							</div>
 							<div style="color: #6c757d; margin-top: 10px;">
-								${formatHHMM(booking.tickets[0].departureFlight.arrivalTime)}
+								${formatDateTime(booking.tickets[0].departureFlight.arrivalDateTime).time}
 							</div>
 						</div>
 					</div>
 					<div style="text-align: center; color: #6c757d;">
-						${formatDate(booking.tickets[0].departureFlight.departureDate)}
+						${formatDateTime(booking.tickets[0].departureFlight.departureDateTime).date}
 					</div>
 					<div style="margin-top: 10px; text-align: center;">
 						<strong>Airline:</strong> ${
@@ -175,7 +175,7 @@ const sendBookingConfirmationEmail = async (booking) => {
 								${booking.tickets[0].returnFlight.departureAirport.city}
 							</div>
 							<div style="color: #6c757d; margin-top: 10px;">
-								${formatHHMM(booking.tickets[0].returnFlight.departureTime)}
+								${formatDateTime(booking.tickets[0].returnFlight.departureDateTime).time}
 							</div>
 						</div>
 						<div style="text-align: center; padding: 0 15px;">
@@ -188,12 +188,12 @@ const sendBookingConfirmationEmail = async (booking) => {
 								${booking.tickets[0].returnFlight.arrivalAirport.city}
 							</div>
 							<div style="color: #6c757d; margin-top: 10px;">
-								${formatHHMM(booking.tickets[0].returnFlight.arrivalTime)}
+								${formatDateTime(booking.tickets[0].returnFlight.arrivalDateTime).time}
 							</div>
 						</div>
 					</div>
 					<div style="text-align: center; color: #6c757d;">
-						${formatDate(booking.tickets[0].returnFlight.departureDate)}
+						${formatDateTime(booking.tickets[0].returnFlight.departureDateTime).date}
 					</div>
 					<div style="margin-top: 10px; text-align: center;">
 						<strong>Airline:</strong> ${
@@ -280,10 +280,14 @@ const sendBookingConfirmationEmail = async (booking) => {
 		To: ${booking.tickets[0].departureFlight.arrivalAirport.airportName} (${
 		booking.tickets[0].departureFlight.arrivalAirport.airportCode
 	})
-		Date: ${formatDate(booking.tickets[0].departureFlight.departureDate)}
-		Time: ${formatHHMM(
-			booking.tickets[0].departureFlight.departureTime
-		)} - ${formatHHMM(booking.tickets[0].departureFlight.arrivalTime)}
+		Date: ${
+			formatDateTime(booking.tickets[0].departureFlight.departureDateTime).date
+		}
+		Time: ${
+			formatDateTime(booking.tickets[0].departureFlight.departureDateTime).time
+		} - ${
+		formatDateTime(booking.tickets[0].departureFlight.arrivalDateTime).time
+	}
 		Airline: ${booking.tickets[0].departureFlight.airline.airlineName}
 		Flight: ${booking.tickets[0].departureFlight.flightNo}\n
 		${
@@ -296,10 +300,10 @@ const sendBookingConfirmationEmail = async (booking) => {
 		To: ${booking.tickets[0].returnFlight.arrivalAirport.airportName} (${
 						booking.tickets[0].returnFlight.arrivalAirport.airportCode
 				  })
-		Date: ${formatDate(booking.tickets[0].returnFlight.departureDate)}
-		Time: ${formatHHMM(
-			booking.tickets[0].returnFlight.departureTime
-		)} - ${formatHHMM(booking.tickets[0].returnFlight.arrivalTime)}
+		Date: ${formatDateTime(booking.tickets[0].returnFlight.departureDateTime).date}
+		Time: ${
+			formatDateTime(booking.tickets[0].returnFlight.departureDateTime).time
+		} - ${formatDateTime(booking.tickets[0].returnFlight.arrivalDateTime).time}
 		Airline: ${booking.tickets[0].returnFlight.airline.airlineName}
 		Flight: ${booking.tickets[0].returnFlight.flightNo}\n
 		`
@@ -346,7 +350,9 @@ const sendBookingCancellationEmail = async (booking) => {
 		</div>
 	`;
 
-	const text = `Hello ${booking.userDetails.username},\n\nYour booking ${booking._id.toString()} has been cancelled successfully.\n\nBest regards,\nFlight Smart Team`;
+	const text = `Hello ${
+		booking.userDetails.username
+	},\n\nYour booking ${booking._id.toString()} has been cancelled successfully.\n\nBest regards,\nFlight Smart Team`;
 
 	return sendEmail(booking.userDetails.email, subject, text, html);
 };

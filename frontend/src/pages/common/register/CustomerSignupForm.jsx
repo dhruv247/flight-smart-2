@@ -159,7 +159,10 @@ const CustomerSignupForm = () => {
 			<div className="row mb-3">
 				<div className="col-1 col-md-4"></div>
 				<div className="col-10 col-md-4">
-					<div className="d-flex align-items-center">
+					<div className="d-flex flex-column border p-2 rounded">
+						<label htmlFor="profilePicture" className="form-label text-muted text-start">
+							Profile Picture
+						</label>
 						<input
 							type="file"
 							className="form-control"

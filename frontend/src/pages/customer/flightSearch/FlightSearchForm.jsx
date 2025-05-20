@@ -4,7 +4,9 @@ import useGetUserDetails from '../../../hooks/useGetUserDetails';
 import { useNavigate } from 'react-router-dom';
 import { Modal } from 'bootstrap';
 import DatePicker from 'react-datepicker';
+import Select from 'react-select';
 import 'react-datepicker/dist/react-datepicker.css';
+import { showErrorToast } from '../../../utils/toast';
 
 const FlightSearchForm = ({
 	onSubmit,
@@ -18,8 +20,12 @@ const FlightSearchForm = ({
 	const [tripType, setTripType] = useState(initialTripType);
 	const { user, isLoading: userLoading } = useGetUserDetails();
 	const [formData, setFormData] = useState({
-		flightFrom: initialValues.flightFrom || '',
-		flightTo: initialValues.flightTo || '',
+		flightFrom: initialValues.flightFrom
+			? { value: initialValues.flightFrom, label: initialValues.flightFrom }
+			: null,
+		flightTo: initialValues.flightTo
+			? { value: initialValues.flightTo, label: initialValues.flightTo }
+			: null,
 		departureDate: initialValues.departureDate
 			? new Date(initialValues.departureDate)
 			: null,
@@ -59,6 +65,13 @@ const FlightSearchForm = ({
 		}));
 	};
 
+	const handleSelectChange = (selectedOption, { name }) => {
+		setFormData((prev) => ({
+			...prev,
+			[name]: selectedOption,
+		}));
+	};
+
 	const swapLocations = () => {
 		setFormData((prev) => ({
 			...prev,
@@ -70,6 +83,10 @@ const FlightSearchForm = ({
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		try {
+			if (formData.flightFrom?.value === formData.flightTo?.value) {
+				throw new Error('Departure and arrival cities cannot be the same');
+			}
+
 			// Check if user is logged in
 			if (!user && !userLoading) {
 				throw new Error('User not logged in');
@@ -77,6 +94,8 @@ const FlightSearchForm = ({
 			// Format dates to YYYY-MM-DD format before submitting
 			const formattedData = {
 				...formData,
+				flightFrom: formData.flightFrom?.value || '',
+				flightTo: formData.flightTo?.value || '',
 				departureDate: formData.departureDate
 					? formatDate(formData.departureDate)
 					: '',
@@ -85,11 +104,15 @@ const FlightSearchForm = ({
 			// If logged in, proceed with search
 			onSubmit({ ...formattedData, tripType });
 		} catch (error) {
-			// If not logged in, show modal
-			const loginModal = new Modal(
-				document.getElementById('loginRequiredModal')
-			);
-			loginModal.show();
+			if (error.message === 'Departure and arrival cities cannot be the same') {
+				showErrorToast(error.message);
+			} else {
+				// If not logged in, show modal
+				const loginModal = new Modal(
+					document.getElementById('loginRequiredModal')
+				);
+				loginModal.show();
+			}
 		}
 	};
 
@@ -112,6 +135,7 @@ const FlightSearchForm = ({
 
 	// Get today's date for min date
 	const today = new Date();
+	const maxDate = new Date(2026, 11, 31); // December 31, 2026
 
 	// Helper function to add days to a date
 	const addDays = (date, days) => {
@@ -121,9 +145,20 @@ const FlightSearchForm = ({
 		return result;
 	};
 
+	// Transform cities data for react-select
+	const cityOptions =
+		airports?.map((airport) => ({
+			value: airport.city,
+			label: airport.city,
+		})) || [];
+
 	return (
 		<div className="container text-center mt-5">
-			<form id="flightSearchForm" onSubmit={handleSubmit}>
+			<form
+				id="flightSearchForm"
+				onSubmit={handleSubmit}
+				className="border rounded-3 p-4"
+			>
 				{/* Trip Type Radio Buttons */}
 				<div id="tripType" className="mb-3 d-flex justify-content-center gap-4">
 					<div className="form-check">
@@ -171,137 +206,149 @@ const FlightSearchForm = ({
 				{/* Flight Details Input Fields */}
 				<div className="row">
 					{/* To / From Input Fields */}
-					<div className="col-md-5 col-12 d-flex gap-2 flex-grow-1">
-						<input
-							type="search"
-							name="flightFrom"
-							id="flightFrom"
-							className="form-control p-4"
-							placeholder="From (Airport)"
-							list="airportList"
-							autoComplete="off"
-							required
-							value={formData.flightFrom}
-							onChange={handleChange}
-							readOnly={isReadOnly}
-						/>
-
-						<button
-							type="button"
-							className="btn btn-outline-secondary btn-sm align-self-center"
-							onClick={swapLocations}
-							disabled={isReadOnly}
-							style={{ lineHeight: 1, height: '25px' }}
-						>
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								width="12"
-								height="12"
-								fill="currentColor"
-								className="bi bi-arrow-left-right"
-								viewBox="0 0 16 16"
-							>
-								<path
-									fillRule="evenodd"
-									d="M1 11.5a.5.5 0 0 0 .5.5h11.793l-3.147 3.146a.5.5 0 0 0 .708.708l4-4a.5.5 0 0 0 0-.708l-4-4a.5.5 0 0 0-.708.708L13.293 11H1.5a.5.5 0 0 0-.5.5zm14-7a.5.5 0 0 1-.5.5H2.707l3.147 3.146a.5.5 0 1 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 4H14.5a.5.5 0 0 1 .5.5z"
+					<div className="col-md-5">
+						<div className="d-flex gap-2">
+							<div className="flex-grow-1 border rounded-3 p-2">
+								<p className="text-start mb-1">From</p>
+								<Select
+									name="flightFrom"
+									value={formData.flightFrom}
+									onChange={(option) =>
+										handleSelectChange(option, { name: 'flightFrom' })
+									}
+									options={cityOptions}
+									placeholder="Enter Departure City"
+									isSearchable
+									isClearable
+									isDisabled={isReadOnly}
+									required
+									className="flex-grow-1 text-start"
 								/>
-							</svg>
-						</button>
+							</div>
 
-						<input
-							type="search"
-							name="flightTo"
-							id="flightTo"
-							className="form-control p-4"
-							placeholder="To (Airport)"
-							list="airportList"
-							autoComplete="off"
-							required
-							value={formData.flightTo}
-							onChange={handleChange}
-							readOnly={isReadOnly}
-						/>
+							<button
+								type="button"
+								className="btn btn-outline-secondary btn-sm align-self-center"
+								onClick={swapLocations}
+								disabled={isReadOnly}
+								style={{ lineHeight: 1, height: '25px' }}
+							>
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									width="12"
+									height="12"
+									fill="currentColor"
+									className="bi bi-arrow-left-right"
+									viewBox="0 0 16 16"
+								>
+									<path
+										fillRule="evenodd"
+										d="M1 11.5a.5.5 0 0 0 .5.5h11.793l-3.147 3.146a.5.5 0 0 0 .708.708l4-4a.5.5 0 0 0 0-.708l-4-4a.5.5 0 0 0-.708.708L13.293 11H1.5a.5.5 0 0 0-.5.5zm14-7a.5.5 0 0 1-.5.5H2.707l3.147 3.146a.5.5 0 1 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 4H14.5a.5.5 0 0 1 .5.5z"
+									/>
+								</svg>
+							</button>
 
-						<datalist id="airportList">
-							{!airportsLoading &&
-								airports.map((airport, index) => (
-									<option key={index} value={airport.name}>
-										{airport.name} ({airport.code}) - {airport.city}
-									</option>
-								))}
-						</datalist>
+							<div className="flex-grow-1 border rounded-3 p-2">
+								<p className="text-start mb-1">To</p>
+								<Select
+									name="flightTo"
+									value={formData.flightTo}
+									onChange={(option) =>
+										handleSelectChange(option, { name: 'flightTo' })
+									}
+									options={cityOptions}
+									placeholder="Enter Arrival City"
+									isSearchable
+									isClearable
+									isDisabled={isReadOnly}
+									required
+									className="flex-grow-1 text-start"
+								/>
+							</div>
+						</div>
 					</div>
 
 					{/* Date Selection */}
-					<div className="col-md-3 col-12 d-flex gap-2">
-						<div className="form-control p-0">
-							<DatePicker
-								selected={formData.departureDate}
-								onChange={(date) => handleDateChange(date, 'departureDate')}
-								className="form-control p-4 border-0"
-								placeholderText="Departure Date"
-								dateFormat="yyyy-MM-dd"
-								minDate={today}
-								required
-								disabled={isReadOnly}
-							/>
-						</div>
-						{showReturnDate && tripType === 'roundTrip' && (
-							<div className="form-control p-0">
+					<div className="col-md-3 col-12">
+						<div className="d-flex gap-2">
+							<div className="flex-grow-1 border rounded-3 p-2">
+								<p className="text-start mb-1">Departure Date</p>
 								<DatePicker
-									selected={formData.returnDate}
-									onChange={(date) => handleDateChange(date, 'returnDate')}
-									className="form-control p-4 border-0"
-									placeholderText="Return Date"
+									selected={formData.departureDate}
+									onChange={(date) => handleDateChange(date, 'departureDate')}
+									className="form-control"
+									placeholderText="Enter  Departure Date"
 									dateFormat="yyyy-MM-dd"
-									minDate={
-										formData.departureDate
-											? addDays(formData.departureDate, 1)
-											: addDays(today, 1)
-									}
+									minDate={today}
+									maxDate={maxDate}
 									required
 									disabled={isReadOnly}
 								/>
 							</div>
-						)}
+							{showReturnDate && tripType === 'roundTrip' && (
+								<div className="flex-grow-1 border rounded-3 p-2">
+									<p className="text-start mb-1">Return Date</p>
+									<DatePicker
+										selected={formData.returnDate}
+										onChange={(date) => handleDateChange(date, 'returnDate')}
+										className="form-control"
+										placeholderText="Enter Return Date"
+										dateFormat="yyyy-MM-dd"
+										minDate={
+											formData.departureDate
+												? addDays(formData.departureDate, 1)
+												: addDays(today, 1)
+										}
+										maxDate={maxDate}
+										required
+										disabled={isReadOnly}
+									/>
+								</div>
+							)}
+						</div>
 					</div>
 
 					{/* No of Travellers / Travel Class */}
-					<div className="col-md-3 col-12 d-flex gap-2">
-						<select
-							className="form-select"
-							id="passengers"
-							name="passengers"
-							required
-							value={formData.passengers}
-							onChange={handleChange}
-							disabled={isReadOnly}
-						>
-							<option value="1">1</option>
-							<option value="2">2</option>
-							<option value="3">3</option>
-							<option value="4">4</option>
-							<option value="5">5</option>
-						</select>
-						<select
-							className="form-select"
-							id="travelClass"
-							name="travelClass"
-							required
-							value={formData.travelClass}
-							onChange={handleChange}
-							disabled={isReadOnly}
-						>
-							{/* <option value="" disabled>
-								Class
-							</option> */}
-							<option value="1">Economy</option>
-							<option value="2">Business</option>
-						</select>
+					<div className="col-md-3 col-12">
+						<div className="d-flex gap-2">
+							<div className="flex-grow-1 border rounded-3 p-2">
+								<p className="text-start mb-1">Passengers</p>
+								<select
+									className="form-select"
+									id="passengers"
+									name="passengers"
+									required
+									value={formData.passengers}
+									onChange={handleChange}
+									disabled={isReadOnly}
+								>
+									<option value="1">1</option>
+									<option value="2">2</option>
+									<option value="3">3</option>
+									<option value="4">4</option>
+									<option value="5">5</option>
+								</select>
+							</div>
+							<div className="flex-grow-1 border rounded-3 p-2">
+								<p className="text-start mb-1">Class</p>
+								<select
+									className="form-select"
+									id="travelClass"
+									name="travelClass"
+									required
+									value={formData.travelClass}
+									onChange={handleChange}
+									disabled={isReadOnly}
+								>
+									<option value="1">Economy</option>
+									<option value="2">Business</option>
+								</select>
+							</div>
+						</div>
 					</div>
 
-					<div className="col-md-1 col-12 d-flex justify-content-center">
-						{/* Submit Button */}
+					{/* Submit Button */}
+					<div className="col-md-1 col-12 d-flex justify-content-center align-items-center">
 						<button
 							type="submit"
 							className="btn btn-primary p-4"

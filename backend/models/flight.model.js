@@ -52,11 +52,9 @@ const flightSchema = new mongoose.Schema(
 		airline: airlineDetailsSchema,
 		plane: planeDetailsSchema,
 		departureAirport: airportDetailsSchema,
-		departureDate: { type: String, required: true }, // Stored as YYYY-MM-DD
-		departureTime: { type: Number, required: true }, // Store as number in 24h format 1850 (Formatted in the frontend as 18:50)
+		departureDateTime: { type: Date, required: true }, // Store as date
 		arrivalAirport: airportDetailsSchema,
-		arrivalDate: { type: String, required: true }, // Stored as YYYY-MM-DD
-		arrivalTime: { type: Number, required: true }, // Store as number in 24h format 1850 (Formatted in the frontend as 18:50)
+		arrivalDateTime: { type: Date, required: true }, // Store as date
 		duration: { type: Number, required: true }, // Stored in minutes and converted to (2:09) using a utility function on the frontend
 		economyBookedCount: { type: Number, required: true, default: 0 },
 		businessBookedCount: { type: Number, required: true, default: 0 },

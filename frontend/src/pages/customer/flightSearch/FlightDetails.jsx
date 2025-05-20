@@ -10,9 +10,31 @@ const FlightDetails = () => {
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState(null);
 
-	const departureFlightId =
-		currentBooking?.departureFlightId;
+	const departureFlightId = currentBooking?.departureFlightId;
 	const returnFlightId = currentBooking?.returnFlightId;
+
+	/**
+	 * Format date and time from a Date object
+	 * @param {Date} dateTime - The date and time to format
+	 * @returns {Object} - Object containing formatted date and time
+	 */
+	const formatDateTime = (dateTime) => {
+		const date = new Date(dateTime);
+		return {
+			time: date.toLocaleTimeString('en-US', {
+				hour: '2-digit',
+				minute: '2-digit',
+				hour12: false,
+			}),
+			date: date
+				.toLocaleDateString('en-US', {
+					year: 'numeric',
+					month: '2-digit',
+					day: '2-digit',
+				})
+				.replace(/(\d+)\/(\d+)\/(\d+)/, '$3-$1-$2'),
+		};
+	};
 
 	useEffect(() => {
 		const fetchFlight = async (flightId, setter) => {
@@ -33,14 +55,6 @@ const FlightDetails = () => {
 		if (returnFlightId) fetchFlight(returnFlightId, setReturnFlight);
 	}, [departureFlightId, returnFlightId]);
 
-	const formatTime = (time) => {
-		const hours = Math.floor(time / 100);
-		const minutes = time % 100;
-		return `${hours.toString().padStart(2, '0')}:${minutes
-			.toString()
-			.padStart(2, '0')}`;
-	};
-
 	if (!departureFlightId) {
 		return (
 			<div className="alert alert-info" role="alert">
@@ -52,6 +66,12 @@ const FlightDetails = () => {
 
 	if (loading) return <Loading />;
 	if (error) return <div className="alert alert-danger">{error}</div>;
+
+	// const departureFlightDepartureDateTime = formatDateTime(departureFlight.departureDateTime);
+	// const departureFlightArrivalDateTime = formatDateTime(departureFlight.arrivalDateTime);
+
+	// const returnFlightDepartureDateTime = formatDateTime(returnFlight.departureDateTime);
+	// const returnFlightArrivalDateTime = formatDateTime(returnFlight.arrivalDateTime);
 
 	return (
 		<div className="card shadow-lg border-0" style={{ background: '#f8f9fa' }}>
@@ -79,10 +99,10 @@ const FlightDetails = () => {
 									{departureFlight.departureAirport?.city}
 								</div>
 								<div className="text-secondary">
-									{formatTime(departureFlight.departureTime)}
+									{formatDateTime(departureFlight.departureDateTime).time}
 								</div>
 								<div className="text-muted small">
-									{departureFlight.departureDate}
+									{formatDateTime(departureFlight.departureDateTime).date}
 								</div>
 							</div>
 							<div className="col-12 col-md-2 text-center">
@@ -93,10 +113,10 @@ const FlightDetails = () => {
 									{departureFlight.arrivalAirport?.city}
 								</div>
 								<div className="text-secondary">
-									{formatTime(departureFlight.arrivalTime)}
+									{formatDateTime(departureFlight.arrivalDateTime).time}
 								</div>
 								<div className="text-muted small">
-									{departureFlight.arrivalDate}
+									{formatDateTime(departureFlight.arrivalDateTime).date}
 								</div>
 							</div>
 						</div>
@@ -115,8 +135,7 @@ const FlightDetails = () => {
 							</div>
 							<div className="col-12 col-md-6">
 								<span className="fw-semibold">Duration:</span>{' '}
-								{Math.floor(departureFlight.duration / 60)}:
-								{(departureFlight.duration % 60).toString().padStart(2, '0')} hr
+								{Math.floor(departureFlight.duration / 60)} hr : {(departureFlight.duration % 60).toString().padStart(2, '0')} min
 							</div>
 							<div className="col-12 col-md-6">
 								<span className="fw-semibold">Class:</span>{' '}
@@ -140,10 +159,10 @@ const FlightDetails = () => {
 									{returnFlight.departureAirport?.city}
 								</div>
 								<div className="text-secondary">
-									{formatTime(returnFlight.departureTime)}
+									{formatDateTime(returnFlight.departureDateTime).time}
 								</div>
 								<div className="text-muted small">
-									{returnFlight.departureDate}
+									{formatDateTime(returnFlight.departureDateTime).date}
 								</div>
 							</div>
 							<div className="col-12 col-md-2 text-center">
@@ -154,10 +173,10 @@ const FlightDetails = () => {
 									{returnFlight.arrivalAirport?.city}
 								</div>
 								<div className="text-secondary">
-									{formatTime(returnFlight.arrivalTime)}
+									{formatDateTime(returnFlight.arrivalDateTime).time}
 								</div>
 								<div className="text-muted small">
-									{returnFlight.arrivalDate}
+									{formatDateTime(returnFlight.arrivalDateTime).date}
 								</div>
 							</div>
 						</div>
@@ -176,14 +195,12 @@ const FlightDetails = () => {
 							</div>
 							<div className="col-12 col-md-6">
 								<span className="fw-semibold">Duration:</span>{' '}
-								{Math.floor(returnFlight.duration / 60)}:
-								{(returnFlight.duration % 60).toString().padStart(2, '0')} hr
+								{Math.floor(returnFlight.duration / 60)} hr : {(returnFlight.duration % 60).toString().padStart(2, '0')} min
 							</div>
 							<div className="col-12 col-md-6">
 								<span className="fw-semibold">Class:</span>{' '}
 								{returnFlight.seatType === 'business' ? 'Business' : 'Economy'}
 							</div>
-							
 						</div>
 					</div>
 				)}

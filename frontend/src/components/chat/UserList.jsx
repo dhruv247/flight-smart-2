@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useChat } from '../../context/ChatContext';
 import ChooseBookingModal from './ChooseBookingModal';
+import Loading from '../Loading';
 
 const UserList = ({ onSelectConversation, selectedConversation, userType }) => {
 	const [loading, setLoading] = useState(true);
@@ -54,18 +55,7 @@ const UserList = ({ onSelectConversation, selectedConversation, userType }) => {
 				</div>
 
 				<div className="overflow-auto flex-grow-1">
-					{loading && (
-						<div className="text-center p-3">
-							<div
-								className="spinner-border spinner-border-sm text-primary"
-								role="status"
-							>
-								<span className="visually-hidden">
-									Loading conversations...
-								</span>
-							</div>
-						</div>
-					)}
+					{loading && <Loading />}
 
 					{error && (
 						<div className="alert alert-danger m-2 py-2" role="alert">

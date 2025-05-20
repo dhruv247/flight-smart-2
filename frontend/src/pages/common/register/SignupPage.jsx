@@ -48,7 +48,9 @@ const SignupPage = () => {
 			{userType === 'airline' && <AirlineSignupForm />}
 
 			<p>Already a user? Login <Link to='/login'>here</Link>.</p>
-
+			<Link to="/">
+				<button className="btn btn-outline-primary mt-3 mb-5">Back to home</button>
+			</Link>
 		</div>
 	);
 };

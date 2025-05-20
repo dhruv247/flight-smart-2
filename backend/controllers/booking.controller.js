@@ -36,7 +36,6 @@ const calculateAge = (dateOfBirth) => {
  */
 const createBooking = async (req, res) => {
 	try {
-
 		// destructure req body
 		const { tickets } = req.body;
 
@@ -242,8 +241,8 @@ const searchBookingsForCustomer = async (req, res) => {
 	try {
 		const {
 			bookingId,
-			departureAirportName,
-			arrivalAirportName,
+			flightFrom,
+			flightTo,
 			roundTrip,
 			seatType,
 			status,
@@ -275,17 +274,15 @@ const searchBookingsForCustomer = async (req, res) => {
 			}
 		}
 
-		if (departureAirportName) {
-			matchCriteria['tickets.departureFlight.departureAirport.airportName'] = {
-				// $regex: new RegExp(departureAirportName, 'i'),
-				$eq: departureAirportName,
+		if (flightFrom) {
+			matchCriteria['tickets.departureFlight.departureAirport.city'] = {
+				$eq: flightFrom,
 			};
 		}
 
-		if (arrivalAirportName) {
-			matchCriteria['tickets.departureFlight.arrivalAirport.airportName'] = {
-				// $regex: new RegExp(arrivalAirportName, 'i'),
-				$eq: arrivalAirportName,
+		if (flightTo) {
+			matchCriteria['tickets.departureFlight.arrivalAirport.city'] = {
+				$eq: flightTo,
 			};
 		}
 
@@ -298,12 +295,12 @@ const searchBookingsForCustomer = async (req, res) => {
 		}
 
 		if (status === 'future') {
-			matchCriteria['tickets.departureFlight.departureDate'] = {
-				$gt: new Date().toISOString().split('T')[0],
+			matchCriteria['tickets.departureFlight.departureDateTime'] = {
+				$gt: new Date(),
 			};
 		} else if (status === 'past') {
-			matchCriteria['tickets.departureFlight.departureDate'] = {
-				$lt: new Date().toISOString().split('T')[0],
+			matchCriteria['tickets.departureFlight.departureDateTime'] = {
+				$lt: new Date(),
 			};
 		}
 
@@ -374,15 +371,13 @@ const searchBookingsForCustomer = async (req, res) => {
  * @returns
  */
 const searchBookingsForAirlines = async (req, res) => {
-
 	const user = req.user._id;
 
 	try {
-		
 		const {
 			bookingId,
-			departureAirportName,
-			arrivalAirportName,
+			flightFrom,
+			flightTo,
 			roundTrip,
 			seatType,
 			status,
@@ -414,17 +409,15 @@ const searchBookingsForAirlines = async (req, res) => {
 			}
 		}
 
-		if (departureAirportName) {
-			matchCriteria['tickets.departureFlight.departureAirport.airportName'] = {
-				// $regex: new RegExp(departureAirportName, 'i'),
-				$eq: departureAirportName,
+		if (flightFrom) {
+			matchCriteria['tickets.departureFlight.departureAirport.city'] = {
+				$eq: flightFrom,
 			};
 		}
 
-		if (arrivalAirportName) {
-			matchCriteria['tickets.departureFlight.arrivalAirport.airportName'] = {
-				// $regex: new RegExp(arrivalAirportName, 'i'),
-				$eq: arrivalAirportName,
+		if (flightTo) {
+			matchCriteria['tickets.departureFlight.arrivalAirport.city'] = {
+				$eq: flightTo,
 			};
 		}
 
@@ -437,12 +430,12 @@ const searchBookingsForAirlines = async (req, res) => {
 		}
 
 		if (status === 'future') {
-			matchCriteria['tickets.departureFlight.departureDate'] = {
-				$gt: new Date().toISOString().split('T')[0],
+			matchCriteria['tickets.departureFlight.departureDateTime'] = {
+				$gt: new Date(),
 			};
 		} else if (status === 'past') {
-			matchCriteria['tickets.departureFlight.departureDate'] = {
-				$lt: new Date().toISOString().split('T')[0],
+			matchCriteria['tickets.departureFlight.departureDateTime'] = {
+				$lt: new Date(),
 			};
 		}
 
@@ -521,16 +514,20 @@ const searchBookingsForAirlines = async (req, res) => {
 			total,
 		});
 	} catch (error) {
-		// console.error('Search error:', error);
 		return res.status(500).json({ message: error.message });
 	}
 };
 
+/**
+ * Get all bookings for customer
+ * @param {*} req
+ * @param {*} res
+ * @returns {Object} bookings
+ */
 const getAllBookingsForCustomer = async (req, res) => {
 	const user = req.user._id;
 
 	try {
-
 		const bookings = await Booking.find({
 			'userDetails._id': new mongoose.Types.ObjectId(user),
 		});
@@ -549,5 +546,5 @@ export {
 	cancelBooking,
 	searchBookingsForCustomer,
 	searchBookingsForAirlines,
-	getAllBookingsForCustomer
+	getAllBookingsForCustomer,
 };

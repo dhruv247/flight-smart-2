@@ -11,12 +11,44 @@ const AddAirport = () => {
 		image: '',
 	});
 
+	const [errors, setErrors] = useState({
+		airportName: '',
+		airportCode: '',
+	});
+
+	const validateAirportName = (name) => {
+		if (/\d/.test(name)) {
+			return 'Airport name cannot contain numbers';
+		}
+		return '';
+	};
+
+	const validateAirportCode = (code) => {
+		if (!/^[A-Za-z]{3}$/.test(code)) {
+			return 'Airport code must be exactly 3 letters';
+		}
+		return '';
+	};
+
 	const handleAirportChange = (e) => {
 		const { name, value } = e.target;
 		setAirportDetails((prevData) => ({
 			...prevData,
 			[name]: value,
 		}));
+
+		// Validate fields
+		if (name === 'airportName') {
+			setErrors((prev) => ({
+				...prev,
+				airportName: validateAirportName(value),
+			}));
+		} else if (name === 'airportCode') {
+			setErrors((prev) => ({
+				...prev,
+				airportCode: validateAirportCode(value),
+			}));
+		}
 	};
 
 	const handleAirportImageChange = (e) => {
@@ -32,6 +64,19 @@ const AddAirport = () => {
 
 	const handleAddAirport = async (event) => {
 		event.preventDefault();
+
+		// Validate all fields before submission
+		const nameError = validateAirportName(airportDetails.airportName);
+		const codeError = validateAirportCode(airportDetails.airportCode);
+
+		if (nameError || codeError) {
+			setErrors({
+				airportName: nameError,
+				airportCode: codeError,
+			});
+			showErrorToast('Please fix the validation errors before submitting');
+			return;
+		}
 
 		const formData = new FormData();
 		formData.append('image', airportDetails.image);
@@ -57,7 +102,7 @@ const AddAirport = () => {
 
 			const airport = {
 				airportName: airportDetails.airportName,
-				airportCode: airportDetails.airportCode,
+				airportCode: airportDetails.airportCode.toUpperCase(),
 				city: airportDetails.city,
 				image: airportImageUrl,
 			};
@@ -78,6 +123,10 @@ const AddAirport = () => {
 					city: '',
 					image: '',
 				});
+				setErrors({
+					airportName: '',
+					airportCode: '',
+				});
 				formRef.current.reset();
 			}
 		} catch (error) {
@@ -89,62 +138,91 @@ const AddAirport = () => {
 	return (
 		<div className="mt-5">
 			<form ref={formRef} action="" onSubmit={handleAddAirport}>
-				<div className="row">
-					<div className="col-md-4"></div>
-					<div className="col-md-4 col-12">
-						<div className="mb-4">
-							<div className="input-group">
-								<input
-									type="text"
-									name="airportName"
-									className="form-control"
-									placeholder="Enter Airport Name"
-									onChange={handleAirportChange}
-								/>
-							</div>
-						</div>
-						<div className="mb-4">
-							<div className="input-group">
-								<input
-									type="text"
-									name="airportCode"
-									className="form-control"
-									placeholder="Enter Airport Code"
-									onChange={handleAirportChange}
-								/>
-							</div>
-						</div>
-						<div className="mb-4">
-							<div className="input-group">
-								<input
-									type="text"
-									name="city"
-									className="form-control"
-									placeholder="Enter City"
-									onChange={handleAirportChange}
-								/>
-							</div>
-						</div>
-						<div className="mb-4">
-							<div className="input-group">
-								<input
-									type="file"
-									name="image"
-									className="form-control"
-									accept="image/*"
-									onChange={handleAirportImageChange}
-								/>
-							</div>
-						</div>
-						<div className="mb-4">
-							<div>
-								<button type="submit" className="btn btn-primary">
-									Add Airport
-								</button>
-							</div>
-						</div>
+				<div className="d-flex flex-column gap-4 justify-content-center mb-3">
+					<div>
+						<p className="text-start fw-bold">Airport Name</p>
+						<input
+							type="text"
+							name="airportName"
+							className={`form-control ${
+								errors.airportName ? 'is-invalid' : ''
+							}`}
+							placeholder="Enter Airport Name"
+							onChange={handleAirportChange}
+							value={airportDetails.airportName}
+							required
+						/>
+						{errors.airportName && (
+							<div className="invalid-feedback">{errors.airportName}</div>
+						)}
 					</div>
-					<div className="col-md-4"></div>
+
+					<div>
+						<p className="text-start fw-bold">Airport Code</p>
+						<input
+							type="text"
+							name="airportCode"
+							className={`form-control ${
+								errors.airportCode ? 'is-invalid' : ''
+							}`}
+							placeholder="Enter 3 Letter (XYZ) Airport Code"
+							onChange={handleAirportChange}
+							value={airportDetails.airportCode}
+							maxLength={3}
+							required
+						/>
+						{errors.airportCode && (
+							<div className="invalid-feedback">{errors.airportCode}</div>
+						)}
+					</div>
+
+					<div>
+						<p className="text-start fw-bold">City</p>
+						<select
+							className="form-select"
+							name="city"
+							onChange={handleAirportChange}
+							value={airportDetails.city}
+							required
+						>
+							<option value="">Select City</option>
+							<option value="Coimbatore">Coimbatore</option>
+							<option value="Lucknow">Lucknow</option>
+							<option value="Varanasi">Varanasi</option>
+							<option value="Jaipur">Jaipur</option>
+							<option value="Bhubaneswar">Bhubaneswar</option>
+							<option value="Guwahati">Guwahati</option>
+							<option value="Nagpur">Nagpur</option>
+							<option value="Patna">Patna</option>
+							<option value="Raipur">Raipur</option>
+							<option value="Bhopal">Bhopal</option>
+							<option value="Indore">Indore</option>
+							<option value="Chandigarh">Chandigarh</option>
+							<option value="Srinagar">Srinagar</option>
+						</select>
+					</div>
+
+					<div>
+						<p className="text-start fw-bold">City Image</p>
+						<input
+							type="file"
+							name="image"
+							className="form-control"
+							accept="image/*"
+							onChange={handleAirportImageChange}
+							required
+						/>
+					</div>
+
+					<div>
+						<button
+							type="submit"
+							className="btn btn-primary px-5 py-3"
+							disabled={errors.airportName || errors.airportCode}
+					>
+							Add Airport
+						</button>
+					</div>
 				</div>
 			</form>
 		</div>

@@ -3,12 +3,27 @@ import React from 'react';
 const TicketsModal = ({ isOpen, onClose, booking }) => {
 	if (!isOpen) return null;
 
-	const formatHHMM = (time) => {
-		if (typeof time !== 'number' && typeof time !== 'string') return '';
-		const str = time.toString().padStart(4, '0');
-		const hours = str.slice(0, 2);
-		const minutes = str.slice(2, 4);
-		return `${hours}:${minutes}`;
+	/**
+	 * Format date and time from a Date object
+	 * @param {Date} dateTime - The date and time to format
+	 * @returns {Object} - Object containing formatted date and time
+	 */
+	const formatDateTime = (dateTime) => {
+		const date = new Date(dateTime);
+		return {
+			time: date.toLocaleTimeString('en-US', {
+				hour: '2-digit',
+				minute: '2-digit',
+				hour12: false,
+			}),
+			date: date
+				.toLocaleDateString('en-US', {
+					year: 'numeric',
+					month: '2-digit',
+					day: '2-digit',
+				})
+				.replace(/(\d+)\/(\d+)\/(\d+)/, '$3-$1-$2'),
+		};
 	};
 
 	return (
@@ -77,15 +92,19 @@ const TicketsModal = ({ isOpen, onClose, booking }) => {
 															</div>
 															<div className="text-muted mt-3">
 																{
-																	booking?.tickets[0]?.departureFlight
-																		?.departureDate
+																	formatDateTime(
+																		booking?.tickets[0]?.departureFlight
+																			?.departureDateTime
+																	).date
 																}
 															</div>
 															<div className="text-muted">
-																{formatHHMM(
-																	booking?.tickets[0]?.departureFlight
-																		?.departureTime
-																)}
+																{
+																	formatDateTime(
+																		booking?.tickets[0]?.departureFlight
+																			?.departureDateTime
+																	).time
+																}
 															</div>
 														</div>
 														<div className="text-center px-3">
@@ -111,15 +130,19 @@ const TicketsModal = ({ isOpen, onClose, booking }) => {
 															</div>
 															<div className="text-muted mt-3">
 																{
-																	booking?.tickets[0]?.departureFlight
-																		?.departureDate
+																	formatDateTime(
+																		booking?.tickets[0]?.departureFlight
+																			?.arrivalDateTime
+																	).date
 																}
 															</div>
 															<div className="text-muted">
-																{formatHHMM(
-																	booking?.tickets[0]?.departureFlight
-																		?.arrivalTime
-																)}
+																{
+																	formatDateTime(
+																		booking?.tickets[0]?.departureFlight
+																			?.arrivalDateTime
+																	).time
+																}
 															</div>
 														</div>
 													</div>
@@ -146,15 +169,15 @@ const TicketsModal = ({ isOpen, onClose, booking }) => {
 															{Math.floor(
 																booking?.tickets[0]?.departureFlight?.duration /
 																	60
-															)}
-															:
+															)}{' '}
+															hr :{' '}
 															{(
 																booking?.tickets[0]?.departureFlight?.duration %
 																60
 															)
 																.toString()
 																.padStart(2, '0')}{' '}
-															hr
+															min
 														</div>
 													</div>
 												</div>
@@ -189,15 +212,19 @@ const TicketsModal = ({ isOpen, onClose, booking }) => {
 																</div>
 																<div className="text-muted mt-3">
 																	{
-																		booking?.tickets[0]?.returnFlight
-																			?.departureDate
+																		formatDateTime(
+																			booking?.tickets[0]?.returnFlight
+																				?.departureDateTime
+																		).date
 																	}
 																</div>
 																<div className="text-muted">
-																	{formatHHMM(
-																		booking?.tickets[0]?.returnFlight
-																			?.departureTime
-																	)}
+																	{
+																		formatDateTime(
+																			booking?.tickets[0]?.returnFlight
+																				?.departureDateTime
+																		).time
+																	}
 																</div>
 															</div>
 															<div className="text-center px-3">
@@ -223,15 +250,19 @@ const TicketsModal = ({ isOpen, onClose, booking }) => {
 																</div>
 																<div className="text-muted mt-3">
 																	{
-																		booking?.tickets[0]?.returnFlight
-																			?.departureDate
+																		formatDateTime(
+																			booking?.tickets[0]?.returnFlight
+																				?.arrivalDateTime
+																		).date
 																	}
 																</div>
 																<div className="text-muted">
-																	{formatHHMM(
-																		booking?.tickets[0]?.returnFlight
-																			?.arrivalTime
-																	)}
+																	{
+																		formatDateTime(
+																			booking?.tickets[0]?.returnFlight
+																				?.arrivalDateTime
+																		).time
+																	}
 																</div>
 															</div>
 														</div>
@@ -258,15 +289,15 @@ const TicketsModal = ({ isOpen, onClose, booking }) => {
 																{Math.floor(
 																	booking?.tickets[0]?.returnFlight?.duration /
 																		60
-																)}
-																:
+																)}{' '}
+																hr :{' '}
 																{(
 																	booking?.tickets[0]?.returnFlight?.duration %
 																	60
 																)
 																	.toString()
 																	.padStart(2, '0')}{' '}
-																hr
+																min
 															</div>
 														</div>
 													</div>

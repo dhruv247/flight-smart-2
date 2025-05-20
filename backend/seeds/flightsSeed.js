@@ -5,8 +5,8 @@ import { User } from '../models/user.model.js';
 import { createSeats } from '../utils/seatUtils.js';
 
 /**
- * Generates a random date between today and 2025-05-11
- * @returns {string} - Date in YYYY-MM-DD format
+ * Generates a random date between today and 2025-05-26
+ * @returns {Date} - Random date object
  */
 const generateRandomDate = () => {
 	const startDate = new Date(); // Current Day
@@ -16,19 +16,21 @@ const generateRandomDate = () => {
 		startDate.getTime() +
 			Math.random() * (endDate.getTime() - startDate.getTime())
 	);
-	return randomDate.toISOString().split('T')[0];
+	return randomDate;
 };
 
 /**
- * Generates a random time between 6 AM (600) and 10 PM (2200)
- * @returns {number} - Time in HHMM format
+ * Generates a random time between 6 AM and 10 PM
+ * @param {Date} date - The date to add time to
+ * @returns {Date} - Date with random time
  */
-const generateRandomTime = () => {
+const generateRandomTime = (date) => {
 	const startHour = 6;
 	const endHour = 22;
 	const hours = Math.floor(Math.random() * (endHour - startHour)) + startHour;
 	const minutes = Math.floor(Math.random() * 4) * 15; // Rounds to nearest 15 minutes
-	return hours * 100 + minutes;
+	date.setHours(hours, minutes, 0, 0);
+	return date;
 };
 
 /**
@@ -54,7 +56,7 @@ const seedFlights = async () => {
 		);
 
 		const flights = [];
-		const numberOfFlights = 500; // Generate 490 random flights
+		const numberOfFlights = 10; // Generate 500 random flights
 
 		for (let i = 0; i < numberOfFlights; i++) {
 			const plane = planes[Math.floor(Math.random() * planes.length)];
@@ -76,38 +78,14 @@ const seedFlights = async () => {
 			);
 
 			// Generate valid dates and times
-			const departureDate = generateRandomDate();
-			const departureTime = generateRandomTime();
+			const departureDateTime = generateRandomDate();
+			generateRandomTime(departureDateTime);
 
 			// Calculate arrival time ensuring duration is between 1 and 4 hours
 			const durationMinutes = Math.floor(Math.random() * 180) + 60; // Random duration between 1-4 hours
-
-			// Calculate arrival time properly
-			const departureHours = Math.floor(departureTime / 100);
-			const departureMins = departureTime % 100;
-
-			let arrivalHours = departureHours + Math.floor(durationMinutes / 60);
-			let arrivalMins = departureMins + (durationMinutes % 60);
-
-			// Handle minute overflow
-			if (arrivalMins >= 60) {
-				arrivalHours += Math.floor(arrivalMins / 60);
-				arrivalMins = arrivalMins % 60;
-			}
-
-			// Handle hour overflow
-			if (arrivalHours >= 24) {
-				arrivalHours = arrivalHours % 24;
-			}
-
-			const calculatedArrivalTime = arrivalHours * 100 + arrivalMins;
-
-			// If arrival time is next day, adjust the date
-			const arrivalDate = new Date(departureDate);
-			if (calculatedArrivalTime < departureTime) {
-				arrivalDate.setDate(arrivalDate.getDate() + 1);
-			}
-			const formattedArrivalDate = arrivalDate.toISOString().split('T')[0];
+			const arrivalDateTime = new Date(
+				departureDateTime.getTime() + durationMinutes * 60000
+			);
 
 			// Generate flight number and check for duplicates
 			let flightNo;
@@ -142,8 +120,7 @@ const seedFlights = async () => {
 					country: departureAirport.country,
 					image: departureAirport.image,
 				},
-				departureDate: departureDate,
-				departureTime: departureTime,
+				departureDateTime,
 				arrivalAirport: {
 					_id: arrivalAirport._id.toString(),
 					airportName: arrivalAirport.airportName,
@@ -153,8 +130,7 @@ const seedFlights = async () => {
 					country: arrivalAirport.country,
 					image: arrivalAirport.image,
 				},
-				arrivalDate: formattedArrivalDate,
-				arrivalTime: calculatedArrivalTime,
+				arrivalDateTime,
 				duration: durationMinutes,
 				economyBasePrice: economyBasePrice,
 				businessBasePrice: businessBasePrice,

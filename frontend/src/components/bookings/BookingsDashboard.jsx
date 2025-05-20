@@ -4,14 +4,15 @@ import axios from 'axios';
 import Loading from '../Loading';
 import { useAirports } from '../../hooks/useAirports';
 import Pagination from '../Pagination';
+import Select from 'react-select';
 
 const BookingsDashboard = ({ type }) => {
 	const [bookingsList, setBookingsList] = useState([]);
 	const { airports, isLoading: airportsLoading } = useAirports();
 	const [searchParams, setSearchParams] = useState({
 		bookingId: '',
-		departureAirportName: '',
-		arrivalAirportName: '',
+		flightFrom: null,
+		flightTo: null,
 		roundTrip: null,
 		confirmed: null,
 		seatType: '',
@@ -23,6 +24,13 @@ const BookingsDashboard = ({ type }) => {
 	const [error, setError] = useState(null);
 	const [totalPages, setTotalPages] = useState(0);
 
+	// Transform cities data for react-select
+	const cityOptions =
+		airports?.map((airport) => ({
+			value: airport.city,
+			label: airport.city,
+		})) || [];
+
 	useEffect(() => {
 		const getBookingsFromDB = async () => {
 			try {
@@ -30,8 +38,18 @@ const BookingsDashboard = ({ type }) => {
 
 				// add search params to query params
 				Object.entries(searchParams).forEach(([key, value]) => {
-					if (value !== '' && value !== false && value !== null) {
-						queryParams.append(key, value);
+					if (
+						value !== '' &&
+						value !== false &&
+						value !== null &&
+						!(key === 'flightFrom' && value === null) &&
+						!(key === 'flightTo' && value === null)
+					) {
+						if (key === 'flightFrom' || key === 'flightTo') {
+							queryParams.append(key, value.value);
+						} else {
+							queryParams.append(key, value);
+						}
 					}
 				});
 
@@ -58,8 +76,15 @@ const BookingsDashboard = ({ type }) => {
 
 	const handleChange = (e) => {
 		const { name, value } = e.target;
-		// Reset page to 0 when search parameters change
 		setSearchParams({ ...searchParams, [name]: value, page: 0 });
+	};
+
+	const handleSelectChange = (selectedOption, { name }) => {
+		setSearchParams((prev) => ({
+			...prev,
+			[name]: selectedOption,
+			page: 0,
+		}));
 	};
 
 	const handlePageChange = (newPage) => {
@@ -71,102 +96,137 @@ const BookingsDashboard = ({ type }) => {
 
 	return (
 		<div className="">
-			<div className="text-center border rounded p-2 mb-5">
-				<h3 className="my-3">Search Bookings</h3>
-				<form action="" className="">
+			<div className="text-center mb-5">
+				<h1 className="my-3">Search Bookings</h1>
+				<form action="" className="border rounded p-2">
 					<div className="row">
-						<div className="col-md-4 col-12">
+						<div className="col-md-3 col-12">
+							<p className="text-start fw-bold">Booking ID</p>
 							<input
 								className="form-control"
 								type="text"
 								name="bookingId"
-								placeholder="Booking ID"
+								placeholder="Enter Booking ID"
 								onChange={handleChange}
 							/>
 						</div>
-						<div className="col-md-4 col-12">
-							<input
-								className="form-control"
-								type="search"
-								name="departureAirportName"
-								placeholder="Departure Airport Name"
-								list="airportList"
-								onChange={handleChange}
+						<div className="col-md-3 col-12">
+							<p className="text-start fw-bold">Flight From</p>
+							<Select
+								name="flightFrom"
+								value={searchParams.flightFrom}
+								onChange={(option) =>
+									handleSelectChange(option, { name: 'flightFrom' })
+								}
+								options={cityOptions}
+								placeholder="Select Flight From"
+								isSearchable
+								isClearable
+								className="flex-grow-1 text-start"
+								// styles={{
+								// 	control: (base) => ({
+								// 		...base,
+								// 		minHeight: '39px',
+								// 		height: '39px',
+								// 	}),
+								// }}
 							/>
 						</div>
-						<div className="col-md-4 col-12">
-							<input
-								className="form-control"
-								type="search"
-								name="arrivalAirportName"
-								placeholder="Arrival Airport Name"
-								list="airportList"
-								onChange={handleChange}
+						<div className="col-md-3 col-12">
+							<p className="text-start fw-bold">Flight To</p>
+							<Select
+								name="flightTo"
+								value={searchParams.flightTo}
+								onChange={(option) =>
+									handleSelectChange(option, { name: 'flightTo' })
+								}
+								options={cityOptions}
+								placeholder="Select Flight To"
+								isSearchable
+								isClearable
+								className="flex-grow-1 text-start"
+								// styles={{
+								// 	control: (base) => ({
+								// 		...base,
+								// 		minHeight: '39px',
+								// 		height: '39px',
+								// 	}),
+								// }}
 							/>
 						</div>
-						<datalist id="airportList">
-							{!airportsLoading &&
-								airports.map((airport, index) => (
-									<option key={index} value={airport.name}>
-										{airport.name} ({airport.code}) - {airport.city}
-									</option>
-								))}
-						</datalist>
-					</div>
-					<div className="row mt-3">
-						<div className="col-md-3 col-6">
-							<select
-								name="roundTrip"
-								className="form-select"
-								onChange={handleChange}
-							>
-								<option value="" selected>
-									Trip Type
-								</option>
-								<option value="false">One Way</option>
-								<option value="true">Round</option>
-							</select>
-						</div>
-						<div className="col-md-3 col-6">
-							<select
-								name="seatType"
-								className="form-select"
-								onChange={handleChange}
-							>
-								<option value="" selected>
-									Seat Type
-								</option>
-								<option value="economy">Economy</option>
-								<option value="business">Business</option>
-							</select>
-						</div>
-						<div className="col-md-3 col-6">
+						<div className="col-md-3 col-12">
+							<p className="text-start fw-bold">Trip Date</p>
 							<select
 								name="status"
 								className="form-select"
 								onChange={handleChange}
 							>
 								<option value="" selected>
-									Trip Date
+									Select Trip Date
 								</option>
-								<option value="future">Future</option>
+								<option value="future">Upcoming</option>
+								<option value="past">Past</option>
+							</select>
+						</div>
+					</div>
+					{/* <div className="row mt-3">
+						<div className="col-md-3 col-6">
+							<p className="text-start fw-bold">Trip Type</p>
+							<select
+								name="roundTrip"
+								className="form-select"
+								onChange={handleChange}
+							>
+								<option value="" selected>
+									Select Trip Type
+								</option>
+								<option value="false">One Way</option>
+								<option value="true">Round</option>
+							</select>
+						</div>
+						<div className="col-md-3 col-6">
+							<p className="text-start fw-bold">Seat Type</p>
+							<select
+								name="seatType"
+								className="form-select"
+								onChange={handleChange}
+							>
+								<option value="" selected>
+									Select Seat Type
+								</option>
+								<option value="economy">Economy</option>
+								<option value="business">Business</option>
+							</select>
+						</div>
+						<div className="col-md-3 col-6">
+							<p className="text-start fw-bold">Trip Date</p>
+							<select
+								name="status"
+								className="form-select"
+								onChange={handleChange}
+							>
+								<option value="" selected>
+									Select Trip Date
+								</option>
+								<option value="future">Upcoming</option>
 								<option value="past">Past</option>
 							</select>
 						</div>
 						<div className="col-md-3 col-6">
+							<p className="text-start fw-bold">Booking Status</p>
 							<select
 								name="confirmed"
 								className="form-select"
 								onChange={handleChange}
 							>
 								<option value="" selected>
-									Booking Status
+									Select Booking Status
 								</option>
-								<option value="true">Active</option>
+								<option value="true">Confirmed</option>
 								<option value="false">Cancelled</option>
 							</select>
 						</div>
-					</div>
+					</div> */}
 				</form>
 			</div>
 			<div className="row border border-subtle rounded m-0 mb-1 py-2 align-items-center bg-light fw-bold">

@@ -19,16 +19,26 @@ const FlightCard = ({
 	if (!flight) return null;
 
 	/**
-	 * Ensure that time is in format 14:20
-	 * @param {*} time
-	 * @returns
+	 * Format date and time from a Date object
+	 * @param {Date} dateTime - The date and time to format
+	 * @returns {Object} - Object containing formatted date and time
 	 */
-	const formatTime = (time) => {
-		const hours = Math.floor(time / 100);
-		const minutes = time % 100;
-		return `${hours.toString().padStart(2, '0')}:${minutes
-			.toString()
-			.padStart(2, '0')}`;
+	const formatDateTime = (dateTime) => {
+		const date = new Date(dateTime);
+		return {
+			time: date.toLocaleTimeString('en-US', {
+				hour: '2-digit',
+				minute: '2-digit',
+				hour12: false,
+			}),
+			date: date
+				.toLocaleDateString('en-US', {
+					year: 'numeric',
+					month: '2-digit',
+					day: '2-digit',
+				})
+				.replace(/(\d+)\/(\d+)\/(\d+)/, '$3-$1-$2'),
+		};
 	};
 
 	/**
@@ -82,6 +92,9 @@ const FlightCard = ({
 		}
 	};
 
+	const departureDateTime = formatDateTime(flight.departureDateTime);
+	const arrivalDateTime = formatDateTime(flight.arrivalDateTime);
+
 	return (
 		<div className="row border border-subtle rounded m-0 mb-3 py-2 align-items-center bg-white">
 			<div className="col-12 col-md-1">
@@ -96,20 +109,19 @@ const FlightCard = ({
 			<div className="col-12 col-md-3 d-flex justify-content-evenly align-items-center">
 				<div className="align-items-center">
 					<p>{flight.departureAirport.city}</p>
-					<p>{formatTime(flight.departureTime)}</p>
-					<p>{flight.departureDate}</p>
+					<p>{departureDateTime.time}</p>
+					<p>{departureDateTime.date}</p>
 				</div>
 				<i className="bi bi-arrow-right"></i>
 				<div className="align-items-center">
 					<p>{flight.arrivalAirport.city}</p>
-					<p>{formatTime(flight.arrivalTime)}</p>
-					<p>{flight.arrivalDate}</p>
+					<p>{arrivalDateTime.time}</p>
+					<p>{arrivalDateTime.date}</p>
 				</div>
 			</div>
 			<div className="col-12 col-md-2">
 				<p>
-					{Math.floor(flight.duration / 60)}:
-					{(flight.duration % 60).toString().padStart(2, '0')} hr
+					{Math.floor(flight.duration / 60)} hr : {(flight.duration % 60).toString().padStart(2, '0')} min
 				</p>
 			</div>
 			<div className="col-12 col-md-2">

@@ -5,6 +5,9 @@ import useGetUserDetails from '../../../../hooks/useGetUserDetails';
 import Loading from '../../../../components/Loading';
 import { flightService } from '../../../../services/flight.service';
 import { planeService } from '../../../../services/plane.service';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import { setHours, setMinutes, addDays } from 'date-fns';
 
 const AddFlight = () => {
 	const { airports, isLoading: isLoadingAirports } = useAirports();
@@ -16,14 +19,51 @@ const AddFlight = () => {
 		flightNo: '',
 		planeName: '',
 		departureAirportName: '',
-		departureDate: '',
-		departureTime: '',
+		departureDateTime: '',
 		arrivalAirportName: '',
-		arrivalDate: '',
-		arrivalTime: '',
+		arrivalDateTime: '',
 		economyBasePrice: '',
 		businessBasePrice: '',
 	});
+
+	// New state for separate date and time
+	const [departureDate, setDepartureDate] = useState(null);
+	const [departureTime, setDepartureTime] = useState('');
+	const [arrivalDate, setArrivalDate] = useState(null);
+	const [arrivalTime, setArrivalTime] = useState('');
+
+	const airportOptions = airports?.map((airport) => ({
+		value: airport.airportName,
+		label: airport.airportName + ' (' + airport.code + ') - ' + airport.city,
+	}));
+
+	const now = new Date();
+	const tomorrow = addDays(now, 1);
+
+	// Combine date and time into Date object
+	const combineDateAndTime = (date, time) => {
+		if (!date || !time) return '';
+		const [hours, minutes] = time.split(':');
+		const combined = setHours(setMinutes(new Date(date), minutes), hours);
+		return combined;
+	};
+
+	// Update flightDetails when date or time changes
+	useEffect(() => {
+		const depDateTime = combineDateAndTime(departureDate, departureTime);
+		setFlightDetails((prev) => ({
+			...prev,
+			departureDateTime: depDateTime,
+		}));
+	}, [departureDate, departureTime]);
+
+	useEffect(() => {
+		const arrDateTime = combineDateAndTime(arrivalDate, arrivalTime);
+		setFlightDetails((prev) => ({
+			...prev,
+			arrivalDateTime: arrDateTime,
+		}));
+	}, [arrivalDate, arrivalTime]);
 
 	useEffect(() => {
 		const fetchPlanes = async () => {
@@ -57,11 +97,6 @@ const AddFlight = () => {
 		}));
 	};
 
-	const formatTimeForSubmission = (timeStr) => {
-		// Convert from HH:MM to HHMM format
-		return timeStr.replace(':', '');
-	};
-
 	const handleAddFlight = async (event) => {
 		event.preventDefault();
 		setIsSubmitting(true);
@@ -73,20 +108,9 @@ const AddFlight = () => {
 				.toUpperCase();
 			const fullFlightNo = `${airlinePrefix}${flightDetails.flightNo}`;
 
-			// Format times for submission
-			const formattedDepartureTime = formatTimeForSubmission(
-				flightDetails.departureTime
-			);
-
-			const formattedArrivalTime = formatTimeForSubmission(
-				flightDetails.arrivalTime
-			);
-
 			const response = await flightService.createFlight({
 				...flightDetails,
 				flightNo: fullFlightNo,
-				departureTime: formattedDepartureTime,
-				arrivalTime: formattedArrivalTime,
 			});
 
 			if (response.status === 201) {
@@ -96,11 +120,9 @@ const AddFlight = () => {
 					flightNo: '',
 					planeName: '',
 					departureAirportName: '',
-					departureDate: '',
-					departureTime: '',
+					departureDateTime: '',
 					arrivalAirportName: '',
-					arrivalDate: '',
-					arrivalTime: '',
+					arrivalDateTime: '',
 					economyBasePrice: '',
 					businessBasePrice: '',
 				});
@@ -119,172 +141,175 @@ const AddFlight = () => {
 		<div className="mt-5">
 			{isSubmitting && <Loading />}
 			{!isSubmitting && (
-				<form onSubmit={handleAddFlight}>
-					<div className="row">
-						<div className="col-md-4"></div>
-						<div className="col-md-4 col-12">
-							<div className="mb-4">
-								<div className="input-group">
-									<div className="input-group">
-										<span className="input-group-text">
-											{airlineDetails?.username.substring(0, 2).toUpperCase()}
-										</span>
-										<input
-											type="text"
-											className="form-control"
-											name="flightNo"
-											placeholder="Enter 4 digit flight number"
-											value={flightDetails.flightNo}
-											onChange={handleFlightNumberChange}
-											maxLength={4}
-										/>
-									</div>
-								</div>
-							</div>
-							<div className="mb-4">
-								<div className="input-group">
-									<select
-										className="form-control"
-										name="planeName"
-										value={flightDetails.planeName}
-										onChange={handleFlightDetailsChange}
-										required
-									>
-										<option value="">Select a Plane</option>
-										{planes.map((plane) => (
-											<option key={plane._id} value={plane.planeName}>
-												{plane.planeName} (Economy: {plane.economyCapacity},
-												Business: {plane.businessCapacity})
-											</option>
-										))}
-									</select>
-								</div>
-							</div>
-							<div className="mb-4">
-								<div className="input-group">
-									<select
-										className="form-control"
-										name="departureAirportName"
-										value={flightDetails.departureAirportName}
-										onChange={handleFlightDetailsChange}
-										required
-									>
-										<option value="">Select Departure Airport</option>
-										{!isLoadingAirports &&
-											airports.map((airport) => (
-												<option key={airport.code} value={airport.name}>
-													{airport.name} ({airport.code}) - {airport.city}
-												</option>
-											))}
-									</select>
-								</div>
-							</div>
-							<div className="mb-4">
-								<label className="form-label d-block">Departure Date</label>
-								<div className="input-group">
-									<input
-										type="date"
-										className="form-control"
-										name="departureDate"
-										value={flightDetails.departureDate}
-										onChange={handleFlightDetailsChange}
-										required
-									/>
-								</div>
-							</div>
-							<div className="mb-4">
-								<label className="form-label d-block">Departure Time</label>
-								<div className="input-group">
-									<input
-										type="time"
-										className="form-control"
-										name="departureTime"
-										value={flightDetails.departureTime}
-										onChange={handleFlightDetailsChange}
-										required
-									/>
-								</div>
-							</div>
-							<div className="mb-4">
-								<div className="input-group">
-									<select
-										className="form-control"
-										name="arrivalAirportName"
-										value={flightDetails.arrivalAirportName}
-										onChange={handleFlightDetailsChange}
-										required
-									>
-										<option value="">Select Arrival Airport</option>
-										{!isLoadingAirports &&
-											airports.map((airport) => (
-												<option key={airport.code} value={airport.name}>
-													{airport.name} ({airport.code}) - {airport.city}
-												</option>
-											))}
-									</select>
-								</div>
-							</div>
-							<div className="mb-4">
-								<label className="form-label d-block">Arrival Date</label>
-								<div className="input-group">
-									<input
-										type="date"
-										className="form-control"
-										name="arrivalDate"
-										value={flightDetails.arrivalDate}
-										onChange={handleFlightDetailsChange}
-										required
-									/>
-								</div>
-							</div>
-							<div className="mb-4">
-								<label className="form-label d-block">Arrival Time</label>
-								<div className="input-group">
-									<input
-										type="time"
-										className="form-control"
-										name="arrivalTime"
-										value={flightDetails.arrivalTime}
-										onChange={handleFlightDetailsChange}
-										required
-									/>
-								</div>
-							</div>
-							<div className="mb-4">
-								<div className="input-group">
-									<input
-										type="number"
-										className="form-control"
-										name="economyBasePrice"
-										placeholder="Enter Economy Base Price"
-										value={flightDetails.economyBasePrice}
-										onChange={handleFlightDetailsChange}
-										required
-									/>
-								</div>
-							</div>
-							<div className="mb-4">
-								<div className="input-group">
-									<input
-										type="number"
-										className="form-control"
-										name="businessBasePrice"
-										placeholder="Enter Business Base Price"
-										value={flightDetails.businessBasePrice}
-										onChange={handleFlightDetailsChange}
-										required
-									/>
-								</div>
-							</div>
-							<div className="mb-4">
-								<div>
-									<button type="submit" className="btn btn-primary">
-										Add Flight
-									</button>
-								</div>
+				<form onSubmit={handleAddFlight} className="border rounded p-3">
+					<h3 className="text-center mb-3">Flight Details</h3>
+					<div className="d-flex flex-column flex-md-row justify-content-center gap-3 mb-3">
+						<div className="border rounded p-2">
+							<p className="text-start">Flight Number</p>
+							<div className="input-group">
+								<span className="input-group-text">
+									{airlineDetails?.username.substring(0, 2).toUpperCase()}
+								</span>
+								<input
+									type="text"
+									className="form-control"
+									name="flightNo"
+									placeholder="Enter 4 digit flight number"
+									value={flightDetails.flightNo}
+									onChange={handleFlightNumberChange}
+									maxLength={4}
+								/>
 							</div>
 						</div>
-						<div className="col-md-4"></div>
+						<div className="border rounded p-2">
+							<p className="text-start">Plane</p>
+
+							<select
+								className="form-control"
+								name="planeName"
+								value={flightDetails.planeName}
+								onChange={handleFlightDetailsChange}
+								required
+							>
+								<option value="">Select a Plane</option>
+								{planes.map((plane) => (
+									<option key={plane._id} value={plane.planeName}>
+										{plane.planeName} (Economy: {plane.economyCapacity},
+										Business: {plane.businessCapacity})
+									</option>
+								))}
+							</select>
+						</div>
+					</div>
+					<h3 className="text-center mb-3">Departure Details</h3>
+					<div className="d-flex flex-column flex-md-row justify-content-center gap-3 mb-3">
+						<div className="border rounded p-2">
+							<p className="text-start">Departure Airport</p>
+
+							<select
+								className="form-control"
+								name="departureAirportName"
+								value={flightDetails.departureAirportName}
+								onChange={handleFlightDetailsChange}
+								required
+							>
+								<option value="">Select Departure Airport</option>
+								{!isLoadingAirports &&
+									airports.map((airport) => (
+										<option key={airport.code} value={airport.name}>
+											{airport.name} ({airport.code}) - {airport.city}
+										</option>
+									))}
+							</select>
+						</div>
+						<div className="border rounded p-2">
+							<p className="text-start">Departure Date</p>
+
+							<DatePicker
+								selected={departureDate}
+								onChange={setDepartureDate}
+								minDate={tomorrow}
+								dateFormat="yyyy-MM-dd"
+								placeholderText="Select Departure Date"
+								className="form-control"
+								required
+							/>
+						</div>
+						<div className="border rounded p-2">
+							<p className="text-start">Departure Time</p>
+
+							<input
+								type="time"
+								className="form-control"
+								value={departureTime}
+								onChange={(e) => setDepartureTime(e.target.value)}
+								required
+							/>
+						</div>
+					</div>
+					<h3 className="text-center mb-3">Arrival Details</h3>
+					<div className="d-flex flex-column flex-md-row justify-content-center gap-3 mb-3">
+						<div className="border rounded p-2">
+							<p className="text-start">Arrival Airport</p>
+
+							<select
+								className="form-control"
+								name="arrivalAirportName"
+								value={flightDetails.arrivalAirportName}
+								onChange={handleFlightDetailsChange}
+								required
+							>
+								<option value="">Select Arrival Airport</option>
+								{!isLoadingAirports &&
+									airports.map((airport) => (
+										<option key={airport.code} value={airport.name}>
+											{airport.name} ({airport.code}) - {airport.city}
+										</option>
+									))}
+							</select>
+						</div>
+						<div className="border rounded p-2">
+							<p className="text-start">Arrival Date</p>
+
+							<DatePicker
+								selected={arrivalDate}
+								onChange={setArrivalDate}
+								minDate={departureDate || tomorrow}
+								dateFormat="yyyy-MM-dd"
+								placeholderText="Select Arrival Date"
+								className="form-control"
+								required
+							/>
+						</div>
+						<div className="border rounded p-2">
+							<p className="text-start">Arrival Time</p>
+
+							<input
+								type="time"
+								className="form-control"
+								value={arrivalTime}
+								onChange={(e) => setArrivalTime(e.target.value)}
+								required
+							/>
+						</div>
+					</div>
+					<h3 className="text-center mb-3">Price Details</h3>
+					<div className="d-flex flex-column flex-md-row justify-content-center gap-3 mb-3">
+						<div className="border rounded p-2">
+							<p className="text-start">Economy Base Price</p>
+
+							<input
+								type="number"
+								className="form-control"
+								name="economyBasePrice"
+								placeholder="Enter Economy Base Price"
+								value={flightDetails.economyBasePrice}
+								onChange={handleFlightDetailsChange}
+								required
+								min={0}
+								max={10000}
+							/>
+						</div>
+						<div className="border rounded p-2">
+							<p className="text-start">Business Base Price</p>
+
+							<input
+								type="number"
+								className="form-control"
+								name="businessBasePrice"
+								placeholder="Enter Business Base Price"
+								value={flightDetails.businessBasePrice}
+								onChange={handleFlightDetailsChange}
+								required
+								min={0}
+								max={30000}
+							/>
+						</div>
+					</div>
+					<div>
+						<button type="submit" className="btn btn-primary px-5 py-3">
+							Add Flight
+						</button>
 					</div>
 				</form>
 			)}

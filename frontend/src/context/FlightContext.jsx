@@ -5,15 +5,18 @@ export const FlightContext = createContext();
 
 // Provider component
 export const FlightProvider = ({ children }) => {
+	
 	// States with localStorage initialization
 	const [flightSearchData, setFlightSearchData] = useState(() => {
 		const saved = localStorage.getItem('flightSearchData');
 		return saved ? JSON.parse(saved) : null;
 	});
+
 	const [selectedDepartureFlight, setSelectedDepartureFlight] = useState(() => {
 		const saved = localStorage.getItem('selectedDepartureFlight');
 		return saved ? JSON.parse(saved) : null;
 	});
+	
 	const [currentBooking, setCurrentBooking] = useState(() => {
 		const saved = localStorage.getItem('currentBooking');
 		return saved ? JSON.parse(saved) : null;

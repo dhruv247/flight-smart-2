@@ -1,13 +1,8 @@
 import React from 'react';
+import formatDateTime from '../../../../utils/dateTime';
 
 const FlightCard = ({ flight }) => {
-	const formatTime = (time) => {
-		const hours = Math.floor(time / 100);
-		const minutes = time % 100;
-		return `${hours.toString().padStart(2, '0')}:${minutes
-			.toString()
-			.padStart(2, '0')}`;
-	};
+	if (!flight) return null;
 
 	return (
 		<div className="row border border-subtle rounded m-0 mb-3 py-2 align-items-center bg-white">
@@ -20,20 +15,19 @@ const FlightCard = ({ flight }) => {
 			<div className="col-12 col-md-3 d-flex justify-content-evenly align-items-center">
 				<div className="align-items-center">
 					<p>{flight.departureAirport.city}</p>
-					<p>{formatTime(flight.departureTime)}</p>
-					<p>{flight.departureDate}</p>
+					<p>{formatDateTime(flight.departureDateTime).time}</p>
+					<p>{formatDateTime(flight.departureDateTime).date}</p>
 				</div>
 				<p>-</p>
 				<div className="align-items-center">
 					<p>{flight.arrivalAirport.city}</p>
-					<p>{formatTime(flight.arrivalTime)}</p>
-					<p>{flight.arrivalDate}</p>
+					<p>{formatDateTime(flight.arrivalDateTime).time}</p>
+					<p>{formatDateTime(flight.arrivalDateTime).date}</p>
 				</div>
 			</div>
 			<div className="col-12 col-md-1">
 				<p>
-					{Math.floor(flight.duration / 60)}:
-					{(flight.duration % 60).toString().padStart(2, '0')}
+					{Math.floor(flight.duration / 60)} hr : {(flight.duration % 60).toString().padStart(2, '0')} min
 				</p>
 			</div>
 			<div className="col-12 col-md-3 d-flex justify-content-around align-items-center">
@@ -53,13 +47,8 @@ const FlightCard = ({ flight }) => {
 					<p>E: {flight.plane.economyCapacity}</p>
 				</div>
 				<div className="col-6">
-					<p>
-						B:{' '}
-						{flight.plane.businessCapacity - flight.businessBookedCount}
-					</p>
-					<p>
-						E: {flight.plane.economyCapacity - flight.economyBookedCount}
-					</p>
+					<p>B: {flight.plane.businessCapacity - flight.businessBookedCount}</p>
+					<p>E: {flight.plane.economyCapacity - flight.economyBookedCount}</p>
 				</div>
 			</div>
 		</div>

@@ -180,15 +180,20 @@ const DepartureFlights = () => {
 				<FlightSorting onSort={handleSort} />
 				{isLoading ? (
 					<Loading />
+				) : responseMessage === 'No departure flights available for this round trip' ? (
+					<div className="alert alert-info my-4" role="alert">
+						No departure flights available for this round trip. Please try different
+						departure dates or destinations.
+					</div>
 				) : responseMessage === 'No return flights available for this route' ? (
 					<div className="alert alert-info my-4" role="alert">
-						No return flights available for this route. Please try different return
-						dates or destinations.
+						No return flights available for this route. Please try different
+						return dates or destinations.
 					</div>
 				) : departureFlightsList.length === 0 ? (
 					<div className="alert alert-info my-4" role="alert">
-						No departure flights found for this route. Please try different departure dates or
-						destinations.
+						No departure flights found for this route. Please try different
+						departure dates or destinations.
 					</div>
 				) : (
 					<div id="sampleFlights">
