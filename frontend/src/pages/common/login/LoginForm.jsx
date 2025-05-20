@@ -34,7 +34,11 @@ const LoginForm = () => {
 				showSuccessToast('Login successful!');
 				// console.log('User Login Successful!', userRes.data);
 				if (userRes.data.userType === 'customer') {
-					navigate('/');
+					if (localStorage.getItem('flightSearchData')) {
+						navigate('/customer/departureFlights');
+					} else {
+						navigate('/');
+					}
 				} else if (userRes.data.userType === 'airline') {
 					navigate('/airline/dashboard');
 				} else if (userRes.data.userType === 'admin') {

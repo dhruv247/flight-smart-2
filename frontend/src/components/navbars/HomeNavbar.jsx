@@ -42,7 +42,7 @@ const Navbar = () => {
 					)}
 					{/* Customer Dashboard Button */}
 					{!isLoading && user && user.userType === 'customer' && (
-						<Link to="/customer/dashboard">
+						<Link to="/customer/dashboard/bookings">
 							<button
 								className="btn px-4 py-2"
 								style={{

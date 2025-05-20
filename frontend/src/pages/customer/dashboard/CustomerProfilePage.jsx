@@ -4,7 +4,7 @@ import ChangePasswordModal from '../../../components/profile/ChangePasswordModal
 import ChangeProfileModal from '../../../components/profile/ChangeProfileModal';
 import Loading from '../../../components/Loading';
 
-const CustomerDashboardProfile = () => {
+const CustomerProfilePage = () => {
 	const { user, isLoading } = useGetUserDetails();
 	const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 	const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -56,4 +56,4 @@ const CustomerDashboardProfile = () => {
 	);
 };
 
-export default CustomerDashboardProfile;
+export default CustomerProfilePage;

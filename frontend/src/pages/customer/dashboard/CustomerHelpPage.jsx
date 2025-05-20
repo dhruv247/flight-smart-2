@@ -1,7 +1,7 @@
 import React from 'react';
 import DashboardChat from '../../../components/chat/ChatDashboard';
 
-const CustomerDashboardChat = () => {
+const CustomerHelpPage = () => {
 	return (
 		<DashboardChat
 			userType="customer"
@@ -11,4 +11,4 @@ const CustomerDashboardChat = () => {
 	);
 };
 
-export default CustomerDashboardChat;
+export default CustomerHelpPage;

@@ -100,7 +100,7 @@ const BookingsDashboard = ({ type }) => {
 				<h1 className="my-3">Search Bookings</h1>
 				<form action="" className="border rounded p-2">
 					<div className="row">
-						<div className="col-md-3 col-12">
+						{/* <div className="col-md-3 col-12">
 							<p className="text-start fw-bold">Booking ID</p>
 							<input
 								className="form-control"
@@ -109,8 +109,8 @@ const BookingsDashboard = ({ type }) => {
 								placeholder="Enter Booking ID"
 								onChange={handleChange}
 							/>
-						</div>
-						<div className="col-md-3 col-12">
+						</div> */}
+						<div className="col-md-4 col-12">
 							<p className="text-start fw-bold">Flight From</p>
 							<Select
 								name="flightFrom"
@@ -132,7 +132,7 @@ const BookingsDashboard = ({ type }) => {
 								// }}
 							/>
 						</div>
-						<div className="col-md-3 col-12">
+						<div className="col-md-4 col-12">
 							<p className="text-start fw-bold">Flight To</p>
 							<Select
 								name="flightTo"
@@ -154,7 +154,7 @@ const BookingsDashboard = ({ type }) => {
 								// }}
 							/>
 						</div>
-						<div className="col-md-3 col-12">
+						<div className="col-md-4 col-12">
 							<p className="text-start fw-bold">Trip Date</p>
 							<select
 								name="status"
@@ -230,10 +230,10 @@ const BookingsDashboard = ({ type }) => {
 				</form>
 			</div>
 			<div className="row border border-subtle rounded m-0 mb-1 py-2 align-items-center bg-light fw-bold">
-				<div className="col-12 col-md-3 d-flex justify-content-center align-items-center">
+				{/* <div className="col-12 col-md-3 d-flex justify-content-center align-items-center">
 					<p className="mb-0">Booking ID</p>
-				</div>
-				<div className="col-12 col-md-1 d-flex justify-content-center align-items-center">
+				</div> */}
+				<div className="col-12 col-md-2 d-flex justify-content-center align-items-center">
 					<p className="mb-0">Trip Type</p>
 				</div>
 				<div className="col-12 col-md-4 d-flex justify-content-between align-items-center">

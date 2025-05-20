@@ -87,12 +87,12 @@ const BookingCard = ({ booking, type }) => {
 		return (
 			<div className="d-flex flex-column">
 				<div className="row border border rounded m-0 py-2 my-2 align-items-center">
-					<div className="col-12 col-md-3 d-flex justify-content-center align-items-center">
+					{/* <div className="col-12 col-md-3 d-flex justify-content-center align-items-center">
 						<div className="d-flex flex-column align-items-center gap-2">
 							<p className="fw-bold">{booking._id}</p>
 						</div>
-					</div>
-					<div className="col-12 col-md-1 d-flex justify-content-center align-items-center">
+					</div> */}
+					<div className="col-12 col-md-2 d-flex justify-content-center align-items-center">
 						<div className="d-flex flex-column align-items-center gap-2">
 							<p className="fw-bold">
 								{booking.tickets[0].roundTrip ? 'Round' : 'One Way'}
@@ -146,7 +146,7 @@ const BookingCard = ({ booking, type }) => {
 
 					{type === 'customer' && (
 						<>
-							<div className="col-6 col-md-2 d-flex justify-content-center align-items-center ">
+							<div className="col-4 col-md-2 d-flex justify-content-center align-items-center ">
 								<button
 									className="btn btn-success px-3 py-2"
 									onClick={() => setIsTicketsModalOpen(true)}
@@ -154,7 +154,12 @@ const BookingCard = ({ booking, type }) => {
 									View Tickets
 								</button>
 							</div>
-							<div className="col-6 col-md-2 d-flex justify-content-center align-items-center">
+							<div className="col-4 col-md-2 d-flex justify-content-center align-items-center ">
+								<button className="btn btn-primary px-3 py-2">
+									Get Help
+								</button>
+							</div>
+							<div className="col-4 col-md-2 d-flex justify-content-center align-items-center">
 								{bookingState === 'Confirmed' ? (
 									new Date(booking.tickets[0].departureFlight.departureDate) <=
 									new Date() ? (
@@ -175,7 +180,7 @@ const BookingCard = ({ booking, type }) => {
 													Cancelling...
 												</>
 											) : (
-												'Cancel'
+												'Cancel Booking'
 											)}
 										</button>
 									)
@@ -208,12 +213,12 @@ const BookingCard = ({ booking, type }) => {
 	return (
 		<div className="d-flex flex-column">
 			<div className="row border border rounded m-0 py-2 my-2 align-items-center">
-				<div className="col-12 col-md-3 d-flex justify-content-center align-items-center">
+				{/* <div className="col-12 col-md-3 d-flex justify-content-center align-items-center">
 					<div className="d-flex flex-column align-items-center gap-2">
 						<p className="fw-bold">{booking._id}</p>
 					</div>
-				</div>
-				<div className="col-12 col-md-1 d-flex justify-content-center align-items-center">
+				</div> */}
+				<div className="col-12 col-md-2 d-flex justify-content-center align-items-center">
 					<div className="d-flex flex-column align-items-center gap-2">
 						<p className="fw-bold">
 							{booking.tickets[0].roundTrip ? 'Round Trip' : 'One Way'}
@@ -240,7 +245,7 @@ const BookingCard = ({ booking, type }) => {
 
 				{type === 'customer' && (
 					<>
-						<div className="col-6 col-md-2 d-flex justify-content-center align-items-center">
+						<div className="col-4 col-md-2 d-flex justify-content-center align-items-center">
 							<button
 								className="btn btn-success px-3 py-2"
 								onClick={() => setIsTicketsModalOpen(true)}
@@ -248,7 +253,12 @@ const BookingCard = ({ booking, type }) => {
 								View Tickets
 							</button>
 						</div>
-						<div className="col-6 col-md-2 d-flex justify-content-center align-items-center">
+						<div className="col-4 col-md-2 d-flex justify-content-center align-items-center ">
+								<button className="btn btn-primary px-3 py-2">
+									Get Help
+								</button>
+							</div>
+						<div className="col-4 col-md-2 d-flex justify-content-center align-items-center">
 							{bookingState === 'Confirmed' ? (
 								new Date(booking.tickets[0].departureFlight.departureDate) <=
 								new Date() ? (
@@ -269,7 +279,7 @@ const BookingCard = ({ booking, type }) => {
 												Cancelling...
 											</>
 										) : (
-											'Cancel'
+											'Cancel Booking'
 										)}
 									</button>
 								)

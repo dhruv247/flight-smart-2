@@ -127,28 +127,39 @@ const SeatMap = ({ flightId, seatType, onSeatSelect, blockedSeats = [] }) => {
 						<div key={rowNum} className="seat-row mb-2">
 							{seatRows[rowNum]
 								.sort((a, b) => a.seatNumber - b.seatNumber)
-								.map((seat) => {
+								.map((seat, index) => {
 									const isBlocked = blockedSeats.includes(
 										parseInt(seat.seatNumber)
 									);
 									return (
-										<button
-											key={seat._id}
-											className={`btn m-1 ${
-												seat.occupied
-													? 'btn-danger'
-													: isBlocked
-													? 'btn-warning'
-													: selectedSeat?.seatNumber === seat.seatNumber
-													? 'btn-success'
-													: 'btn-outline-primary'
-											}`}
-											onClick={() => handleSeatClick(seat)}
-											disabled={seat.occupied || isBlocked}
-											style={{ width: '45px' }}
-										>
-											{seat.seatNumber}
-										</button>
+										<React.Fragment key={seat._id}>
+											<button
+												className={`btn m-1 ${
+													seat.occupied
+														? 'btn-danger'
+														: isBlocked
+														? 'btn-warning'
+														: selectedSeat?.seatNumber === seat.seatNumber
+														? 'btn-success'
+														: 'btn-outline-primary'
+												}`}
+												onClick={() => handleSeatClick(seat)}
+												disabled={seat.occupied || isBlocked}
+												style={{ width: '45px' }}
+											>
+												{seat.seatNumber}
+											</button>
+											{/* Add aisle after every 3 seats */}
+											{index % 3 === 2 &&
+												index < seatRows[rowNum].length - 1 && (
+													<div
+														className="d-inline-block mx-2"
+														style={{ width: '20px' }}
+													>
+														<div className="border-start border-2 h-100"></div>
+													</div>
+												)}
+										</React.Fragment>
 									);
 								})}
 						</div>

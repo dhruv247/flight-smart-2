@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFlightContext } from '../../../hooks/useFlightContext';
+import useGetUserDetails from '../../../hooks/useGetUserDetails';
 
 const FlightCard = ({
 	flight,
@@ -10,6 +11,7 @@ const FlightCard = ({
 	isReturnFlight,
 }) => {
 	const navigate = useNavigate();
+	const { user } = useGetUserDetails();
 	const {
 		selectedDepartureFlight,
 		setSelectedDepartureFlight,
@@ -54,6 +56,7 @@ const FlightCard = ({
 	};
 
 	const handleSelectFlight = () => {
+
 		/**
 		 * Needed for the individual ticket prices
 		 */
@@ -82,13 +85,21 @@ const FlightCard = ({
 			setCurrentBooking(bookingData);
 			navigate('/customer/bookingDetails');
 		} else if (tripType === 'oneWay') {
-			// Store one-way booking data in context
-			setCurrentBooking(selectedFlight);
-			navigate('/customer/bookingDetails');
+			if (!user) {
+				navigate('/login');
+			} else {
+				// Store one-way booking data in context
+				setCurrentBooking(selectedFlight);
+				navigate('/customer/bookingDetails');
+			}
 		} else {
-			// For round trip departure flight, just store the flight in context
-			setSelectedDepartureFlight(selectedFlight);
-			navigate('/customer/returnFlights');
+			if (!user) {
+				navigate('/login');
+			} else {
+				// For round trip departure flight, just store the flight in context
+				setSelectedDepartureFlight(selectedFlight);
+				navigate('/customer/returnFlights');
+			}
 		}
 	};
 

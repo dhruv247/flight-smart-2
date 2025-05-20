@@ -87,10 +87,10 @@ const FlightSearchForm = ({
 				throw new Error('Departure and arrival cities cannot be the same');
 			}
 
-			// Check if user is logged in
-			if (!user && !userLoading) {
-				throw new Error('User not logged in');
-			}
+			// // Check if user is logged in
+			// if (!user && !userLoading) {
+			// 	throw new Error('User not logged in');
+			// }
 			// Format dates to YYYY-MM-DD format before submitting
 			const formattedData = {
 				...formData,
@@ -106,12 +106,6 @@ const FlightSearchForm = ({
 		} catch (error) {
 			if (error.message === 'Departure and arrival cities cannot be the same') {
 				showErrorToast(error.message);
-			} else {
-				// If not logged in, show modal
-				const loginModal = new Modal(
-					document.getElementById('loginRequiredModal')
-				);
-				loginModal.show();
 			}
 		}
 	};

@@ -1,27 +1,21 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useFlightContext } from '../../hooks/useFlightContext';
 import axios from 'axios';
 
-const DashboardNavbar = ({
-	activeComponent,
-	setActiveComponent,
-	navItems = [],
-}) => {
+const DashboardNavbar = ({ navItems = [] }) => {
 	const navigate = useNavigate();
+	const location = useLocation();
 	const { clearFlightData } = useFlightContext();
 	const [showSidebar, setShowSidebar] = useState(false);
 
 	const logout = async () => {
 		try {
-
 			const response = await axios.post(
 				'http://localhost:8000/api/auth/logout',
 				{},
 				{ withCredentials: true }
-			);	
-
-			// console.log(response);
+			);
 
 			// Clear all flight data from context
 			clearFlightData();
@@ -38,10 +32,11 @@ const DashboardNavbar = ({
 	const NavButtons = ({ isMobile = false }) => (
 		<div className={`${isMobile ? 'd-flex flex-column' : 'd-flex'}`}>
 			{navItems.map((item) => (
-				<button
+				<Link
 					key={item.id}
+					to={item.path}
 					className={`${isMobile ? 'w-100 text-start mb-2' : 'mx-2'} btn ${
-						activeComponent === item.id
+						location.pathname === item.path
 							? 'text-white fw-medium'
 							: isMobile
 							? 'btn-light'
@@ -49,17 +44,14 @@ const DashboardNavbar = ({
 					}`}
 					style={{
 						backgroundColor:
-							activeComponent === item.id ? '#2E7D32' : 'transparent',
-						color: activeComponent === item.id ? '#fff' : '#5f6368',
+							location.pathname === item.path ? '#2E7D32' : 'transparent',
+						color: location.pathname === item.path ? '#fff' : '#5f6368',
 					}}
-					onClick={() => {
-						setActiveComponent(item.id);
-						isMobile && setShowSidebar(false);
-					}}
+					onClick={() => isMobile && setShowSidebar(false)}
 				>
 					<i className={`bi ${item.icon} me-2`}></i>
 					{item.label}
-				</button>
+				</Link>
 			))}
 		</div>
 	);

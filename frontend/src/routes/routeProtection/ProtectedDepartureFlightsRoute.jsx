@@ -8,7 +8,7 @@ import Loading from '../../components/Loading';
  * @param {React.ReactNode} children - The child components to be protected
  * @returns {React.ReactNode} The protected content or a loading indicator
  */
-const ProtectedHomePageRoute = ({ children }) => {
+const ProtectedDepartureFlightsRoute = ({ children }) => {
 	const { user, isLoading, error } = useGetUserDetails();
 
 	// Show loading state while checking authentication
@@ -23,13 +23,13 @@ const ProtectedHomePageRoute = ({ children }) => {
 
 	// If user is logged in but not as customer, redirect to appropriate dashboard
 	if (user.userType === 'admin') {
-		return <Navigate to="/admin/dashboard/analytics" />;
+		return <Navigate to="/admin/dashboard" />;
 	} else if (user.userType === 'airline') {
-		return <Navigate to="/airline/dashboard/analytics" />;
+		return <Navigate to="/airline/dashboard" />;
 	}
 
 	// If user is customer or not logged in, render the children
 	return children;
 };
 
-export default ProtectedHomePageRoute;
+export default ProtectedDepartureFlightsRoute;
