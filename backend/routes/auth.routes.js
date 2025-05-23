@@ -4,7 +4,6 @@ import {
 	login,
 	logout,
 	getMe,
-	updatePassword,
 	verifyAirline,
 	deleteAirline,
 	getAllAirlines,
@@ -18,7 +17,6 @@ router.post('/register', register);
 router.post('/login', login);
 router.post('/logout', verifyUser, logout);
 router.get('/me', verifyUser, getMe);
-router.patch('/update-password', verifyUser, updatePassword);
 
 // Admin Routes (For verifying and blocking airlines)
 router.post('/verify-airline', verifyAdmin, verifyAirline);

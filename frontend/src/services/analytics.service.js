@@ -4,10 +4,13 @@ const PORT = import.meta.env.VITE_PORT;
 const API_URL = `http://localhost:${PORT}/api/analytics`;
 
 export const analyticsService = {
-	getTopDatesByNumberOfFlights: async () => {
+
+	// Airline Analytics
+
+	getTopDatesByNumberOfFlights: async (startDate, endDate) => {
 		try {
 			const response = await axios.get(
-				`${API_URL}/top-dates-by-number-of-flights`,
+				`${API_URL}/top-dates-by-number-of-flights?startDate=${startDate}&endDate=${endDate}`,
 				{
 					withCredentials: true,
 				}
@@ -18,10 +21,10 @@ export const analyticsService = {
 		}
 	},
 
-	getProfitableBusinessFlights: async (limit) => {
+	getProfitableBusinessFlights: async (limit, startDate, endDate) => {
 		try {
 			const response = await axios.get(
-				`${API_URL}/profitable-business-flights?limit=${limit}`,
+				`${API_URL}/profitable-business-flights?limit=${limit}&startDate=${startDate}&endDate=${endDate}`,
 				{
 					withCredentials: true,
 				}
@@ -32,10 +35,10 @@ export const analyticsService = {
 		}
 	},
 
-	getProfitableEconomyFlights: async (limit) => {
+	getProfitableEconomyFlights: async (limit, startDate, endDate) => {
 		try {
 			const response = await axios.get(
-				`${API_URL}/profitable-economy-flights?limit=${limit}`,
+				`${API_URL}/profitable-economy-flights?limit=${limit}&startDate=${startDate}&endDate=${endDate}`,
 				{
 					withCredentials: true,
 				}
@@ -46,21 +49,10 @@ export const analyticsService = {
 		}
 	},
 
-	getFlightsByDuration: async () => {
-		try {
-			const response = await axios.get(`${API_URL}/flights-by-duration`, {
-				withCredentials: true,
-			});
-			return response.data;
-		} catch (error) {
-			throw error;
-		}
-	},
-
-	getTopAirlinesByNumberOfFlights: async (num) => {
+	getFlightsByDuration: async (startDate, endDate) => {
 		try {
 			const response = await axios.get(
-				`${API_URL}/top-airlines-by-number-of-flights?num=${num}`,
+				`${API_URL}/flights-by-duration?startDate=${startDate}&endDate=${endDate}`,
 				{
 					withCredentials: true,
 				}
@@ -71,10 +63,10 @@ export const analyticsService = {
 		}
 	},
 
-	getTopPlanesByNumberOfFlights: async (num) => {
+	getTopEconomyOccupancyFlights: async (limit, startDate, endDate) => {
 		try {
 			const response = await axios.get(
-				`${API_URL}/top-planes-by-number-of-flights?num=${num}`,
+				`${API_URL}/top-economy-occupancy-flights?limit=${limit}&startDate=${startDate}&endDate=${endDate}`,
 				{
 					withCredentials: true,
 				}
@@ -85,10 +77,10 @@ export const analyticsService = {
 		}
 	},
 
-	getTopDepartureFlightsByNumberOfTickets: async (num) => {
+	getTopBusinessOccupancyFlights: async (limit, startDate, endDate) => {
 		try {
 			const response = await axios.get(
-				`${API_URL}/top-departure-flights-by-number-of-tickets?num=${num}`,
+				`${API_URL}/top-business-occupancy-flights?limit=${limit}&startDate=${startDate}&endDate=${endDate}`,
 				{
 					withCredentials: true,
 				}
@@ -99,10 +91,12 @@ export const analyticsService = {
 		}
 	},
 
-	getTopCitiesByNumberOfFlights: async (num) => {
+	// Admin Analytics
+
+	getTopAirlinesByNumberOfFlights: async (limit, startDate, endDate) => {
 		try {
 			const response = await axios.get(
-				`${API_URL}/top-cities-by-number-of-flights?num=${num}`,
+				`${API_URL}/top-airlines-by-number-of-flights?limit=${limit}&startDate=${startDate}&endDate=${endDate}`,
 				{
 					withCredentials: true,
 				}
@@ -112,4 +106,75 @@ export const analyticsService = {
 			throw error;
 		}
 	},
+
+	getTopPlanesByNumberOfFlights: async (limit, startDate, endDate) => {
+		try {
+			const response = await axios.get(
+				`${API_URL}/top-planes-by-number-of-flights?limit=${limit}&startDate=${startDate}&endDate=${endDate}`,
+				{
+					withCredentials: true,
+				}
+			);
+			return response.data;
+		} catch (error) {
+			throw error;
+		}
+	},
+
+	getTopDepartureTimes: async (startDate, endDate) => {
+		try {
+			const response = await axios.get(
+				`${API_URL}/top-departure-times?startDate=${startDate}&endDate=${endDate}`,
+				{
+					withCredentials: true,
+				}
+			);
+			return response.data;
+		} catch (error) {
+			throw error;
+		}
+	},
+
+	getTopCitiesByNumberOfFlights: async (limit, startDate, endDate) => {
+		try {
+			const response = await axios.get(
+				`${API_URL}/top-cities-by-number-of-flights?limit=${limit}&startDate=${startDate}&endDate=${endDate}`,
+				{
+					withCredentials: true,
+				}
+			);
+			return response.data;
+		} catch (error) {
+			throw error;
+		}
+	},
+
+	getTopTravelClassByOccupancy: async (startDate, endDate) => {
+		try {
+			const response = await axios.get(
+				`${API_URL}/top-travel-class-by-occupancy?startDate=${startDate}&endDate=${endDate}`,
+				{
+					withCredentials: true,
+				}
+			);
+			return response.data;
+		} catch (error) {
+			throw error;
+		}
+	},
+
+	getTopRoutesByNumberOfFlights: async (limit, startDate, endDate) => {
+		try {
+			const response = await axios.get(
+				`${API_URL}/top-routes-by-number-of-flights?limit=${limit}&startDate=${startDate}&endDate=${endDate}`,
+				{
+					withCredentials: true,
+				}
+			);
+			return response.data;
+		} catch (error) {
+			throw error;
+		}
+	},
+
 };

@@ -5,3 +5,11 @@ p {
 .react-datepicker-popper {
   z-index: 2000 !important;
 }
+
+.custom-flightTo {
+  z-index: 1000 !important;
+}
+
+.custom-datepicker {
+  min-width: 285px;
+}

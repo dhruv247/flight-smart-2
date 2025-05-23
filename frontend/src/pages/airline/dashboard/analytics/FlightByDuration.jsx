@@ -22,7 +22,7 @@ const generateBorderColor = (hslaColor) => {
 		);
 };
 
-const FlightByDuration = () => {
+const FlightByDuration = ({ startDate, endDate }) => {
 	const [data, setData] = useState({});
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState(null);
@@ -57,7 +57,10 @@ const FlightByDuration = () => {
 	useEffect(() => {
 		const getFlightsByDuration = async () => {
 			try {
-				const response = await analyticsService.getFlightsByDuration();
+				const response = await analyticsService.getFlightsByDuration(
+					startDate,
+					endDate
+				);
 
 				const labels = response.map((item) => item.durationRange);
 				const counts = response.map((item) => item.flightCount);
@@ -89,7 +92,7 @@ const FlightByDuration = () => {
 		};
 
 		getFlightsByDuration();
-	}, []);
+	}, [startDate, endDate]);
 
 	if (error) {
 		return (

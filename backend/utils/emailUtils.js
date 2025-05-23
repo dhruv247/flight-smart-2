@@ -98,12 +98,13 @@ const sendBookingConfirmationEmail = async (booking) => {
 				minute: '2-digit',
 				hour12: false,
 			}),
-			date: date.toLocaleDateString('en-US', {
-				weekday: 'short',
-				year: 'numeric',
-				month: 'short',
-				day: 'numeric',
-			}),
+			date: date
+				.toLocaleDateString('en-US', {
+					year: 'numeric',
+					month: '2-digit',
+					day: '2-digit',
+				})
+				.replace(/(\d+)\/(\d+)\/(\d+)/, '$3-$1-$2'),
 		};
 	};
 
@@ -113,6 +114,18 @@ const sendBookingConfirmationEmail = async (booking) => {
 			<p>Hello ${booking.userDetails.username},</p>
 			<p>Thank you for booking with Flight Smart! Your booking has been confirmed.</p>
 			
+			<!-- User Information -->
+			<div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0;">
+				<h3 style="color: #2c3e50;">User Information</h3>
+				<div style="margin-bottom: 10px;">
+					<strong>Username:</strong> ${booking.userDetails.username}
+				</div>
+				<div>
+					<strong>Email:</strong> ${booking.userDetails.email}
+				</div>
+			</div>
+
+			<!-- Flight Information -->
 			<div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0;">
 				<h3 style="color: #2c3e50;">Flight Information</h3>
 				
@@ -127,6 +140,9 @@ const sendBookingConfirmationEmail = async (booking) => {
 								${booking.tickets[0].departureFlight.departureAirport.city}
 							</div>
 							<div style="color: #6c757d; margin-top: 10px;">
+								${formatDateTime(booking.tickets[0].departureFlight.departureDateTime).date}
+							</div>
+							<div style="color: #6c757d;">
 								${formatDateTime(booking.tickets[0].departureFlight.departureDateTime).time}
 							</div>
 						</div>
@@ -140,18 +156,19 @@ const sendBookingConfirmationEmail = async (booking) => {
 								${booking.tickets[0].departureFlight.arrivalAirport.city}
 							</div>
 							<div style="color: #6c757d; margin-top: 10px;">
+								${formatDateTime(booking.tickets[0].departureFlight.arrivalDateTime).date}
+							</div>
+							<div style="color: #6c757d;">
 								${formatDateTime(booking.tickets[0].departureFlight.arrivalDateTime).time}
 							</div>
 						</div>
-					</div>
-					<div style="text-align: center; color: #6c757d;">
-						${formatDateTime(booking.tickets[0].departureFlight.departureDateTime).date}
 					</div>
 					<div style="margin-top: 10px; text-align: center;">
 						<strong>Airline:</strong> ${
 							booking.tickets[0].departureFlight.airline.airlineName
 						} | 
 						<strong>Flight:</strong> ${booking.tickets[0].departureFlight.flightNo} | 
+						<strong>Plane:</strong> ${booking.tickets[0].departureFlight.plane} | 
 						<strong>Duration:</strong> ${Math.floor(
 							booking.tickets[0].departureFlight.duration / 60
 						)}:${(booking.tickets[0].departureFlight.duration % 60)
@@ -175,6 +192,9 @@ const sendBookingConfirmationEmail = async (booking) => {
 								${booking.tickets[0].returnFlight.departureAirport.city}
 							</div>
 							<div style="color: #6c757d; margin-top: 10px;">
+								${formatDateTime(booking.tickets[0].returnFlight.departureDateTime).date}
+							</div>
+							<div style="color: #6c757d;">
 								${formatDateTime(booking.tickets[0].returnFlight.departureDateTime).time}
 							</div>
 						</div>
@@ -188,18 +208,19 @@ const sendBookingConfirmationEmail = async (booking) => {
 								${booking.tickets[0].returnFlight.arrivalAirport.city}
 							</div>
 							<div style="color: #6c757d; margin-top: 10px;">
+								${formatDateTime(booking.tickets[0].returnFlight.arrivalDateTime).date}
+							</div>
+							<div style="color: #6c757d;">
 								${formatDateTime(booking.tickets[0].returnFlight.arrivalDateTime).time}
 							</div>
 						</div>
-					</div>
-					<div style="text-align: center; color: #6c757d;">
-						${formatDateTime(booking.tickets[0].returnFlight.departureDateTime).date}
 					</div>
 					<div style="margin-top: 10px; text-align: center;">
 						<strong>Airline:</strong> ${
 							booking.tickets[0].returnFlight.airline.airlineName
 						} | 
 						<strong>Flight:</strong> ${booking.tickets[0].returnFlight.flightNo} | 
+						<strong>Plane:</strong> ${booking.tickets[0].returnFlight.plane} | 
 						<strong>Duration:</strong> ${Math.floor(
 							booking.tickets[0].returnFlight.duration / 60
 						)}:${(booking.tickets[0].returnFlight.duration % 60)
@@ -212,6 +233,7 @@ const sendBookingConfirmationEmail = async (booking) => {
 				}
 			</div>
 
+			<!-- Tickets Information -->
 			<div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0;">
 				<h3 style="color: #2c3e50;">Tickets</h3>
 				<table style="width: 100%; border-collapse: collapse;">
@@ -246,6 +268,7 @@ const sendBookingConfirmationEmail = async (booking) => {
 				</table>
 			</div>
 
+			<!-- Booking Information -->
 			<div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0;">
 				<h3 style="color: #2c3e50;">Booking Information</h3>
 				<div style="margin-bottom: 10px;">
@@ -258,11 +281,24 @@ const sendBookingConfirmationEmail = async (booking) => {
 					</span>
 				</div>
 				<div style="margin-bottom: 10px;">
+					<strong>Booked On:</strong> ${booking.createdAt.split('T')[0]}
+				</div>
+				<div style="margin-bottom: 10px;">
 					<strong>Total Passengers:</strong> ${booking.tickets.length}
 				</div>
 				<div>
-					<strong>Total Amount:</strong> ₹${booking.bookingPrice}
+					<strong>Total Amount:</strong> ₹${booking.tickets.reduce(
+						(sum, ticket) => sum + ticket.ticketPrice,
+						0
+					)}
 				</div>
+			</div>
+
+			<!-- Cancellation Rules -->
+			<div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0;">
+				<h3 style="color: #2c3e50;">Cancellation Rules</h3>
+				<p>Bookings can only be cancelled 24 hours before the departure time (in case of round trip, 24 hours before the
+					departure time of the first flight).</p>
 			</div>
 			
 			<p>Best regards,<br>Flight Smart Team</p>
@@ -272,6 +308,9 @@ const sendBookingConfirmationEmail = async (booking) => {
 	const text = `Booking Confirmation\n\n
 		Hello ${booking.userDetails.username},\n\n
 		Thank you for booking with Flight Smart! Your booking has been confirmed.\n\n
+		User Information:\n
+		Username: ${booking.userDetails.username}
+		Email: ${booking.userDetails.email}\n\n
 		Flight Information:\n
 		Departure Flight:\n
 		From: ${booking.tickets[0].departureFlight.departureAirport.airportName} (${
@@ -289,7 +328,13 @@ const sendBookingConfirmationEmail = async (booking) => {
 		formatDateTime(booking.tickets[0].departureFlight.arrivalDateTime).time
 	}
 		Airline: ${booking.tickets[0].departureFlight.airline.airlineName}
-		Flight: ${booking.tickets[0].departureFlight.flightNo}\n
+		Flight: ${booking.tickets[0].departureFlight.flightNo}
+		Plane: ${booking.tickets[0].departureFlight.plane}
+		Duration: ${Math.floor(booking.tickets[0].departureFlight.duration / 60)}:${(
+		booking.tickets[0].departureFlight.duration % 60
+	)
+		.toString()
+		.padStart(2, '0')} hr\n
 		${
 			booking.tickets[0].returnFlight
 				? `
@@ -305,7 +350,13 @@ const sendBookingConfirmationEmail = async (booking) => {
 			formatDateTime(booking.tickets[0].returnFlight.departureDateTime).time
 		} - ${formatDateTime(booking.tickets[0].returnFlight.arrivalDateTime).time}
 		Airline: ${booking.tickets[0].returnFlight.airline.airlineName}
-		Flight: ${booking.tickets[0].returnFlight.flightNo}\n
+		Flight: ${booking.tickets[0].returnFlight.flightNo}
+		Plane: ${booking.tickets[0].returnFlight.plane}
+		Duration: ${Math.floor(booking.tickets[0].returnFlight.duration / 60)}:${(
+						booking.tickets[0].returnFlight.duration % 60
+				  )
+						.toString()
+						.padStart(2, '0')} hr\n
 		`
 				: ''
 		}
@@ -325,8 +376,15 @@ const sendBookingConfirmationEmail = async (booking) => {
 		Booking Information:\n
 		Booking ID: ${booking._id.toString()}
 		Status: Confirmed
+		Booked On: ${booking.createdAt.split('T')[0]}
 		Total Passengers: ${booking.tickets.length}
-		Total Amount: ₹${booking.bookingPrice}\n
+		Total Amount: ₹${booking.tickets.reduce(
+			(sum, ticket) => sum + ticket.ticketPrice,
+			0
+		)}\n
+		Cancellation Rules:\n
+		Bookings can only be cancelled 24 hours before the departure time (in case of round trip, 24 hours before the
+		departure time of the first flight).\n
 		Best regards,\n
 		Flight Smart Team`;
 

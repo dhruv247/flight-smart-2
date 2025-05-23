@@ -254,6 +254,9 @@ const searchFlights = async (req, res) => {
 			returnDate,
 			travelClass,
 			passengers,
+			page = 0,
+			size = 10,
+			departureFlightArrivalTime
 		} = req.body;
 
 		// validate required fields
@@ -303,7 +306,7 @@ const searchFlights = async (req, res) => {
 
 		// validate passenger count
 		const passengerCount = parseInt(passengers);
-		if (isNaN(passengerCount) || passengerCount < 1 || passengerCount > 5) {
+		if (isNaN(passengerCount) || passengerCount < 1 || passengerCount > 9) {
 			return res.status(400).json({
 				message: 'Passenger count must be between 1 and 5',
 				details: {
@@ -411,7 +414,7 @@ const searchFlights = async (req, res) => {
 										{
 											$gte: [
 												'$departureDateTime',
-												{ $add: [new Date(), 6 * 60 * 60 * 1000] },
+												{ $add: [new Date(), 1 * 60 * 60 * 1000] },
 											],
 										},
 									],
@@ -436,11 +439,43 @@ const searchFlights = async (req, res) => {
 		};
 
 		// sort stage (separate so that it can be removed easily in case best flight is written)
-		const sortStage = {
-			$sort: {
-				economyCurrentPrice: 1,
+		const economySortStage = [
+			{
+				$addFields: {
+					totalPrice: {
+						$add: ['$economyCurrentPrice', '$duration'],
+					},
+				},
 			},
-		};
+			{
+				$sort: {
+					totalPrice: 1,
+				},
+			},
+		];
+
+		const businessSortStage = [
+			{
+				$addFields: {
+					totalPrice: {
+						$add: ['$businessCurrentPrice', '$duration'],
+					},
+				},
+			},
+			{
+				$sort: {
+					totalPrice: 1,
+				},
+			},
+		];
+
+		let sortStage;
+
+		if (travelClassStr === '1') {
+			sortStage = economySortStage;
+		} else {
+			sortStage = businessSortStage;
+		}
 
 		// Add a debug log
 		console.log('Search Parameters:', {
@@ -455,8 +490,18 @@ const searchFlights = async (req, res) => {
 		const departureFlights = await Flight.aggregate([
 			departureMatchStage,
 			debugStage,
-			sortStage,
+			...sortStage,
+			{ $skip: page * size },
+			{ $limit: size },
 		]);
+
+		// Get total count of matching flights
+		const totalDepartureFlights = await Flight.aggregate([
+			departureMatchStage,
+			{ $count: 'total' },
+		]);
+
+		const totalPages = Math.ceil((totalDepartureFlights[0]?.total || 0) / size);
 
 		// Add debug log for results
 		console.log('Found departure flights:', departureFlights.length);
@@ -473,6 +518,7 @@ const searchFlights = async (req, res) => {
 
 		// if return date is provided, validate and search for return flights
 		let returnFlights = [];
+		let totalReturnPages = 0;
 		if (returnDate) {
 			const returnSearchDate = new Date(returnDate);
 			returnSearchDate.setHours(0, 0, 0, 0);
@@ -507,7 +553,11 @@ const searchFlights = async (req, res) => {
 					'departureAirport._id': arrivalAirport._id,
 					'arrivalAirport._id': departureAirport._id,
 					departureDateTime: {
-						$gte: new Date(returnDate),
+						$gte: new Date(
+							new Date(departureFlightArrivalTime).setHours(
+								new Date(departureFlightArrivalTime).getHours() + 1
+							)
+						),
 						$lt: new Date(
 							new Date(returnDate).setDate(new Date(returnDate).getDate() + 1)
 						),
@@ -545,8 +595,19 @@ const searchFlights = async (req, res) => {
 			returnFlights = await Flight.aggregate([
 				returnMatchStage,
 				debugStage,
-				sortStage,
+				...sortStage,
+				{ $skip: page * size },
+				{ $limit: size },
 			]);
+
+			// Get total count of matching return flights
+			const totalReturnFlights = await Flight.aggregate([
+				returnMatchStage,
+				{ $count: 'total' },
+			]);
+
+			totalReturnPages = Math.ceil((totalReturnFlights[0]?.total || 0) / size);
+
 			console.log('Found return flights:', returnFlights.length);
 			console.log(
 				'Return flight details:',
@@ -579,6 +640,9 @@ const searchFlights = async (req, res) => {
 			message: 'Flights retrieved successfully',
 			departureFlights,
 			returnFlights: returnFlights || [],
+			totalPages,
+			totalReturnPages,
+			currentPage: page,
 		});
 	} catch (error) {
 		return res.status(500).json({

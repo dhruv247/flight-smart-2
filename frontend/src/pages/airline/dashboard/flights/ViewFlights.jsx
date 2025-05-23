@@ -5,6 +5,7 @@ import FlightCard from './FlightCard';
 import { useAirports } from '../../../../hooks/useAirports';
 import axios from 'axios';
 import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import Select from 'react-select';
 
 const ViewFlights = () => {
@@ -107,17 +108,17 @@ const ViewFlights = () => {
 				<h1 className="my-3">Search Flights</h1>
 				<form action="" className="border rounded p-2">
 					<div className="row">
-						<div className="col-md-3 col-12">
+						<div className="col-md-3 col-12 my-2">
 							<p className="text-start fw-bold">Flight No</p>
 							<input
 								className="form-control"
 								type="text"
 								name="flightNo"
-								placeholder="Flight No"
+								placeholder="Enter Flight No"
 								onChange={handleChange}
 							/>
 						</div>
-						<div className="col-md-3 col-12">
+						<div className="col-md-3 col-12 my-2">
 							{/* <input
 								className="form-control"
 								type="search"
@@ -134,10 +135,10 @@ const ViewFlights = () => {
 									handleSelectChange(option, { name: 'flightFrom' })
 								}
 								options={cityOptions}
-								placeholder="Flight From"
+								placeholder="Enter Flight From"
 								isSearchable
 								isClearable
-								className="flex-grow-1"
+								className="flex-grow-1 text-start"
 								// styles={{
 								// 	control: (base) => ({
 								// 		...base,
@@ -147,7 +148,7 @@ const ViewFlights = () => {
 								// }}
 							/>
 						</div>
-						<div className="col-md-3 col-12">
+						<div className="col-md-3 col-12 my-2">
 							{/* <input
 								className="form-control"
 								type="search"
@@ -164,10 +165,10 @@ const ViewFlights = () => {
 									handleSelectChange(option, { name: 'flightTo' })
 								}
 								options={cityOptions}
-								placeholder="Flight To"
+								placeholder="Enter Flight To"
 								isSearchable
 								isClearable
-								className="flex-grow-1"
+								className="flex-grow-1 text-start"
 								// styles={{
 								// 	control: (base) => ({
 								// 		...base,
@@ -186,14 +187,14 @@ const ViewFlights = () => {
 								))}
 						</datalist> */}
 
-						<div className="col-md-3 col-12">
+						<div className="col-md-3 col-12 my-2 text-start">
 							<p className="text-start fw-bold">Departure Date</p>
-							<div className="form-control p-0">
+							<div>
 								<DatePicker
 									selected={searchParams.departureDate}
 									onChange={(date) => handleDateChange(date, 'departureDate')}
-									className="form-control border-0"
-									placeholderText="Departure Date"
+									className="form-control custom-datepicker"
+									placeholderText="Select Departure Date"
 									dateFormat="yyyy-MM-dd"
 								/>
 							</div>

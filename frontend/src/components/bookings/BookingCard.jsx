@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import TicketsModal from './TicketsModal';
 import { showSuccessToast, showErrorToast } from '../../utils/toast';
+import { Link } from 'react-router-dom';
 
 /**
-	 * Format date and time from a Date object
-	 * @param {Date} dateTime - The date and time to format
-	 * @returns {Object} - Object containing formatted date and time
-	 */
+ * Format date and time from a Date object
+ * @param {Date} dateTime - The date and time to format
+ * @returns {Object} - Object containing formatted date and time
+ */
 const formatDateTime = (dateTime) => {
 	const date = new Date(dateTime);
 	return {
@@ -24,6 +25,18 @@ const formatDateTime = (dateTime) => {
 			})
 			.replace(/(\d+)\/(\d+)\/(\d+)/, '$3-$1-$2'),
 	};
+};
+
+/**
+ * Calculate time difference in hours between now and departure time
+ * @param {string} departureDateTime - The departure date and time
+ * @returns {number} - Time difference in hours
+ */
+const getTimeDifferenceInHours = (departureDateTime) => {
+	const departure = new Date(departureDateTime);
+	const now = new Date();
+	const diffInMs = departure - now;
+	return diffInMs / (1000 * 60 * 60); // Convert to hours
 };
 
 const BookingCard = ({ booking, type }) => {
@@ -105,11 +118,19 @@ const BookingCard = ({ booking, type }) => {
 								<p>
 									{booking.tickets[0].departureFlight?.departureAirport.city}
 								</p>
-								<p>{formatDateTime(booking.tickets[0].departureFlight?.departureDateTime).date}</p>
 								<p>
-									{formatDateTime(
-										booking.tickets[0].departureFlight?.departureDateTime
-									).time}
+									{
+										formatDateTime(
+											booking.tickets[0].departureFlight?.departureDateTime
+										).date
+									}
+								</p>
+								<p>
+									{
+										formatDateTime(
+											booking.tickets[0].departureFlight?.departureDateTime
+										).time
+									}
 								</p>
 							</div>
 							<div className="d-flex flex-column align-items-center">
@@ -117,18 +138,38 @@ const BookingCard = ({ booking, type }) => {
 							</div>
 							<div className="d-flex flex-column align-items-center">
 								<p>{booking.tickets[0].departureFlight?.arrivalAirport.city}</p>
-								<p>{formatDateTime(booking.tickets[0].departureFlight?.arrivalDateTime).date}</p>
 								<p>
-									{formatDateTime(booking.tickets[0].departureFlight?.arrivalDateTime).time}
+									{
+										formatDateTime(
+											booking.tickets[0].departureFlight?.arrivalDateTime
+										).date
+									}
+								</p>
+								<p>
+									{
+										formatDateTime(
+											booking.tickets[0].departureFlight?.arrivalDateTime
+										).time
+									}
 								</p>
 							</div>
 						</div>
 						<div className="d-flex justify-content-between align-items-center">
 							<div className="d-flex flex-column align-items-center">
 								<p>{booking.tickets[0].returnFlight?.departureAirport.city}</p>
-								<p>{formatDateTime(booking.tickets[0].returnFlight?.departureDateTime).date}</p>
 								<p>
-									{formatDateTime(booking.tickets[0].returnFlight?.departureDateTime).time}
+									{
+										formatDateTime(
+											booking.tickets[0].returnFlight?.departureDateTime
+										).date
+									}
+								</p>
+								<p>
+									{
+										formatDateTime(
+											booking.tickets[0].returnFlight?.departureDateTime
+										).time
+									}
 								</p>
 							</div>
 							<div className="d-flex flex-column align-items-center">
@@ -136,9 +177,19 @@ const BookingCard = ({ booking, type }) => {
 							</div>
 							<div className="d-flex flex-column align-items-center">
 								<p>{booking.tickets[0].returnFlight?.arrivalAirport.city}</p>
-								<p>{formatDateTime(booking.tickets[0].returnFlight?.arrivalDateTime).date}</p>
 								<p>
-									{formatDateTime(booking.tickets[0].returnFlight?.arrivalDateTime).time}
+									{
+										formatDateTime(
+											booking.tickets[0].returnFlight?.arrivalDateTime
+										).date
+									}
+								</p>
+								<p>
+									{
+										formatDateTime(
+											booking.tickets[0].returnFlight?.arrivalDateTime
+										).time
+									}
 								</p>
 							</div>
 						</div>
@@ -155,15 +206,31 @@ const BookingCard = ({ booking, type }) => {
 								</button>
 							</div>
 							<div className="col-4 col-md-2 d-flex justify-content-center align-items-center ">
-								<button className="btn btn-primary px-3 py-2">
-									Get Help
-								</button>
+								<a
+									href="/customer/dashboard/help"
+									target="_blank"
+									rel="noopener noreferrer"
+								>
+									<button className="btn btn-primary px-3 py-2">
+										Get Help
+									</button>
+								</a>
 							</div>
 							<div className="col-4 col-md-2 d-flex justify-content-center align-items-center">
 								{bookingState === 'Confirmed' ? (
-									new Date(booking.tickets[0].departureFlight.departureDate) <=
-									new Date() ? (
+									new Date(
+										booking.tickets[0].departureFlight.departureDateTime
+									) <= new Date() ? (
 										<h6 className="text-success fw-bold text-xl">Completed</h6>
+									) : getTimeDifferenceInHours(
+											booking.tickets[0].departureFlight.departureDateTime
+									  ) <= 24 ? (
+										<button
+											className="btn btn-danger px-3 py-2"
+											disabled={true}
+										>
+											Cancel Booking
+										</button>
 									) : (
 										<button
 											className="btn btn-danger px-3 py-2"
@@ -191,9 +258,9 @@ const BookingCard = ({ booking, type }) => {
 						</>
 					)}
 					{type === 'airline' && (
-						<div className="col-12 col-md-4 d-flex justify-content-center align-items-center ">
+						<div className="col-12 col-md-6 d-flex justify-content-center align-items-center ">
 							<button
-								className="btn btn-success px-3 py-2"
+								className="btn btn-success px-5 py-2"
 								onClick={() => setIsTicketsModalOpen(true)}
 							>
 								View Tickets
@@ -228,9 +295,19 @@ const BookingCard = ({ booking, type }) => {
 				<div className="col-12 col-md-4 d-flex justify-content-between align-items-center">
 					<div className="d-flex flex-column align-items-center">
 						<p>{booking.tickets[0].departureFlight?.departureAirport.city}</p>
-						<p>{formatDateTime(booking.tickets[0].departureFlight?.departureDateTime).date}</p>
 						<p>
-							{formatDateTime(booking.tickets[0].departureFlight?.departureDateTime).time}
+							{
+								formatDateTime(
+									booking.tickets[0].departureFlight?.departureDateTime
+								).date
+							}
+						</p>
+						<p>
+							{
+								formatDateTime(
+									booking.tickets[0].departureFlight?.departureDateTime
+								).time
+							}
 						</p>
 					</div>
 					<div className="d-flex flex-column align-items-center">
@@ -238,8 +315,20 @@ const BookingCard = ({ booking, type }) => {
 					</div>
 					<div className="d-flex flex-column align-items-center">
 						<p>{booking.tickets[0].departureFlight?.arrivalAirport.city}</p>
-						<p>{formatDateTime(booking.tickets[0].departureFlight?.arrivalDateTime).date}</p>
-						<p>{formatDateTime(booking.tickets[0].departureFlight?.arrivalDateTime).time}</p>
+						<p>
+							{
+								formatDateTime(
+									booking.tickets[0].departureFlight?.arrivalDateTime
+								).date
+							}
+						</p>
+						<p>
+							{
+								formatDateTime(
+									booking.tickets[0].departureFlight?.arrivalDateTime
+								).time
+							}
+						</p>
 					</div>
 				</div>
 
@@ -254,15 +343,26 @@ const BookingCard = ({ booking, type }) => {
 							</button>
 						</div>
 						<div className="col-4 col-md-2 d-flex justify-content-center align-items-center ">
-								<button className="btn btn-primary px-3 py-2">
-									Get Help
-								</button>
-							</div>
+							<a
+								href="/customer/dashboard/help"
+								target="_blank"
+								rel="noopener noreferrer"
+							>
+								<button className="btn btn-primary px-3 py-2">Get Help</button>
+							</a>
+						</div>
 						<div className="col-4 col-md-2 d-flex justify-content-center align-items-center">
 							{bookingState === 'Confirmed' ? (
-								new Date(booking.tickets[0].departureFlight.departureDate) <=
-								new Date() ? (
+								new Date(
+									booking.tickets[0].departureFlight.departureDateTime
+								) <= new Date() ? (
 									<h6 className="text-success fw-bold text-xl">Completed</h6>
+								) : getTimeDifferenceInHours(
+										booking.tickets[0].departureFlight.departureDateTime
+								  ) <= 24 ? (
+									<button className="btn btn-danger px-3 py-2" disabled={true}>
+										Cancel Booking
+									</button>
 								) : (
 									<button
 										className="btn btn-danger px-3 py-2"
@@ -290,9 +390,9 @@ const BookingCard = ({ booking, type }) => {
 					</>
 				)}
 				{type === 'airline' && (
-					<div className="col-12 col-md-4 d-flex justify-content-center align-items-center ">
+					<div className="col-12 col-md-6 d-flex justify-content-center align-items-center ">
 						<button
-							className="btn btn-success px-3 py-2"
+							className="btn btn-success px-5 py-2"
 							onClick={() => setIsTicketsModalOpen(true)}
 						>
 							View Tickets

@@ -24,7 +24,7 @@ const generateBorderColor = (hslaColor) => {
 		);
 };
 
-const TopCities = ({ noOfTopCities }) => {
+const TopCities = ({ noOfTopCities, startDate, endDate }) => {
 	const [topCitiesList, setTopCitiesList] = useState([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState(null);
@@ -45,7 +45,7 @@ const TopCities = ({ noOfTopCities }) => {
 			},
 			title: {
 				display: true,
-				text: 'Top Cities by Number of Flights',
+				text: 'Top Cities (Destinations) by Number of Flights',
 				font: {
 					size: 16,
 					weight: 'normal',
@@ -61,7 +61,9 @@ const TopCities = ({ noOfTopCities }) => {
 		const getTopCities = async () => {
 			try {
 				const response = await analyticsService.getTopCitiesByNumberOfFlights(
-					noOfTopCities
+					noOfTopCities,
+					startDate,
+					endDate
 				);
 				setTopCitiesList(response);
 
@@ -96,7 +98,7 @@ const TopCities = ({ noOfTopCities }) => {
 		};
 
 		getTopCities();
-	}, [noOfTopCities]);
+	}, [noOfTopCities, startDate, endDate]);
 
 	if (error) {
 		return (

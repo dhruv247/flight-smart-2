@@ -7,18 +7,10 @@ import { Airport } from '../models/airport.model.js';
  * @returns {Object} airport
  */
 const addAirport = async (req, res) => {
-	
 	try {
-
+		
 		// destructure req body
 		const { airportName, airportCode, city, image } = req.body;
-
-		// mandatory fields
-		if (!airportName || !airportCode || !city || !image) {
-			return res.status(400).json({
-				message: 'All fields are required',
-			});
-		}
 
 		// create new airport
 		const airport = new Airport({ airportName, airportCode, city, image });

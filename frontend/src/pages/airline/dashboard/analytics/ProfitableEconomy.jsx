@@ -23,11 +23,11 @@ ChartJS.register(
 	Legend
 );
 
-const ProfitableEconomy = () => {
+const ProfitableEconomy = ({ startDate, endDate }) => {
 	const [data, setData] = useState({});
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState(null);
-	const [numFlights, setNumFlights] = useState(10);
+	const [numFlights, setNumFlights] = useState(5);
 
 	const options = {
 		responsive: true,
@@ -69,7 +69,9 @@ const ProfitableEconomy = () => {
 		const getProfitableEconomyFlights = async () => {
 			try {
 				const response = await analyticsService.getProfitableEconomyFlights(
-					numFlights
+					numFlights,
+					startDate,
+					endDate
 				);
 
 				const flightNumbers = response.map((item) => item.flightNo);
@@ -99,7 +101,7 @@ const ProfitableEconomy = () => {
 		};
 
 		getProfitableEconomyFlights();
-	}, [numFlights]);
+	}, [numFlights, startDate, endDate]);
 
 	const handleNumFlightsChange = (e) => {
 		setNumFlights(parseInt(e.target.value));

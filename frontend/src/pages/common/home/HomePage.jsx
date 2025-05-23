@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFlightContext } from '../../../hooks/useFlightContext';
 import Navbar from '../../../components/navbars/HomeNavbar';
@@ -7,6 +7,12 @@ import PopularDestinations from './PopularDestinations';
 
 const HomePage = () => {
 	const navigate = useNavigate();
+
+	const [flightTo, setFlightTo] = useState('');
+
+	const changeFlightTo = (destination) => {
+		setFlightTo(destination);
+	};
 
 	const { setFlightSearchData } = useFlightContext();
 
@@ -20,9 +26,9 @@ const HomePage = () => {
 			{/* Navbar */}
 			<Navbar />
 
-			<FlightSearchForm onSubmit={handleSearch} />
+			<FlightSearchForm onSubmit={handleSearch} initialFlightTo={flightTo} />
 
-			<PopularDestinations />
+			<PopularDestinations changeFlightTo={changeFlightTo} />
 		</div>
 	);
 };

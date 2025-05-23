@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAirports } from '../../../hooks/useAirports';
 import useGetUserDetails from '../../../hooks/useGetUserDetails';
 import { useNavigate } from 'react-router-dom';
@@ -14,6 +14,7 @@ const FlightSearchForm = ({
 	initialValues = {},
 	isReadOnly = false,
 	showReturnDate = true,
+	initialFlightTo = '',
 }) => {
 	const navigate = useNavigate();
 	const { airports, isLoading: airportsLoading } = useAirports();
@@ -25,6 +26,8 @@ const FlightSearchForm = ({
 			: null,
 		flightTo: initialValues.flightTo
 			? { value: initialValues.flightTo, label: initialValues.flightTo }
+			: initialFlightTo
+			? { value: initialFlightTo, label: initialFlightTo }
 			: null,
 		departureDate: initialValues.departureDate
 			? new Date(initialValues.departureDate)
@@ -32,10 +35,35 @@ const FlightSearchForm = ({
 		returnDate: initialValues.returnDate
 			? new Date(initialValues.returnDate)
 			: null,
-		passengers: initialValues.passengers || 1,
-		travelClass: initialValues.travelClass || 1,
+		adultPassengers: initialValues.adultPassengers || 1,
+		childPassengers: initialValues.childPassengers || 0,
+		infantPassengers: initialValues.infantPassengers || 0,
+		travelClass: initialValues.travelClass || '1',
 		tripType: initialTripType,
 	});
+
+	const [passengerDropdownOpen, setPassengerDropdownOpen] = useState(false);
+
+	useEffect(() => {
+		setFormData((prev) => {
+			if (initialFlightTo) {
+				return {
+					...prev,
+					flightTo: { value: initialFlightTo, label: initialFlightTo },
+				};
+			}
+			return prev;
+		});
+	}, [initialFlightTo]);
+
+	useEffect(() => {
+		setFormData((prev) => ({
+			...prev,
+			adultPassengers: prev.adultPassengers,
+			childPassengers: prev.childPassengers,
+			infantPassengers: prev.infantPassengers,
+		}));
+	}, [formData.adultPassengers, formData.childPassengers, formData.infantPassengers]);
 
 	// Determine if this is the return flight search form
 	const isReturnFlightForm =
@@ -87,11 +115,6 @@ const FlightSearchForm = ({
 				throw new Error('Departure and arrival cities cannot be the same');
 			}
 
-			// // Check if user is logged in
-			// if (!user && !userLoading) {
-			// 	throw new Error('User not logged in');
-			// }
-			// Format dates to YYYY-MM-DD format before submitting
 			const formattedData = {
 				...formData,
 				flightFrom: formData.flightFrom?.value || '',
@@ -102,7 +125,7 @@ const FlightSearchForm = ({
 				returnDate: formData.returnDate ? formatDate(formData.returnDate) : '',
 			};
 			// If logged in, proceed with search
-			onSubmit({ ...formattedData, tripType });
+			onSubmit({ ...formattedData, tripType, adultPassengers: formData.adultPassengers, childPassengers: formData.childPassengers, infantPassengers: formData.infantPassengers });
 		} catch (error) {
 			if (error.message === 'Departure and arrival cities cannot be the same') {
 				showErrorToast(error.message);
@@ -131,27 +154,36 @@ const FlightSearchForm = ({
 	const today = new Date();
 	const maxDate = new Date(2026, 11, 31); // December 31, 2026
 
-	// Helper function to add days to a date
-	const addDays = (date, days) => {
-		if (!date) return null;
-		const result = new Date(date);
-		result.setDate(result.getDate() + days);
-		return result;
-	};
+	// Transform cities data for react-select and remove duplicates
+	const cityOptions = React.useMemo(() => {
+		const uniqueCities = [...new Set(airports.map((airport) => airport.city))];
+		return uniqueCities.map((city) => ({
+			value: city,
+			label: city,
+		}));
+	}, [airports]);
 
-	// Transform cities data for react-select
-	const cityOptions =
-		airports?.map((airport) => ({
-			value: airport.city,
-			label: airport.city,
-		})) || [];
+	// Filter options for To dropdown based on From selection
+	const toOptions = React.useMemo(() => {
+		return cityOptions.filter(
+			(option) =>
+				!formData.flightFrom || option.value !== formData.flightFrom.value
+		);
+	}, [cityOptions, formData.flightFrom]);
+
+	// Filter options for From dropdown based on To selection
+	const fromOptions = React.useMemo(() => {
+		return cityOptions.filter(
+			(option) => !formData.flightTo || option.value !== formData.flightTo.value
+		);
+	}, [cityOptions, formData.flightTo]);
 
 	return (
 		<div className="container text-center mt-5">
 			<form
 				id="flightSearchForm"
 				onSubmit={handleSubmit}
-				className="border rounded-3 p-4"
+				className="border rounded-3 p-4 bg-white"
 			>
 				{/* Trip Type Radio Buttons */}
 				<div id="tripType" className="mb-3 d-flex justify-content-center gap-4">
@@ -200,17 +232,17 @@ const FlightSearchForm = ({
 				{/* Flight Details Input Fields */}
 				<div className="row">
 					{/* To / From Input Fields */}
-					<div className="col-md-5">
+					<div className="col-md-5 my-2">
 						<div className="d-flex gap-2">
 							<div className="flex-grow-1 border rounded-3 p-2">
-								<p className="text-start mb-1">From</p>
+								<p className="text-start mb-1 fw-semibold">From</p>
 								<Select
 									name="flightFrom"
 									value={formData.flightFrom}
 									onChange={(option) =>
 										handleSelectChange(option, { name: 'flightFrom' })
 									}
-									options={cityOptions}
+									options={fromOptions}
 									placeholder="Enter Departure City"
 									isSearchable
 									isClearable
@@ -243,88 +275,218 @@ const FlightSearchForm = ({
 							</button>
 
 							<div className="flex-grow-1 border rounded-3 p-2">
-								<p className="text-start mb-1">To</p>
+								<p className="text-start mb-1 fw-semibold">To</p>
 								<Select
 									name="flightTo"
 									value={formData.flightTo}
 									onChange={(option) =>
 										handleSelectChange(option, { name: 'flightTo' })
 									}
-									options={cityOptions}
+									options={toOptions}
 									placeholder="Enter Arrival City"
 									isSearchable
 									isClearable
 									isDisabled={isReadOnly}
 									required
-									className="flex-grow-1 text-start"
+									className="flex-grow-1 text-start custom-flightTo"
 								/>
 							</div>
 						</div>
 					</div>
 
-					{/* Date Selection */}
-					<div className="col-md-3 col-12">
-						<div className="d-flex gap-2">
-							<div className="flex-grow-1 border rounded-3 p-2">
-								<p className="text-start mb-1">Departure Date</p>
-								<DatePicker
-									selected={formData.departureDate}
-									onChange={(date) => handleDateChange(date, 'departureDate')}
-									className="form-control"
-									placeholderText="Enter  Departure Date"
-									dateFormat="yyyy-MM-dd"
-									minDate={today}
-									maxDate={maxDate}
-									required
-									disabled={isReadOnly}
-								/>
+					{/* Date Selection one way and round trip */}
+					{tripType === 'oneWay' && (
+						<div className="col-md-3 col-12 my-2">
+							<div className="d-flex gap-2">
+								<div className="flex-grow-1 border rounded-3 p-2 text-start">
+									<p className="text-start mb-1 fw-semibold">Departure Date</p>
+									<DatePicker
+										selected={formData.departureDate}
+										onChange={(date) => handleDateChange(date, 'departureDate')}
+										className="form-control custom-datepicker"
+										placeholderText="Select Departure Date"
+										dateFormat="yyyy-MM-dd"
+										minDate={today}
+										maxDate={maxDate}
+										required
+										disabled={isReadOnly}
+									/>
+								</div>
 							</div>
-							{showReturnDate && tripType === 'roundTrip' && (
+						</div>
+					)}
+					{showReturnDate && tripType === 'roundTrip' && (
+						<div className="col-md-3 col-12 my-2">
+							<div className="d-flex gap-2">
+								<div className="flex-grow-1 border rounded-3 p-2 text-start">
+									<p className="text-start mb-1 fw-semibold">Departure Date</p>
+									<DatePicker
+										selected={formData.departureDate}
+										onChange={(date) => handleDateChange(date, 'departureDate')}
+										className="form-control"
+										placeholderText="Select Departure Date"
+										dateFormat="yyyy-MM-dd"
+										minDate={today}
+										maxDate={maxDate}
+										required
+										disabled={isReadOnly}
+									/>
+								</div>
+
 								<div className="flex-grow-1 border rounded-3 p-2">
-									<p className="text-start mb-1">Return Date</p>
+									<p className="text-start mb-1 fw-semibold">Return Date</p>
 									<DatePicker
 										selected={formData.returnDate}
 										onChange={(date) => handleDateChange(date, 'returnDate')}
 										className="form-control"
-										placeholderText="Enter Return Date"
+										placeholderText="Select Return Date"
 										dateFormat="yyyy-MM-dd"
 										minDate={
-											formData.departureDate
-												? addDays(formData.departureDate, 1)
-												: addDays(today, 1)
+											formData.departureDate ? formData.departureDate : today
 										}
 										maxDate={maxDate}
 										required
 										disabled={isReadOnly}
 									/>
 								</div>
-							)}
+							</div>
 						</div>
-					</div>
-
+					)}
 					{/* No of Travellers / Travel Class */}
-					<div className="col-md-3 col-12">
+					<div className="col-md-3 col-12 my-2">
 						<div className="d-flex gap-2">
-							<div className="flex-grow-1 border rounded-3 p-2">
-								<p className="text-start mb-1">Passengers</p>
-								<select
-									className="form-select"
-									id="passengers"
-									name="passengers"
-									required
-									value={formData.passengers}
-									onChange={handleChange}
-									disabled={isReadOnly}
-								>
-									<option value="1">1</option>
-									<option value="2">2</option>
-									<option value="3">3</option>
-									<option value="4">4</option>
-									<option value="5">5</option>
-								</select>
+							<div
+								className="flex-grow-1 border rounded-3 p-2"
+								style={{ position: 'relative' }}
+							>
+								<p className="text-start mb-1 fw-semibold">Passengers</p>
+								<div className="dropdown">
+									<button
+										type="button"
+										className="form-control text-start"
+										onClick={() => setPassengerDropdownOpen((open) => !open)}
+										disabled={isReadOnly}
+										style={{ position: 'relative' }}
+									>
+										{formData.adultPassengers + formData.childPassengers + formData.infantPassengers}
+										<span className="ms-2">&#9662;</span>
+									</button>
+									{passengerDropdownOpen && (
+										<div
+											className="position-absolute bg-white border rounded shadow p-3"
+											style={{ zIndex: 1000, minWidth: 250, left: 0 }}
+										>
+											<div className="d-flex justify-content-between align-items-center mb-2">
+												<div>
+													<div>Adults</div>
+													<div
+														className="text-muted"
+														style={{ fontSize: '0.85em' }}
+													>
+														(12+ Years)
+													</div>
+												</div>
+												<div>
+													<button
+														type="button"
+														className="btn btn-outline-secondary btn-sm"
+														onClick={() => setFormData((p) => ({ ...p, adultPassengers: Math.max(1, p.adultPassengers - 1) }))}
+														disabled={formData.adultPassengers <= 1}
+													>
+														-
+													</button>
+													<span className="mx-2">{formData.adultPassengers}</span>
+													<button
+														type="button"
+														className="btn btn-outline-secondary btn-sm"
+														onClick={() => setFormData((p) => ({ ...p, adultPassengers: p.adultPassengers + 1 }))}
+														disabled={formData.adultPassengers + formData.childPassengers + formData.infantPassengers >= 9}
+													>
+														+
+													</button>
+												</div>
+											</div>
+											<div className="d-flex justify-content-between align-items-center mb-2">
+												<div>
+													<div>Children</div>
+													<div
+														className="text-muted"
+														style={{ fontSize: '0.85em' }}
+													>
+														(2-12 Years)
+													</div>
+												</div>
+												<div>
+													<button
+														type="button"
+														className="btn btn-outline-secondary btn-sm"
+														onClick={() =>
+															setFormData((p) => ({ ...p, childPassengers: Math.max(0, p.childPassengers - 1) }))
+														}
+														disabled={formData.childPassengers <= 0}
+													>
+														-
+													</button>
+													<span className="mx-2">{formData.childPassengers}</span>
+													<button
+														type="button"
+														className="btn btn-outline-secondary btn-sm"
+														onClick={() =>
+															setFormData((p) => ({ ...p, childPassengers: p.childPassengers + 1 }))
+														}
+														disabled={formData.adultPassengers + formData.childPassengers + formData.infantPassengers >= 9}
+													>
+														+
+													</button>
+												</div>
+											</div>
+											<div className="d-flex justify-content-between align-items-center mb-2">
+												<div>
+													<div>Infant</div>
+													<div
+														className="text-muted"
+														style={{ fontSize: '0.85em' }}
+													>
+														(0-2 Years)
+													</div>
+												</div>
+												<div>
+													<button
+														type="button"
+														className="btn btn-outline-secondary btn-sm"
+														onClick={() =>
+															setFormData((p) => ({ ...p, infantPassengers: Math.max(0, p.infantPassengers - 1) }))
+														}
+														disabled={formData.infantPassengers <= 0}
+													>
+														-
+													</button>
+													<span className="mx-2">{formData.infantPassengers}</span>
+													<button
+														type="button"
+														className="btn btn-outline-secondary btn-sm"
+														onClick={() =>
+															setFormData((p) => ({ ...p, infantPassengers: p.infantPassengers + 1 }))
+														}
+														disabled={formData.adultPassengers + formData.childPassengers + formData.infantPassengers >= 9}
+													>
+														+
+													</button>
+												</div>
+											</div>
+											<button
+												type="button"
+												className="btn btn-primary w-100 mt-2"
+												onClick={() => setPassengerDropdownOpen(false)}
+											>
+												Done
+											</button>
+										</div>
+									)}
+								</div>
 							</div>
 							<div className="flex-grow-1 border rounded-3 p-2">
-								<p className="text-start mb-1">Class</p>
+								<p className="text-start mb-1 fw-semibold">Class</p>
 								<select
 									className="form-select"
 									id="travelClass"

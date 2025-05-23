@@ -345,7 +345,7 @@ const TicketsModal = ({ isOpen, onClose, booking }) => {
 								</div>
 
 								{/* Booking Information */}
-								<div className="card">
+								<div className="card mb-4">
 									<div className="card-body">
 										<h6 className="card-subtitle mb-3 text-muted">
 											Booking Information
@@ -386,6 +386,20 @@ const TicketsModal = ({ isOpen, onClose, booking }) => {
 											</div>
 											<div className="col-md-6"></div>
 										</div>
+									</div>
+								</div>
+
+								{/* Cancellation Rules */}
+								<div className="card">
+									<div className="card-body">
+										<h6 className="card-subtitle mb-3 text-muted">
+											Cancellation Rules
+										</h6>
+										<p>
+											Bookings can only be cancelled 24 hours before the
+											departure time (in case of round trip, 24 hours before the
+											departure time of the first flight).
+										</p>
 									</div>
 								</div>
 							</div>

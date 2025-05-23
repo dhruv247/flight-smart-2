@@ -21,7 +21,7 @@ ChartJS.register(
 	Legend
 );
 
-const BusyDates = () => {
+const BusyDates = ({ startDate, endDate }) => {
 	const [data, setData] = useState({});
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState(null);
@@ -65,7 +65,10 @@ const BusyDates = () => {
 	useEffect(() => {
 		const getBusyDates = async () => {
 			try {
-				const response = await analyticsService.getTopDatesByNumberOfFlights();
+				const response = await analyticsService.getTopDatesByNumberOfFlights(
+					startDate,
+					endDate
+				);
 
 				const dates = response.map((item) =>
 					new Date(item.date).toLocaleDateString()
@@ -94,7 +97,7 @@ const BusyDates = () => {
 		};
 
 		getBusyDates();
-	}, []);
+	}, [startDate, endDate]);
 
 	if (error) {
 		return (

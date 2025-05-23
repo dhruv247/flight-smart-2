@@ -28,6 +28,7 @@ const bookingSchema = new mongoose.Schema(
 		tickets: [embeddedTicketSchema],
 		bookingPrice: { type: Number, required: true },
 		confirmed: { type: Boolean, default: true, required: true },
+		pnr: { type: String, required: true, unique: true },
 	},
 	{
 		timestamps: true,

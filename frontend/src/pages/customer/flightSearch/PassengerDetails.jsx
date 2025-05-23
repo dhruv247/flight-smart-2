@@ -12,7 +12,7 @@ import Loading from '../../../components/Loading';
 
 const PassengerDetails = () => {
 	const navigate = useNavigate();
-	const { currentBooking, setCurrentBooking } = useFlightContext();
+	const { currentBooking, clearFlightData, flightSearchData } = useFlightContext();
 
 	const [bookingDetails, setBookingDetails] = useState(null);
 	const { user, isLoading: userLoading } = useGetUserDetails();
@@ -320,8 +320,8 @@ const PassengerDetails = () => {
 					);
 				}
 
-				setCurrentBooking(null);
-				navigate('/customer/dashboard');
+				clearFlightData();
+				navigate('/customer/dashboard/bookings');
 			} catch (error) {
 				showErrorToast(
 					error.response?.data?.message || 'Error creating booking'
@@ -396,7 +396,6 @@ const PassengerDetails = () => {
 					<i className="bi bi-person-lines-fill me-2 fs-4"></i>
 					<div className="d-flex flex-column gap-1">
 						<h4 className="mb-0">Passenger Details</h4>
-						<h6>Atleast 1 adult (18+) must be present</h6>
 					</div>
 				</div>
 				<div className="card-body p-4">

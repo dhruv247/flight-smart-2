@@ -7,7 +7,7 @@ import ProtectedAirlineRoute from './routeProtection/ProtectedAirlineRoute';
 import ProtectedHomePageRoute from './routeProtection/ProtectedHomePageRoute';
 import ProtectedDepartureFlightsRoute from './routeProtection/ProtectedDepartureFlightsRoute';
 import SignupPage from '../pages/common/register/SignupPage';
-import LoginPage from '../pages/common/login/LoginPage';
+import LoginForm from '../pages/common/LoginForm';
 import HomePage from '../pages/common/home/HomePage';
 import AdminDashboardLayout from '../pages/admin/dashboard/AdminDashboardLayout';
 import AdminDashboardAnalytics from '../pages/admin/dashboard/analytics/AdminDashboardAnalytics';
@@ -47,7 +47,7 @@ const AppRoutes = () => {
 				path="/login"
 				element={
 					<ProtectedPublicRoute>
-						<LoginPage />
+						<LoginForm />
 					</ProtectedPublicRoute>
 				}
 			/>

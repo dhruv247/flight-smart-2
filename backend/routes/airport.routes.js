@@ -1,6 +1,9 @@
 import express from 'express';
 import { verifyAdmin } from '../middlewares/auth.middlewares.js';
-import { addAirport, getAllAirports } from '../controllers/airport.controller.js';
+import {
+	addAirport,
+	getAllAirports,
+} from '../controllers/airport.controller.js';
 
 const router = express.Router();
 

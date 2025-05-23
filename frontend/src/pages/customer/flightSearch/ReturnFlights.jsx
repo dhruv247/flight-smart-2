@@ -6,23 +6,31 @@ import Navbar from '../../../components/navbars/HomeNavbar';
 import FlightSorting from './FlightSorting';
 import { showErrorToast } from '../../../utils/toast';
 import Loading from '../../../components/Loading';
+import Pagination from '../../../components/Pagination';
+import { Link } from 'react-router-dom';
 
 const ReturnFlights = () => {
 	// For the list of searched flights
 	const [returnFlightsList, setReturnFlightsList] = useState([]);
-	const { flightSearchData } = useFlightContext();
+	const { flightSearchData, selectedDepartureFlightArrivalTime } =
+		useFlightContext();
 	const [isLoading, setIsLoading] = useState(true);
+	const [currentPage, setCurrentPage] = useState(0);
+	const [totalPages, setTotalPages] = useState(0);
+	const [sortOption, setSortOption] = useState('bestFlight');
+	const pageSize = 10;
 
 	// Automatically search for return flights on component mount
 	useEffect(() => {
-		if (flightSearchData.returnDate) {
+		if (flightSearchData?.returnDate) {
 			searchReturnFlights();
 		}
-	}, []);
+	}, [currentPage]);
 
 	const searchReturnFlights = async () => {
 		try {
 			setIsLoading(true);
+			setSortOption('bestFlight');
 
 			// Format date to ensure consistent format for API
 			const formatDate = (date) => {
@@ -44,19 +52,33 @@ const ReturnFlights = () => {
 			const response = await axios.post(
 				'http://localhost:8000/api/flights/search-flights',
 				{
-					flightFrom: flightSearchData.flightTo,
-					flightTo: flightSearchData.flightFrom,
-					departureDate: formatDate(flightSearchData.returnDate),
-					returnDate: null,
+					flightFrom: flightSearchData.flightFrom,
+					flightTo: flightSearchData.flightTo,
+					departureDate: formatDate(flightSearchData.departureDate),
+					returnDate: formatDate(flightSearchData.returnDate),
 					travelClass: flightSearchData.travelClass,
-					passengers: flightSearchData.passengers,
+					passengers: flightSearchData.adultPassengers + flightSearchData.childPassengers + flightSearchData.infantPassengers,
+					departureFlightArrivalTime: selectedDepartureFlightArrivalTime,
+					page: currentPage,
+					size: pageSize,
 				},
-				{ withCredentials: true } // Add credentials for authentication
+				{ withCredentials: true }
 			);
-			setReturnFlightsList(response.data.departureFlights);
+
+			// Ensure we have valid data before setting state
+			if (response.data && Array.isArray(response.data.returnFlights)) {
+				setReturnFlightsList(response.data.returnFlights);
+				setTotalPages(response.data.totalReturnPages || 0);
+			} else {
+				setReturnFlightsList([]);
+				setTotalPages(0);
+			}
+
 			setIsLoading(false);
 		} catch (error) {
 			setIsLoading(false);
+			setReturnFlightsList([]);
+			setTotalPages(0);
 			console.error('Error searching flights:', error);
 
 			if (error.response) {
@@ -98,11 +120,33 @@ const ReturnFlights = () => {
 	};
 
 	const handleSort = (value) => {
+		setSortOption(value);
 		setReturnFlightsList((prevFlights) => {
 			const sortedFlights = [...prevFlights];
-			if (value === 'price') {
+			if (value === 'bestFlight' && flightSearchData.travelClass === '1') {
+				sortedFlights.sort(
+					(a, b) =>
+						a.economyCurrentPrice +
+						a.duration -
+						(b.economyCurrentPrice + b.duration)
+				);
+			} else if (
+				value === 'bestFlight' &&
+				flightSearchData.travelClass === '2'
+			) {
+				sortedFlights.sort(
+					(a, b) =>
+						a.businessCurrentPrice +
+						a.duration -
+						(b.businessCurrentPrice + b.duration)
+				);
+			} else if (value === 'price' && flightSearchData.travelClass === '1') {
 				sortedFlights.sort(
 					(a, b) => a.economyCurrentPrice - b.economyCurrentPrice
+				);
+			} else if (value === 'price' && flightSearchData.travelClass === '2') {
+				sortedFlights.sort(
+					(a, b) => a.businessCurrentPrice - b.businessCurrentPrice
 				);
 			} else if (value === 'duration') {
 				sortedFlights.sort((a, b) => a.duration - b.duration);
@@ -111,9 +155,20 @@ const ReturnFlights = () => {
 		});
 	};
 
+	const handlePageChange = (newPage) => {
+		setCurrentPage(newPage);
+	};
+
 	return (
 		<div className="bg-light vh-100 text-center">
 			<Navbar />
+			<div className="d-flex justify-content-start container mt-5">
+				<Link to="/customer/departureFlights">
+					<button className="btn btn-primary px-3 py-2">
+						<i className="bi bi-arrow-left"></i> Go Back
+					</button>
+				</Link>
+			</div>
 			<div className="my-4">
 				<h3>Select Your Return Flight</h3>
 				<p>
@@ -127,54 +182,61 @@ const ReturnFlights = () => {
 				id="displayFlightsSection"
 				className="container d-flex flex-column mt-5"
 			>
-				<FlightSorting onSort={handleSort} />
+				<FlightSorting onSort={handleSort} selectedOption={sortOption} />
 
 				{isLoading ? (
 					<Loading />
-				) : returnFlightsList.length === 0 ? (
+				) : !returnFlightsList || returnFlightsList.length === 0 ? (
 					<div className="alert alert-info my-4" role="alert">
 						No return flights found for this route on the selected date. Please
 						go back and select a different return date.
 					</div>
 				) : (
-					<div id="sampleFlights">
-						<div className="row border border-subtle rounded m-0 mb-3 py-2 align-items-center bg-white fw-bold">
-							<div className="col-12 col-md-1">
-								<p className="mb-0">Flight No</p>
-							</div>
-							<div className="col-12 col-md-1">
-								<p className="mb-0">Airline</p>
-							</div>
-							<div className="col-12 col-md-1">
-								<p className="mb-0">Aircraft</p>
-							</div>
-							<div className="col-12 col-md-3 d-flex justify-content-evenly align-items-center">
-								<div className="align-items-center">
-									<p className="mb-0">From</p>
+					<>
+						<div id="sampleFlights">
+							<div className="row border border-subtle rounded m-0 mb-3 py-2 align-items-center bg-white fw-bold">
+								<div className="col-12 col-md-1">
+									<p className="mb-0">Flight No</p>
 								</div>
-								<p className="mb-0"></p>
-								<div className="align-items-center">
-									<p className="mb-0">To</p>
+								<div className="col-12 col-md-1">
+									<p className="mb-0">Airline</p>
+								</div>
+								<div className="col-12 col-md-1">
+									<p className="mb-0">Plane</p>
+								</div>
+								<div className="col-12 col-md-3 d-flex justify-content-evenly align-items-center">
+									<div className="align-items-center">
+										<p className="mb-0">From</p>
+									</div>
+									<p className="mb-0"></p>
+									<div className="align-items-center">
+										<p className="mb-0">To</p>
+									</div>
+								</div>
+								<div className="col-12 col-md-2">
+									<p className="mb-0">Duration</p>
+								</div>
+								<div className="col-12 col-md-2">
+									<p className="mb-0">Price</p>
 								</div>
 							</div>
-							<div className="col-12 col-md-2">
-								<p className="mb-0">Duration</p>
-							</div>
-							<div className="col-12 col-md-2">
-								<p className="mb-0">Price</p>
-							</div>
+							{returnFlightsList.map((flight, index) => (
+								<FlightCard
+									key={index}
+									flight={flight}
+									travelClass={flightSearchData.travelClass}
+									passengers={flightSearchData.adultPassengers + flightSearchData.childPassengers + flightSearchData.infantPassengers}
+									tripType="roundTrip"
+									isReturnFlight={true}
+								/>
+							))}
 						</div>
-						{returnFlightsList.map((flight, index) => (
-							<FlightCard
-								key={index}
-								flight={flight}
-								travelClass={flightSearchData.travelClass}
-								passengers={flightSearchData.passengers}
-								tripType="roundTrip"
-								isReturnFlight={true}
-							/>
-						))}
-					</div>
+						<Pagination
+							searchParams={{ page: currentPage }}
+							handlePageChange={handlePageChange}
+							totalPages={totalPages}
+						/>
+					</>
 				)}
 			</div>
 		</div>

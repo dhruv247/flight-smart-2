@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './PopularDestinations.css';
 
-const PopularDestinations = () => {
+const PopularDestinations = ({ changeFlightTo }) => {
 	const [popularDestinations, setPopularDestinations] = useState([]);
 
 	useEffect(() => {
@@ -21,7 +21,10 @@ const PopularDestinations = () => {
 			<div className="d-flex flex-column flex-md-row my-5 gap-3">
 				{popularDestinations.map((destination) => (
 					<div className="col" key={destination._id}>
-						<div className="card h-100 shadow-sm hover-card">
+						<div
+							className="card h-100 shadow-sm hover-card"
+							onClick={() => changeFlightTo(destination.name)}
+						>
 							<img
 								className="card-img-top"
 								src={destination.image}

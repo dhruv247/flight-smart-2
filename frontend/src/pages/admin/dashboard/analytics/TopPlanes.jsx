@@ -23,7 +23,7 @@ ChartJS.register(
 	Legend
 );
 
-const TopPlanes = ({ noOfTopPlanes }) => {
+const TopPlanes = ({ noOfTopPlanes, startDate, endDate }) => {
 	const [topPlanesList, setTopPlanesList] = useState([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState(null);
@@ -75,7 +75,9 @@ const TopPlanes = ({ noOfTopPlanes }) => {
 		const getTopPlanes = async () => {
 			try {
 				const response = await analyticsService.getTopPlanesByNumberOfFlights(
-					noOfTopPlanes
+					noOfTopPlanes,
+					startDate,
+					endDate
 				);
 				setTopPlanesList(response);
 
@@ -109,7 +111,7 @@ const TopPlanes = ({ noOfTopPlanes }) => {
 		};
 
 		getTopPlanes();
-	}, [noOfTopPlanes]);
+	}, [noOfTopPlanes, startDate, endDate]);
 
 	if (error) {
 		return (

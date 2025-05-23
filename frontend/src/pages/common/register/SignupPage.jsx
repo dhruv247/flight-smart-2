@@ -12,8 +12,7 @@ const SignupPage = () => {
 
 	return (
 		<div className="container mt-5 text-center">
-			<h1>Register</h1>
-			<div className="mt-5 btn-group" role="group">
+			<div className="btn-group mb-3" role="group">
 				<input
 					type="radio"
 					className="btn-check"
@@ -46,11 +45,6 @@ const SignupPage = () => {
 			{/* Conditional form rendering */}
 			{userType === 'customer' && <CustomerSignupForm />}
 			{userType === 'airline' && <AirlineSignupForm />}
-
-			<p>Already a user? Login <Link to='/login'>here</Link>.</p>
-			<Link to="/">
-				<button className="btn btn-outline-primary mt-3 mb-5">Back to home</button>
-			</Link>
 		</div>
 	);
 };

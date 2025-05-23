@@ -24,7 +24,7 @@ const generateBorderColor = (hslaColor) => {
 		);
 };
 
-const TopAirlines = ({ noOfTopAirlines }) => {
+const TopAirlines = ({ noOfTopAirlines, startDate, endDate }) => {
 	const [topAirlinesList, setTopAirlinesList] = useState([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState(null);
@@ -62,7 +62,9 @@ const TopAirlines = ({ noOfTopAirlines }) => {
 		const getTopAirlines = async () => {
 			try {
 				const response = await analyticsService.getTopAirlinesByNumberOfFlights(
-					noOfTopAirlines
+					noOfTopAirlines,
+					startDate,
+					endDate
 				);
 				setTopAirlinesList(response);
 
@@ -97,7 +99,7 @@ const TopAirlines = ({ noOfTopAirlines }) => {
 		};
 
 		getTopAirlines();
-	}, [noOfTopAirlines]);
+	}, [noOfTopAirlines, startDate, endDate]);
 
 	if (error) {
 		return (

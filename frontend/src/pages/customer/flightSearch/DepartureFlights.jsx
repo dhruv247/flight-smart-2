@@ -7,6 +7,8 @@ import FlightSearchForm from './FlightSearchForm';
 import FlightSorting from './FlightSorting';
 import { showErrorToast } from '../../../utils/toast';
 import Loading from '../../../components/Loading';
+import { Link } from 'react-router-dom';
+import Pagination from '../../../components/Pagination';
 
 const DepartureFlights = () => {
 	// For the list of searched flights
@@ -14,6 +16,10 @@ const DepartureFlights = () => {
 	const [departureFlightsList, setDepartureFlightsList] = useState([]);
 	const { flightSearchData, setFlightSearchData } = useFlightContext();
 	const [isLoading, setIsLoading] = useState(true);
+	const [currentPage, setCurrentPage] = useState(0);
+	const [totalPages, setTotalPages] = useState(0);
+	const [sortOption, setSortOption] = useState('bestFlight');
+	const pageSize = 10;
 
 	/**
 	 * Load the flights when the page loades
@@ -22,7 +28,7 @@ const DepartureFlights = () => {
 		if (flightSearchData) {
 			handleSearch(flightSearchData);
 		}
-	}, []);
+	}, [currentPage]);
 
 	/**
 	 * Handles the flight search functionality on the departureFlight page
@@ -34,7 +40,7 @@ const DepartureFlights = () => {
 	const handleSearch = async (formData) => {
 		try {
 			setIsLoading(true);
-
+			setSortOption('bestFlight');
 			// Ensure proper date formatting
 			const formatDate = (date) => {
 				if (!date) return null;
@@ -75,12 +81,15 @@ const DepartureFlights = () => {
 							? formatDate(formData.returnDate)
 							: null,
 					travelClass: formData.travelClass,
-					passengers: formData.passengers,
+					passengers: formData.adultPassengers + formData.childPassengers + formData.infantPassengers,
+					page: currentPage,
+					size: pageSize,
 				},
 				{ withCredentials: true }
 			);
 			setResponseMessage(response.data.message);
 			setDepartureFlightsList(response.data.departureFlights);
+			setTotalPages(response.data.totalPages);
 			setIsLoading(false);
 		} catch (error) {
 			setIsLoading(false);
@@ -151,11 +160,33 @@ const DepartureFlights = () => {
 	 * 2. Add a separate sort for considering business class in the future
 	 */
 	const handleSort = (value) => {
+		setSortOption(value);
 		setDepartureFlightsList((prevFlights) => {
 			const sortedFlights = [...prevFlights];
-			if (value === 'price') {
+			if (value === 'bestFlight' && flightSearchData.travelClass === '1') {
+				sortedFlights.sort(
+					(a, b) =>
+						a.economyCurrentPrice +
+						a.duration -
+						(b.economyCurrentPrice + b.duration)
+				);
+			} else if (
+				value === 'bestFlight' &&
+				flightSearchData.travelClass === '2'
+			) {
+				sortedFlights.sort(
+					(a, b) =>
+						a.businessCurrentPrice +
+						a.duration -
+						(b.businessCurrentPrice + b.duration)
+				);
+			} else if (value === 'price' && flightSearchData.travelClass === '1') {
 				sortedFlights.sort(
 					(a, b) => a.economyCurrentPrice - b.economyCurrentPrice
+				);
+			} else if (value === 'price' && flightSearchData.travelClass === '2') {
+				sortedFlights.sort(
+					(a, b) => a.businessCurrentPrice - b.businessCurrentPrice
 				);
 			} else if (value === 'duration') {
 				sortedFlights.sort((a, b) => a.duration - b.duration);
@@ -164,9 +195,20 @@ const DepartureFlights = () => {
 		});
 	};
 
+	const handlePageChange = (newPage) => {
+		setCurrentPage(newPage);
+	};
+
 	return (
 		<div className="bg-light vh-100 text-center">
 			<Navbar />
+			<div className="d-flex justify-content-start container mt-5">
+				<Link to="/">
+					<button className="btn btn-primary px-3 py-2">
+						<i class="bi bi-arrow-left"></i> Go Back
+					</button>
+				</Link>
+			</div>
 			<FlightSearchForm
 				onSubmit={handleSearch}
 				initialValues={flightSearchData}
@@ -177,13 +219,14 @@ const DepartureFlights = () => {
 				id="displayFlightsSection"
 				className="container d-flex flex-column mt-5"
 			>
-				<FlightSorting onSort={handleSort} />
+				<FlightSorting onSort={handleSort} selectedOption={sortOption} />
 				{isLoading ? (
 					<Loading />
-				) : responseMessage === 'No departure flights available for this round trip' ? (
+				) : responseMessage ===
+				  'No departure flights available for this round trip' ? (
 					<div className="alert alert-info my-4" role="alert">
-						No departure flights available for this round trip. Please try different
-						departure dates or destinations.
+						No departure flights available for this round trip. Please try
+						different departure dates or destinations.
 					</div>
 				) : responseMessage === 'No return flights available for this route' ? (
 					<div className="alert alert-info my-4" role="alert">
@@ -196,44 +239,51 @@ const DepartureFlights = () => {
 						departure dates or destinations.
 					</div>
 				) : (
-					<div id="sampleFlights">
-						<div className="row border border-subtle rounded m-0 mb-3 py-2 align-items-center bg-white fw-bold">
-							<div className="col-12 col-md-1">
-								<p className="mb-0">Flight No</p>
-							</div>
-							<div className="col-12 col-md-1">
-								<p className="mb-0">Airline</p>
-							</div>
-							<div className="col-12 col-md-1">
-								<p className="mb-0">Aircraft</p>
-							</div>
-							<div className="col-12 col-md-3 d-flex justify-content-evenly align-items-center">
-								<div className="align-items-center">
-									<p className="mb-0">From</p>
+					<>
+						<div id="sampleFlights">
+							<div className="row border border-subtle rounded m-0 mb-3 py-2 align-items-center bg-white fw-bold">
+								<div className="col-12 col-md-1">
+									<p className="mb-0">Flight No</p>
 								</div>
-								<p className="mb-0"></p>
-								<div className="align-items-center">
-									<p className="mb-0">To</p>
+								<div className="col-12 col-md-1">
+									<p className="mb-0">Airline</p>
+								</div>
+								<div className="col-12 col-md-1">
+									<p className="mb-0">Plane</p>
+								</div>
+								<div className="col-12 col-md-3 d-flex justify-content-evenly align-items-center">
+									<div className="align-items-center">
+										<p className="mb-0">From</p>
+									</div>
+									<p className="mb-0"></p>
+									<div className="align-items-center">
+										<p className="mb-0">To</p>
+									</div>
+								</div>
+								<div className="col-12 col-md-2">
+									<p className="mb-0">Duration</p>
+								</div>
+								<div className="col-12 col-md-2">
+									<p className="mb-0">Price</p>
 								</div>
 							</div>
-							<div className="col-12 col-md-2">
-								<p className="mb-0">Duration</p>
-							</div>
-							<div className="col-12 col-md-2">
-								<p className="mb-0">Price</p>
-							</div>
+							{departureFlightsList.map((flight, index) => (
+								<FlightCard
+									key={index}
+									flight={flight}
+									travelClass={flightSearchData.travelClass}
+									passengers={flightSearchData.adultPassengers + flightSearchData.childPassengers + flightSearchData.infantPassengers}
+									tripType={flightSearchData.tripType}
+									isReturnFlight={false}
+								/>
+							))}
 						</div>
-						{departureFlightsList.map((flight, index) => (
-							<FlightCard
-								key={index}
-								flight={flight}
-								travelClass={flightSearchData.travelClass}
-								passengers={flightSearchData.passengers}
-								tripType={flightSearchData.tripType}
-								isReturnFlight={false}
-							/>
-						))}
-					</div>
+						<Pagination
+							searchParams={{ page: currentPage }}
+							handlePageChange={handlePageChange}
+							totalPages={totalPages}
+						/>
+					</>
 				)}
 			</div>
 		</div>

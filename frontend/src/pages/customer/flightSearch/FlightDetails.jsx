@@ -4,11 +4,15 @@ import axios from 'axios';
 import Loading from '../../../components/Loading';
 
 const FlightDetails = () => {
-	const { currentBooking } = useFlightContext();
+	const { currentBooking, flightSearchData } = useFlightContext();
 	const [departureFlight, setDepartureFlight] = useState(null);
 	const [returnFlight, setReturnFlight] = useState(null);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState(null);
+	const [adultsDiscount, setAdultsDiscount] = useState(0);
+	const [childrenDiscount, setChildrenDiscount] = useState(0);
+	const [infantsDiscount, setInfantsDiscount] = useState(0);
+	const [totalBookingPrice, setTotalBookingPrice] = useState(0);
 
 	const departureFlightId = currentBooking?.departureFlightId;
 	const returnFlightId = currentBooking?.returnFlightId;
@@ -55,6 +59,70 @@ const FlightDetails = () => {
 		if (returnFlightId) fetchFlight(returnFlightId, setReturnFlight);
 	}, [departureFlightId, returnFlightId]);
 
+	useEffect(() => {
+		const fetchDiscounts = async () => {
+			const res = await axios.get(
+				'http://localhost:8000/api/discounts/get-discounts?discountType=ageBased'
+			);
+			res.data.forEach((discount) => {
+				if (discount.discountFor === 'adults') {
+					setAdultsDiscount(discount.discountValue);
+				} else if (discount.discountFor === 'children') {
+					setChildrenDiscount(discount.discountValue);
+				} else if (discount.discountFor === 'infants') {
+					setInfantsDiscount(discount.discountValue);
+				}
+			});
+		};
+		fetchDiscounts();
+	}, []);
+
+	useEffect(() => {
+		if (!departureFlight || !currentBooking) return;
+
+		const departureFlightPrice =
+			currentBooking.seatType === 'business'
+				? departureFlight.businessCurrentPrice
+				: departureFlight.economyCurrentPrice;
+
+		const returnFlightPrice = returnFlight
+			? currentBooking.seatType === 'business'
+				? returnFlight.businessCurrentPrice
+				: returnFlight.economyCurrentPrice
+			: 0;
+
+		const totalPrice =
+			departureFlightPrice * flightSearchData.adultPassengers +
+			Math.round((departureFlightPrice *
+				flightSearchData.childPassengers *
+				(100 - childrenDiscount)) /
+				100) +
+			Math.round((departureFlightPrice *
+				flightSearchData.infantPassengers *
+				(100 - infantsDiscount)) /
+				100) +
+			returnFlightPrice * flightSearchData.adultPassengers +
+			Math.round((returnFlightPrice *
+				flightSearchData.childPassengers *
+				(100 - childrenDiscount)) /
+				100) +
+			Math.round((returnFlightPrice *
+				flightSearchData.infantPassengers *
+				(100 - infantsDiscount)) /
+				100);
+
+		setTotalBookingPrice(totalPrice);
+	}, [
+		adultsDiscount,
+		childrenDiscount,
+		infantsDiscount,
+		departureFlight,
+		returnFlight,
+		flightSearchData,
+		currentBooking.seatType,
+		currentBooking,
+	]);
+
 	if (!departureFlightId) {
 		return (
 			<div className="alert alert-info" role="alert">
@@ -66,12 +134,6 @@ const FlightDetails = () => {
 
 	if (loading) return <Loading />;
 	if (error) return <div className="alert alert-danger">{error}</div>;
-
-	// const departureFlightDepartureDateTime = formatDateTime(departureFlight.departureDateTime);
-	// const departureFlightArrivalDateTime = formatDateTime(departureFlight.arrivalDateTime);
-
-	// const returnFlightDepartureDateTime = formatDateTime(returnFlight.departureDateTime);
-	// const returnFlightArrivalDateTime = formatDateTime(returnFlight.arrivalDateTime);
 
 	return (
 		<div className="card shadow-lg border-0" style={{ background: '#f8f9fa' }}>
@@ -135,7 +197,9 @@ const FlightDetails = () => {
 							</div>
 							<div className="col-12 col-md-6">
 								<span className="fw-semibold">Duration:</span>{' '}
-								{Math.floor(departureFlight.duration / 60)} hr : {(departureFlight.duration % 60).toString().padStart(2, '0')} min
+								{Math.floor(departureFlight.duration / 60)} hr :{' '}
+								{(departureFlight.duration % 60).toString().padStart(2, '0')}{' '}
+								min
 							</div>
 							<div className="col-12 col-md-6">
 								<span className="fw-semibold">Class:</span>{' '}
@@ -144,6 +208,87 @@ const FlightDetails = () => {
 									: 'Economy'}
 							</div>
 						</div>
+						<table className="table table-bordered mt-3">
+							<thead>
+								<tr>
+									<th>Passenger Type</th>
+									<th>Original Price</th>
+									<th>Discount Applicable</th>
+									<th>Discounted Price</th>
+								</tr>
+							</thead>
+							<tbody>
+								{flightSearchData.adultPassengers > 0 &&
+									[...Array(flightSearchData.adultPassengers)].map((_, i) => (
+										<tr>
+											<td>Adult</td>
+											<td>
+												{currentBooking.seatType === 'business'
+													? departureFlight.businessCurrentPrice
+													: departureFlight.economyCurrentPrice}
+											</td>
+											<td>{adultsDiscount}%</td>
+											<td>
+												{currentBooking.seatType === 'business'
+													? Math.round(
+															departureFlight.businessCurrentPrice *
+																(1 - adultsDiscount / 100)
+													  )
+													: Math.round(
+															departureFlight.economyCurrentPrice *
+																(1 - adultsDiscount / 100)
+													  )}
+											</td>
+										</tr>
+									))}
+								{flightSearchData.childPassengers > 0 &&
+									[...Array(flightSearchData.childPassengers)].map((_, i) => (
+										<tr>
+											<td>Child</td>
+											<td>
+												{currentBooking.seatType === 'business'
+													? departureFlight.businessCurrentPrice
+													: departureFlight.economyCurrentPrice}
+											</td>
+											<td>{childrenDiscount}%</td>
+											<td>
+												{currentBooking.seatType === 'business'
+													? Math.round(
+															departureFlight.businessCurrentPrice *
+																(1 - childrenDiscount / 100)
+													  )
+													: Math.round(
+															departureFlight.economyCurrentPrice *
+																(1 - childrenDiscount / 100)
+													  )}
+											</td>
+										</tr>
+									))}
+								{flightSearchData.infantPassengers > 0 &&
+									[...Array(flightSearchData.infantPassengers)].map((_, i) => (
+										<tr>
+											<td>Infant</td>
+											<td>
+												{currentBooking.seatType === 'business'
+													? departureFlight.businessCurrentPrice
+													: departureFlight.economyCurrentPrice}
+											</td>
+											<td>{infantsDiscount}%</td>
+											<td>
+												{currentBooking.seatType === 'business'
+													? Math.round(
+															departureFlight.businessCurrentPrice *
+																(1 - infantsDiscount / 100)
+													  )
+													: Math.round(
+															departureFlight.economyCurrentPrice *
+																(1 - infantsDiscount / 100)
+													  )}
+											</td>
+										</tr>
+									))}
+							</tbody>
+						</table>
 					</div>
 				)}
 				{/* Return Flight */}
@@ -195,15 +340,108 @@ const FlightDetails = () => {
 							</div>
 							<div className="col-12 col-md-6">
 								<span className="fw-semibold">Duration:</span>{' '}
-								{Math.floor(returnFlight.duration / 60)} hr : {(returnFlight.duration % 60).toString().padStart(2, '0')} min
+								{Math.floor(returnFlight.duration / 60)} hr :{' '}
+								{(returnFlight.duration % 60).toString().padStart(2, '0')} min
 							</div>
 							<div className="col-12 col-md-6">
 								<span className="fw-semibold">Class:</span>{' '}
 								{returnFlight.seatType === 'business' ? 'Business' : 'Economy'}
 							</div>
 						</div>
+						<table className="table table-bordered mt-3">
+							<thead>
+								<tr>
+									<th>Passenger Type</th>
+									<th>Original Price</th>
+									<th>Discount Applicable</th>
+									<th>Discounted Price</th>
+								</tr>
+							</thead>
+							<tbody>
+								{flightSearchData.adultPassengers > 0 &&
+									[...Array(flightSearchData.adultPassengers)].map((_, i) => (
+										<tr>
+											<td>Adult</td>
+											<td>
+												{currentBooking.seatType === 'business'
+													? returnFlight.businessCurrentPrice
+													: returnFlight.economyCurrentPrice}
+											</td>
+											<td>{adultsDiscount}%</td>
+											<td>
+												{currentBooking.seatType === 'business'
+													? Math.round(
+															returnFlight.businessCurrentPrice *
+																(1 - adultsDiscount / 100)
+													  )
+													: Math.round(
+															returnFlight.economyCurrentPrice *
+																(1 - adultsDiscount / 100)
+													  )}
+											</td>
+										</tr>
+									))}
+								{flightSearchData.childPassengers > 0 &&
+									[...Array(flightSearchData.childPassengers)].map((_, i) => (
+										<tr>
+											<td>Child</td>
+											<td>
+												{currentBooking.seatType === 'business'
+													? returnFlight.businessCurrentPrice
+													: returnFlight.economyCurrentPrice}
+											</td>
+											<td>{childrenDiscount}%</td>
+											<td>
+												{currentBooking.seatType === 'business'
+													? Math.round(
+															returnFlight.businessCurrentPrice *
+																(1 - childrenDiscount / 100)
+													  )
+													: Math.round(
+															returnFlight.economyCurrentPrice *
+																(1 - childrenDiscount / 100)
+													  )}
+											</td>
+										</tr>
+									))}
+								{flightSearchData.infantPassengers > 0 &&
+									[...Array(flightSearchData.infantPassengers)].map((_, i) => (
+										<tr>
+											<td>Infant</td>
+											<td>
+												{currentBooking.seatType === 'business'
+													? returnFlight.businessCurrentPrice
+													: returnFlight.economyCurrentPrice}
+											</td>
+											<td>{infantsDiscount}%</td>
+											<td>
+												{currentBooking.seatType === 'business'
+													? Math.round(
+															returnFlight.businessCurrentPrice *
+																(1 - infantsDiscount / 100)
+													  )
+													: Math.round(
+															returnFlight.economyCurrentPrice *
+																(1 - infantsDiscount / 100)
+													  )}
+											</td>
+										</tr>
+									))}
+							</tbody>
+						</table>
 					</div>
 				)}
+
+				<div className="border-top pt-4 mt-4">
+					<div className="d-flex align-items-center mb-2 text-primary">
+						<i className="bi bi-cash-coin me-2"></i>
+						<span className="fw-semibold">Total Booking Price: </span>
+						<span className="fw-semibold text-black ms-2">₹{totalBookingPrice}</span>
+					</div>
+					<div className="text-muted small">
+						Cancellation Refund Policy: 100% refund if cancelled 24 hours before departure (in case of round trip, 24 hours before the first flight).
+					</div>
+				</div>
 			</div>
 		</div>
 	);

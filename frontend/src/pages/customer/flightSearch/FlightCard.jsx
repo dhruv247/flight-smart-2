@@ -15,6 +15,7 @@ const FlightCard = ({
 	const {
 		selectedDepartureFlight,
 		setSelectedDepartureFlight,
+		setSelectedDepartureFlightArrivalTime,
 		setCurrentBooking,
 	} = useFlightContext();
 
@@ -56,7 +57,6 @@ const FlightCard = ({
 	};
 
 	const handleSelectFlight = () => {
-
 		/**
 		 * Needed for the individual ticket prices
 		 */
@@ -98,6 +98,7 @@ const FlightCard = ({
 			} else {
 				// For round trip departure flight, just store the flight in context
 				setSelectedDepartureFlight(selectedFlight);
+				setSelectedDepartureFlightArrivalTime(flight.arrivalDateTime);
 				navigate('/customer/returnFlights');
 			}
 		}
@@ -132,7 +133,8 @@ const FlightCard = ({
 			</div>
 			<div className="col-12 col-md-2">
 				<p>
-					{Math.floor(flight.duration / 60)} hr : {(flight.duration % 60).toString().padStart(2, '0')} min
+					{Math.floor(flight.duration / 60)} hr :{' '}
+					{(flight.duration % 60).toString().padStart(2, '0')} min
 				</p>
 			</div>
 			<div className="col-12 col-md-2">

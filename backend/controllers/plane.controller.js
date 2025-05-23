@@ -30,31 +30,17 @@ const addPlane = async (req, res) => {
 			});
 		}
 
-		// validate business class capacity
-		if (businessCap < 4 || businessCap > 20) {
+		// validate business class capacity is divisible by 6
+		if (businessCap % 6 !== 0) {
 			return res.status(400).json({
-				message: 'Business class capacity must be between 4 and 20',
+				message: 'Business class capacity must be divisible by 6',
 			});
 		}
 
-		// validate business class capacity is even
-		if (businessCap % 2 !== 0) {
+		// validate economy class capacity is divisible by 18
+		if (economyCap % 18 !== 0) {
 			return res.status(400).json({
-				message: 'Business class capacity must be divisible by 2',
-			});
-		}
-
-		// validate economy class capacity
-		if (economyCap < 12 || economyCap > 60) {
-			return res.status(400).json({
-				message: 'Economy class capacity must be between 12 and 60',
-			});
-		}
-
-		// validate economy class capacity is divisible by 6
-		if (economyCap % 6 !== 0) {
-			return res.status(400).json({
-				message: 'Economy class capacity must be divisible by 6',
+				message: 'Economy class capacity must be divisible by 18',
 			});
 		}
 

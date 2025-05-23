@@ -19,6 +19,7 @@ import { router as planeRoutes } from './routes/plane.routes.js';
 import { router as seatRoutes } from './routes/seat.routes.js';
 import { router as ticketRoutes } from './routes/ticket.routes.js';
 import { router as conversationRoutes } from './routes/conversation.routes.js';
+import { router as discountRoutes } from './routes/discount.routes.js';
 
 const app = express();
 const server = http.createServer(app);
@@ -44,6 +45,7 @@ app.use('/api/messages', messageRoutes);
 app.use('/api/planes', planeRoutes);
 app.use('/api/seats', seatRoutes);
 app.use('/api/tickets', ticketRoutes);
+app.use('/api/discounts', discountRoutes);
 
 // seeding the database with an admin user
 // createAdminUser();

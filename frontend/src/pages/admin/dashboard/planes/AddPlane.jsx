@@ -127,9 +127,7 @@ const AddPlane = () => {
 					</div>
 
 					<div className="mb-4">
-						<p className="text-start fw-bold">
-							Business Class Capacity
-						</p>
+						<p className="text-start fw-bold">Business Class Capacity</p>
 						<div className="input-group">
 							<select
 								name="businessCapacity"
@@ -140,15 +138,14 @@ const AddPlane = () => {
 								value={planeDetails.businessCapacity}
 							>
 								<option value="">Select Business Capacity</option>
-								<option value="4">4</option>
+
 								<option value="6">6</option>
-								<option value="8">8</option>
-								<option value="10">10</option>
+
 								<option value="12">12</option>
-								<option value="14">14</option>
-								<option value="16">16</option>
+
 								<option value="18">18</option>
-								<option value="20">20</option>
+
+								<option value="24">24</option>
 							</select>
 						</div>
 						{errors.businessCapacity && (
@@ -157,9 +154,7 @@ const AddPlane = () => {
 					</div>
 
 					<div className="mb-4">
-						<p className="text-start fw-bold">
-							Economy Class Capacity
-						</p>
+						<p className="text-start fw-bold">Economy Class Capacity</p>
 						<div className="input-group">
 							<select
 								name="economyCapacity"
@@ -170,15 +165,14 @@ const AddPlane = () => {
 								value={planeDetails.economyCapacity}
 							>
 								<option value="">Select Economy Capacity</option>
-								<option value="12">12</option>
+
 								<option value="18">18</option>
-								<option value="24">24</option>
-								<option value="30">30</option>
+
 								<option value="36">36</option>
-								<option value="42">42</option>
-								<option value="48">48</option>
+
 								<option value="54">54</option>
-								<option value="60">60</option>
+
+								<option value="72">72</option>
 							</select>
 						</div>
 						{errors.economyCapacity && (

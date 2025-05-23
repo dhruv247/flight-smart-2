@@ -186,7 +186,10 @@ const AddAirport = () => {
 							required
 						>
 							<option value="">Select City</option>
-							<option value="Coimbatore">Coimbatore</option>
+							<option value="Pune">Pune</option>
+							<option value="Ahmedabad">Ahmedabad</option>
+							<option value="Cochin">Cochin</option>
+							<option value="Dabolim">Dabolim</option>
 							<option value="Lucknow">Lucknow</option>
 							<option value="Varanasi">Varanasi</option>
 							<option value="Jaipur">Jaipur</option>
@@ -199,6 +202,12 @@ const AddAirport = () => {
 							<option value="Indore">Indore</option>
 							<option value="Chandigarh">Chandigarh</option>
 							<option value="Srinagar">Srinagar</option>
+							<option value="Mumbai">Mumbai</option>
+							<option value="New Delhi">New Delhi</option>
+							<option value="Kolkata">Kolkata</option>
+							<option value="Bengaluru">Bengaluru</option>
+							<option value="Chennai">Chennai</option>
+							<option value="Hyderabad">Hyderabad</option>
 						</select>
 					</div>
 

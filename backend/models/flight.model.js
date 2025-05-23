@@ -39,7 +39,7 @@ const airportDetailsSchema = new mongoose.Schema(
 		airportName: { type: String, required: true },
 		airportCode: { type: String, required: true },
 		city: { type: String, required: true },
-		state: { type: String, required: true },
+		state: { type: String },
 		country: { type: String, required: true, default: 'India' },
 		image: { type: String, required: true },
 	},

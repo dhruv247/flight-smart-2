@@ -145,7 +145,7 @@ const AddFlight = () => {
 					<h3 className="text-center mb-3">Flight Details</h3>
 					<div className="d-flex flex-column flex-md-row justify-content-center gap-3 mb-3">
 						<div className="border rounded p-2">
-							<p className="text-start">Flight Number</p>
+							<p className="text-start fw-semibold">Flight Number</p>
 							<div className="input-group">
 								<span className="input-group-text">
 									{airlineDetails?.username.substring(0, 2).toUpperCase()}
@@ -162,7 +162,7 @@ const AddFlight = () => {
 							</div>
 						</div>
 						<div className="border rounded p-2">
-							<p className="text-start">Plane</p>
+							<p className="text-start fw-semibold">Plane</p>
 
 							<select
 								className="form-control"
@@ -184,7 +184,7 @@ const AddFlight = () => {
 					<h3 className="text-center mb-3">Departure Details</h3>
 					<div className="d-flex flex-column flex-md-row justify-content-center gap-3 mb-3">
 						<div className="border rounded p-2">
-							<p className="text-start">Departure Airport</p>
+							<p className="text-start fw-semibold">Departure Airport</p>
 
 							<select
 								className="form-control"
@@ -203,7 +203,7 @@ const AddFlight = () => {
 							</select>
 						</div>
 						<div className="border rounded p-2">
-							<p className="text-start">Departure Date</p>
+							<p className="text-start fw-semibold">Departure Date</p>
 
 							<DatePicker
 								selected={departureDate}
@@ -216,7 +216,7 @@ const AddFlight = () => {
 							/>
 						</div>
 						<div className="border rounded p-2">
-							<p className="text-start">Departure Time</p>
+							<p className="text-start fw-semibold">Departure Time</p>
 
 							<input
 								type="time"
@@ -230,7 +230,7 @@ const AddFlight = () => {
 					<h3 className="text-center mb-3">Arrival Details</h3>
 					<div className="d-flex flex-column flex-md-row justify-content-center gap-3 mb-3">
 						<div className="border rounded p-2">
-							<p className="text-start">Arrival Airport</p>
+							<p className="text-start fw-semibold">Arrival Airport</p>
 
 							<select
 								className="form-control"
@@ -249,7 +249,7 @@ const AddFlight = () => {
 							</select>
 						</div>
 						<div className="border rounded p-2">
-							<p className="text-start">Arrival Date</p>
+							<p className="text-start fw-semibold">Arrival Date</p>
 
 							<DatePicker
 								selected={arrivalDate}
@@ -262,7 +262,7 @@ const AddFlight = () => {
 							/>
 						</div>
 						<div className="border rounded p-2">
-							<p className="text-start">Arrival Time</p>
+							<p className="text-start fw-semibold">Arrival Time</p>
 
 							<input
 								type="time"
@@ -276,7 +276,7 @@ const AddFlight = () => {
 					<h3 className="text-center mb-3">Price Details</h3>
 					<div className="d-flex flex-column flex-md-row justify-content-center gap-3 mb-3">
 						<div className="border rounded p-2">
-							<p className="text-start">Economy Base Price</p>
+							<p className="text-start fw-semibold">Economy Base Price</p>
 
 							<input
 								type="number"
@@ -291,7 +291,7 @@ const AddFlight = () => {
 							/>
 						</div>
 						<div className="border rounded p-2">
-							<p className="text-start">Business Base Price</p>
+							<p className="text-start fw-semibold">Business Base Price</p>
 
 							<input
 								type="number"

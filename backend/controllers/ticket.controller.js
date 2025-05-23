@@ -3,6 +3,7 @@ import { Ticket } from '../models/ticket.model.js';
 import { Flight } from '../models/flight.model.js';
 import { User } from '../models/user.model.js';
 import { Seat } from '../models/seat.model.js';
+import Discount from '../models/discount.model.js';
 
 /**
  * Helper function to validate date of birth
@@ -19,6 +20,13 @@ const isValidDateOfBirth = (dob) => {
 	}
 
 	return { isValid: true };
+};
+
+const calculateAge = (dateOfBirth) => {
+	const today = new Date();
+	const dob = new Date(dateOfBirth);
+	const age = today.getFullYear() - dob.getFullYear();
+	return age;
 };
 
 /**
@@ -189,6 +197,23 @@ const createTicket = async (req, res) => {
 			if (returnFlight) {
 				ticketPrice += returnFlight.businessCurrentPrice;
 			}
+		}
+
+		// calculate age
+		const age = calculateAge(dateOfBirth);
+
+		if (age < 2) {
+			// get discount
+			const discount = await Discount.findOne({ discountType: 'ageBased', discountFor: 'infants' });
+			ticketPrice = Math.round(ticketPrice * (100 - discount.discountValue) / 100);
+		} else if (age < 12) {
+			// get discount
+			const discount = await Discount.findOne({ discountType: 'ageBased', discountFor: 'children' });
+			ticketPrice = Math.round(ticketPrice * (100 - discount.discountValue) / 100);
+		} else {
+			// get discount
+			const discount = await Discount.findOne({ discountType: 'ageBased', discountFor: 'adults' });
+			ticketPrice = Math.round(ticketPrice * (100 - discount.discountValue) / 100);
 		}
 
 		// start a session for transaction (because we are updating multiple documents)

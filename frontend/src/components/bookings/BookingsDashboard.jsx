@@ -25,11 +25,20 @@ const BookingsDashboard = ({ type }) => {
 	const [totalPages, setTotalPages] = useState(0);
 
 	// Transform cities data for react-select
-	const cityOptions =
-		airports?.map((airport) => ({
-			value: airport.city,
-			label: airport.city,
-		})) || [];
+	// const cityOptions =
+	// 	airports?.map((airport) => ({
+	// 		value: airport.city,
+	// 		label: airport.city,
+	// 	})) || [];
+
+	// Transform cities data for react-select and remove duplicates
+	const cityOptions = React.useMemo(() => {
+		const uniqueCities = [...new Set(airports.map((airport) => airport.city))];
+		return uniqueCities.map((city) => ({
+			value: city,
+			label: city,
+		}));
+	}, [airports]);
 
 	useEffect(() => {
 		const getBookingsFromDB = async () => {
@@ -110,7 +119,7 @@ const BookingsDashboard = ({ type }) => {
 								onChange={handleChange}
 							/>
 						</div> */}
-						<div className="col-md-4 col-12">
+						<div className="col-md-4 col-12 my-2">
 							<p className="text-start fw-bold">Flight From</p>
 							<Select
 								name="flightFrom"
@@ -132,7 +141,7 @@ const BookingsDashboard = ({ type }) => {
 								// }}
 							/>
 						</div>
-						<div className="col-md-4 col-12">
+						<div className="col-md-4 col-12 my-2">
 							<p className="text-start fw-bold">Flight To</p>
 							<Select
 								name="flightTo"
@@ -154,7 +163,7 @@ const BookingsDashboard = ({ type }) => {
 								// }}
 							/>
 						</div>
-						<div className="col-md-4 col-12">
+						<div className="col-md-4 col-12 my-2">
 							<p className="text-start fw-bold">Trip Date</p>
 							<select
 								name="status"

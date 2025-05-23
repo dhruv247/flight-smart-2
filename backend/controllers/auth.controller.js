@@ -34,12 +34,10 @@ const register = async (req, res) => {
 
 		// mandatory field check for backend
 		if (!username || !email || !password || !userType) {
-			return res
-				.status(400)
-				.json({
-					message:
-						'Please fill in the mandatory fields: email, username, password',
-				});
+			return res.status(400).json({
+				message:
+					'Please fill in the mandatory fields: email, username, password',
+			});
 		}
 
 		// if user is an airline and no profile picture is provided, throw error
@@ -68,12 +66,10 @@ const register = async (req, res) => {
 		const passwordRegex =
 			/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 		if (!passwordRegex.test(password)) {
-			return res
-				.status(400)
-				.json({
-					message:
-						'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)',
-				});
+			return res.status(400).json({
+				message:
+					'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)',
+			});
 		}
 
 		// throw error as admin's cannot be manually registered
@@ -134,7 +130,6 @@ const register = async (req, res) => {
 				...user.toJSON(),
 			});
 		} else {
-
 			// if user is not an airline, return success message
 			return res
 				.status(201)
@@ -158,12 +153,10 @@ const login = async (req, res) => {
 
 		// throw error if another user is already logged in
 		if (token) {
-			return res
-				.status(400)
-				.json({
-					message:
-						'User is already logged in! Please log out current user before trying to login',
-				});
+			return res.status(400).json({
+				message:
+					'User is already logged in! Please log out current user before trying to login',
+			});
 		}
 
 		// destructure req body
@@ -171,11 +164,9 @@ const login = async (req, res) => {
 
 		// backend mandatory fields check
 		if (!email || !password) {
-			return res
-				.status(400)
-				.json({
-					message: 'Please fill in the mandatory fields: email, password',
-				});
+			return res.status(400).json({
+				message: 'Please fill in the mandatory fields: email, password',
+			});
 		}
 
 		// normalize email
@@ -188,12 +179,10 @@ const login = async (req, res) => {
 			return res.status(404).json({ message: 'No user found with this email' });
 		} else {
 			if (user.userType === 'airline' && !user.verificationStatus) {
-				return res
-					.status(400)
-					.json({
-						message:
-							'Airline is not verified! Please wait for confirmation from admin',
-					});
+				return res.status(400).json({
+					message:
+						'Airline is not verified! Please wait for confirmation from admin',
+				});
 			}
 
 			// match given and stored passwords
@@ -211,7 +200,7 @@ const login = async (req, res) => {
 						httpOnly: true,
 						secure: false,
 						sameSite: 'lax',
-						maxAge: 3600000,
+						maxAge: 21600000,
 					})
 					.status(200)
 					.json({
@@ -268,75 +257,14 @@ const getMe = async (req, res) => {
 
 		// if user is an airline and is not verified, throw error
 		if (user.userType === 'airline' && !user.verificationStatus) {
-			return res
-				.status(400)
-				.json({
-					message:
-						'Airline is not verified! Please wait for confirmation from admin',
-				});
+			return res.status(400).json({
+				message:
+					'Airline is not verified! Please wait for confirmation from admin',
+			});
 		}
 
 		// return user details
 		res.status(200).json(user);
-	} catch (error) {
-		return res.status(500).json({ message: error.message });
-	}
-};
-
-/**
- * Update the password of the logged in user
- * @param {*} req
- * @param {*} res
- * @returns {Object} message
- */
-const updatePassword = async (req, res) => {
-	try {
-		// destructure req body
-		const { oldPassword, newPassword } = req.body;
-
-		// mandatory fields check
-		if (!oldPassword || !newPassword) {
-			return res
-				.status(400)
-				.json({ message: 'Old and new passwords are required' });
-		}
-
-		if (oldPassword === newPassword) {
-			return res
-				.status(400)
-				.json({ message: 'New password cannot be the same as the old password' });
-		}
-
-		// find the user by id
-		const user = await User.findById(req.user._id);
-
-		// compare old password with the one in the db
-		const match = await bcrypt.compare(oldPassword, user.password);
-
-		if (match) {
-			// validate password complexity
-			const passwordRegex =
-				/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-			if (!passwordRegex.test(newPassword)) {
-				return res
-					.status(400)
-					.json({
-						message:
-							'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)',
-					});
-			}
-
-			// update password
-			user.password = newPassword;
-			await user.save();
-
-			// return success message
-			res.status(200).json({
-				message: 'Password updated successfully',
-			});
-		} else {
-			return res.status(400).json({ message: 'Incorrect old password' });
-		}
 	} catch (error) {
 		return res.status(500).json({ message: error.message });
 	}
@@ -383,12 +311,10 @@ const verifyAirline = async (req, res) => {
 		try {
 			await sendAirlineVerificationEmail(airline);
 		} catch (emailError) {
-			return res
-				.status(500)
-				.json({
-					message: 'Error sending password email:',
-					error: emailError.message,
-				});
+			return res.status(500).json({
+				message: 'Error sending password email:',
+				error: emailError.message,
+			});
 		}
 
 		// return success message
@@ -442,12 +368,10 @@ const deleteAirline = async (req, res) => {
 		try {
 			await sendAirlineDeletionEmail(airline);
 		} catch (emailError) {
-			return res
-				.status(500)
-				.json({
-					message: 'Error sending deletion email:',
-					error: emailError.message,
-				});
+			return res.status(500).json({
+				message: 'Error sending deletion email:',
+				error: emailError.message,
+			});
 		}
 
 		// delete airline
@@ -486,7 +410,6 @@ export {
 	login,
 	logout,
 	getMe,
-	updatePassword,
 	verifyAirline,
 	deleteAirline,
 	getAllAirlines,

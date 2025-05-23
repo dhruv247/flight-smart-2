@@ -6,6 +6,7 @@ import { Flight } from '../models/flight.model.js';
 import { Seat } from '../models/seat.model.js';
 import { sendToEmailQueue } from '../utils/sqsUtils.js';
 import { sendBookingCancellationEmail } from '../utils/emailUtils.js';
+import otpGenerator from 'otp-generator';
 
 /**
  * Utility function to calculate age from date of birth
@@ -91,10 +92,18 @@ const createBooking = async (req, res) => {
 			username: user.username,
 		};
 
+		const code = otpGenerator.generate(6, {
+			upperCaseAlphabets: true,
+			lowerCaseAlphabets: false,
+			digits: true,
+			specialChars: false
+		});
+
 		const booking = new Booking({
 			userDetails,
 			tickets: ticketsArray,
 			bookingPrice,
+			pnr: code,
 		});
 
 		await booking.save();
@@ -135,6 +144,21 @@ const cancelBooking = async (req, res) => {
 		if (!booking) {
 			return res.status(404).json({
 				message: 'Booking not found',
+			});
+		}
+
+		// Check if departure time is at least 24 hours away
+		const departureTime = new Date(
+			booking.tickets[0].departureFlight.departureDateTime
+		);
+		const currentTime = new Date();
+		const hoursUntilDeparture =
+			(departureTime - currentTime) / (1000 * 60 * 60);
+
+		if (hoursUntilDeparture < 24) {
+			return res.status(400).json({
+				message:
+					'Bookings can only be cancelled at least 24 hours before departure',
 			});
 		}
 

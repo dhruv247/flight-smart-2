@@ -47,9 +47,10 @@ const VerifiedAirlineList = () => {
 		<div className="container mt-3">
 			<div className="row mt-3">
 				<div className="col-md-2"></div>
-				<div className="col-md-8 row d-flex align-items-center p-2 m-0">
-					<p className="col-12 col-md-6 fw-bold">Airline Name</p>
-					<p className="col-12 col-md-6 fw-bold">Email</p>
+				<div className="col-md-8 row d-flex align-items-center p-2 m-0 mb-3 border rounded bg-light">
+					<p className="col-12 col-md-4 fw-bold">Airline Name</p>
+					<p className="col-12 col-md-4 fw-bold">Email</p>
+					<p className="col-12 col-md-4 fw-bold">Verified On</p>
 				</div>
 				<div className="col-md-2"></div>
 			</div>

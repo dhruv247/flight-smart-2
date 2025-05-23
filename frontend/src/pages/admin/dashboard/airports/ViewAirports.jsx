@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import './ViewAirports.css';
 
 const ViewAirports = () => {
 	const [airports, setAirports] = useState([]);
@@ -37,7 +36,7 @@ const ViewAirports = () => {
 			<div className="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mt-5">
 				{airports.map((airport) => (
 					<div className="col" key={airport._id}>
-						<div className="card h-100 shadow-sm hover-card">
+						<div className="card h-100 shadow-sm">
 							<img
 								className="card-img-top"
 								src={airport.image}
