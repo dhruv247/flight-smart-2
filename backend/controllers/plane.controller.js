@@ -15,43 +15,6 @@ const addPlane = async (req, res) => {
 		const economyCap = Number(economyCapacity);
 		const businessCap = Number(businessCapacity);
 
-		// validate required fields
-		if (!planeName || !economyCapacity || !businessCapacity) {
-			return res.status(400).json({
-				message: 'All fields are required',
-			});
-		}
-
-		// check if plane already exists
-		const existingPlane = await Plane.findOne({ planeName });
-		if (existingPlane) {
-			return res.status(400).json({
-				message: 'Plane already exists',
-			});
-		}
-
-		// validate business class capacity is divisible by 6
-		if (businessCap % 6 !== 0) {
-			return res.status(400).json({
-				message: 'Business class capacity must be divisible by 6',
-			});
-		}
-
-		// validate economy class capacity is divisible by 18
-		if (economyCap % 18 !== 0) {
-			return res.status(400).json({
-				message: 'Economy class capacity must be divisible by 18',
-			});
-		}
-
-		// check if economy capacity is greater than business capacity
-		if (economyCap <= businessCap) {
-			return res.status(400).json({
-				message:
-					'Economy class capacity must be greater than business class capacity',
-			});
-		}
-
 		// create new plane
 		const plane = new Plane({
 			planeName,
@@ -68,7 +31,20 @@ const addPlane = async (req, res) => {
 			plane,
 		});
 	} catch (error) {
-		return res.status(500).json({ message: error.message });
+
+		// Handle duplicate key error (for unique planeName)
+		if (error.code === 11000) {
+			return res.status(400).json({ message: 'Plane already exists' });
+		}
+
+		// Handle validation errors
+		if (error.message) {
+			return res.status(400).json({ message: error.message });
+		}
+
+		return res
+			.status(500)
+			.json({ message: 'Failed to create plane. Please try again later.' });
 	}
 };
 
@@ -84,11 +60,12 @@ const getAllPlanes = async (req, res) => {
 
 		// return success message
 		return res.status(200).json({
-			message: 'Planes retrieved successfully',
 			planes: planes,
 		});
 	} catch (error) {
-		return res.status(500).json({ message: error.message });
+		return res
+			.status(500)
+			.json({ message: 'Failed to get all planes. Please try again later.' });
 	}
 };
 

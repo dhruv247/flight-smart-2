@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useFlightContext } from '../../hooks/useFlightContext';
-import axios from 'axios';
+import { authService } from '../../services/auth.service';
 
 const DashboardNavbar = ({ navItems = [] }) => {
 	const navigate = useNavigate();
@@ -11,11 +11,7 @@ const DashboardNavbar = ({ navItems = [] }) => {
 
 	const logout = async () => {
 		try {
-			const response = await axios.post(
-				'http://localhost:8000/api/auth/logout',
-				{},
-				{ withCredentials: true }
-			);
+			const response = await authService.logout();
 
 			// Clear all flight data from context
 			clearFlightData();
@@ -74,7 +70,7 @@ const DashboardNavbar = ({ navItems = [] }) => {
 							to="/"
 							style={{ color: '#2E7D32' }}
 						>
-							<h2 className="">FlyEasy</h2>
+							<h2 className="">Flight Smart</h2>
 						</Link>
 
 						{/* Navigation Options - Desktop */}

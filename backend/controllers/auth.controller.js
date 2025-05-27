@@ -32,82 +32,8 @@ const register = async (req, res) => {
 		// destructure request body
 		const { username, email, password, userType, profilePicture } = req.body;
 
-		// mandatory field check for backend
-		if (!username || !email || !password || !userType) {
-			return res.status(400).json({
-				message:
-					'Please fill in the mandatory fields: email, username, password',
-			});
-		}
-
-		// if user is an airline and no profile picture is provided, throw error
-		if (userType === 'airline' && !profilePicture) {
-			return res
-				.status(400)
-				.json({ message: 'Airline profile picture is required' });
-		}
-
-		// validate email format
-		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-		if (!emailRegex.test(email)) {
-			return res
-				.status(400)
-				.json({ message: 'Please provide a valid email address' });
-		}
-
-		// validate username length
-		if (username.length > 30) {
-			return res
-				.status(400)
-				.json({ message: 'Username must be less than 30 characters' });
-		}
-
-		// validate password complexity
-		const passwordRegex =
-			/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-		if (!passwordRegex.test(password)) {
-			return res.status(400).json({
-				message:
-					'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)',
-			});
-		}
-
-		// throw error as admin's cannot be manually registered
-		if (userType === 'admin') {
-			return res
-				.status(400)
-				.json({ message: 'Admin cannot be created through registration' });
-		}
-
-		let verificationStatus = true;
-
-		// if user is an airline, set verification status to false
-		if (userType === 'airline') {
-			verificationStatus = false;
-		}
-
 		// normalize email
 		let lowerCaseEmail = email.toLowerCase();
-
-		// check for duplicate email
-		const duplicateEmail = await User.findOne({ email: lowerCaseEmail });
-
-		// check for duplicate username
-		const duplicateUsername = await User.findOne({ username });
-
-		// if duplicate email, throw error
-		if (duplicateEmail) {
-			return res
-				.status(400)
-				.json({ message: 'User with the same email already exists!' });
-		}
-
-		// if duplicate username, throw error
-		if (duplicateUsername) {
-			return res
-				.status(400)
-				.json({ message: 'User with the same username already exists!' });
-		}
 
 		// create User document
 		const user = new User({
@@ -115,8 +41,8 @@ const register = async (req, res) => {
 			email: lowerCaseEmail,
 			password,
 			userType,
-			verificationStatus,
 			profilePicture,
+			verificationStatus: userType === 'airline' ? false : true,
 		});
 
 		// save user
@@ -127,16 +53,26 @@ const register = async (req, res) => {
 			return res.status(201).json({
 				message:
 					'Airline Registration Request Sent! Please wait for email confirmation from admin before logging in',
-				...user.toJSON(),
 			});
 		} else {
 			// if user is not an airline, return success message
-			return res
-				.status(201)
-				.json({ message: 'User registered', ...user.toJSON() });
+			return res.status(201).json({ message: 'User registered' });
 		}
 	} catch (error) {
-		return res.status(500).json({ message: error.message });
+
+
+		// Handle duplicate key error (for unique email)
+		if (error.code === 11000) {
+			return res.status(400).json({ message: 'Email or username already exists' });
+		}
+
+		// Handle validation errors
+		if (error.name === 'ValidationError') {
+			return res.status(400).json({ message: error.message });
+		}
+		return res
+			.status(500)
+			.json({ message: 'Failed to register user. Please try again later.' });
 	}
 };
 
@@ -210,7 +146,9 @@ const login = async (req, res) => {
 			}
 		}
 	} catch (error) {
-		return res.status(500).json({ message: error.message });
+		return res
+			.status(500)
+			.json({ message: 'Failed to login. Please try again later.' });
 	}
 };
 
@@ -235,7 +173,9 @@ const logout = (req, res) => {
 		// clear the token stored in cookie
 		res.clearCookie('token').status(200).json({ message: 'Logged out' });
 	} catch (error) {
-		return res.status(500).json({ message: error.message });
+		return res
+			.status(500)
+			.json({ message: 'Failed to logout. Please try again later.' });
 	}
 };
 
@@ -266,7 +206,9 @@ const getMe = async (req, res) => {
 		// return user details
 		res.status(200).json(user);
 	} catch (error) {
-		return res.status(500).json({ message: error.message });
+		return res
+			.status(500)
+			.json({ message: 'Failed to get user profile. Please try again later.' });
 	}
 };
 
@@ -307,7 +249,7 @@ const verifyAirline = async (req, res) => {
 		// save airline
 		await airline.save();
 
-		// Send email to airline with their password
+		// Send email to airline
 		try {
 			await sendAirlineVerificationEmail(airline);
 		} catch (emailError) {
@@ -327,7 +269,9 @@ const verifyAirline = async (req, res) => {
 			},
 		});
 	} catch (error) {
-		return res.status(500).json({ message: error.message });
+		return res
+			.status(500)
+			.json({ message: 'Failed to verify airline. Please try again later.' });
 	}
 };
 
@@ -380,7 +324,9 @@ const deleteAirline = async (req, res) => {
 		// return success message
 		return res.status(200).json({ message: 'Airline deleted successfully' });
 	} catch (error) {
-		return res.status(500).json({ message: error.message });
+		return res
+			.status(500)
+			.json({ message: 'Failed to delete airline. Please try again later.' });
 	}
 };
 
@@ -397,11 +343,12 @@ const getAllAirlines = async (req, res) => {
 
 		// return success message
 		return res.status(200).json({
-			message: 'Airlines retrieved successfully',
 			airlines: airlines,
 		});
 	} catch (error) {
-		return res.status(500).json({ message: error.message });
+		return res.status(500).json({
+			message: 'Failed to retrieve airlines. Please try again later.',
+		});
 	}
 };
 

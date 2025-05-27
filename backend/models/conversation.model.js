@@ -44,9 +44,8 @@ const conversationSchema = new mongoose.Schema(
 	{
 		customer: customerSchema,
 		airline: airlineSchema,
-		bookingId: {
-			type: mongoose.Schema.Types.ObjectId,
-			ref: 'Booking',
+		pnr: {
+			type: String,
 			required: true,
 		},
 	},

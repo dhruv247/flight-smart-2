@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import AddAirport from './AddAirport';
 import ViewAirports from './ViewAirports';
 
+/**
+ * Admin dashboard airports page - choose between adding and viewing airports
+ */
 const AdminDashboardAirports = () => {
 	const [dashboardOption, setDashboardOption] = useState('addAirport');
 

@@ -22,7 +22,7 @@ const Navbar = () => {
 						to="/"
 						style={{ color: '#2E7D32' }}
 					>
-						<h2 className="">FlyEasy</h2>
+						<h2 className="">Flight Smart</h2>
 					</Link>
 				</div>
 

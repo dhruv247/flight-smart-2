@@ -9,10 +9,16 @@ import { showErrorToast, showSuccessToast } from '../../../utils/toast';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import Loading from '../../../components/Loading';
+import PassengerDetailsCard from './PassengerDetailsCard';
+import { imageService } from '../../../services/image.service';
+import { ticketService } from '../../../services/ticket.service';
+import { bookingService } from '../../../services/booking.service';
+import { flightService } from '../../../services/flight.service';
 
 const PassengerDetails = () => {
 	const navigate = useNavigate();
-	const { currentBooking, clearFlightData, flightSearchData } = useFlightContext();
+	const { currentBooking, clearFlightData, flightSearchData } =
+		useFlightContext();
 
 	const [bookingDetails, setBookingDetails] = useState(null);
 	const { user, isLoading: userLoading } = useGetUserDetails();
@@ -22,6 +28,15 @@ const PassengerDetails = () => {
 	const [currentFlightType, setCurrentFlightType] = useState('departure'); // 'departure' or 'return'
 	const [loading, setLoading] = useState(true);
 	const [isCreatingBooking, setIsCreatingBooking] = useState(false);
+	const [adultPassenger, setAdultPassenger] = useState(
+		flightSearchData.adultPassengers
+	);
+	const [childrenPassenger, setChildrenPassenger] = useState(
+		flightSearchData.childPassengers
+	);
+	const [infantPassenger, setInfantPassenger] = useState(
+		flightSearchData.infantPassengers
+	);
 
 	// Today's date for DatePicker max date
 	const today = new Date();
@@ -236,8 +251,7 @@ const PassengerDetails = () => {
 					const formData = new FormData();
 					formData.append('image', passenger.documentImage);
 
-					const imageURLResponse = await axios.post(
-						'http://localhost:8000/api/images/upload-image',
+					const imageURLResponse = await imageService.uploadImage(
 						formData,
 						{
 							headers: {
@@ -278,8 +292,7 @@ const PassengerDetails = () => {
 						// roundTrip: !!bookingDetails.returnFlightId,
 					};
 
-					const response = await axios.post(
-						'http://localhost:8000/api/tickets/create-ticket',
+					const response = await ticketService.createTicket(
 						ticket,
 						{
 							withCredentials: true,
@@ -300,8 +313,7 @@ const PassengerDetails = () => {
 					tickets: createdTickets,
 				};
 
-				await axios.post(
-					'http://localhost:8000/api/bookings/create-booking',
+				await bookingService.createBooking(
 					booking,
 					{
 						withCredentials: true,
@@ -311,13 +323,9 @@ const PassengerDetails = () => {
 				showSuccessToast('Booking created successfully!');
 
 				// Update flight prices
-				await axios.patch(
-					`http://localhost:8000/api/flights/update-flight-price/${bookingDetails.departureFlightId}`
-				);
+				await flightService.updateFlightPrice(bookingDetails.departureFlightId);
 				if (bookingDetails.returnFlightId) {
-					await axios.patch(
-						`http://localhost:8000/api/flights/update-flight-price/${bookingDetails.returnFlightId}`
-					);
+					await flightService.updateFlightPrice(bookingDetails.returnFlightId);
 				}
 
 				clearFlightData();
@@ -396,6 +404,9 @@ const PassengerDetails = () => {
 					<i className="bi bi-person-lines-fill me-2 fs-4"></i>
 					<div className="d-flex flex-column gap-1">
 						<h4 className="mb-0">Passenger Details</h4>
+						<p className="mb-0">
+							At least one adult (18 or older) must be present in the booking
+						</p>
 					</div>
 				</div>
 				<div className="card-body p-4">
@@ -405,107 +416,33 @@ const PassengerDetails = () => {
 							handleCreateTicket();
 						}}
 					>
-						{passengerDetails.map((passenger, index) => (
-							<div key={index} className="mb-4 pb-3 border-bottom">
-								<div className="mb-3">
-									<span className="badge bg-secondary fs-6">
-										Passenger {index + 1}
-									</span>
-								</div>
-								<div className="row g-3">
-									<div className="col-12 col-md-6">
-										<label className="form-label fw-semibold">Full Name</label>
-										<input
-											placeholder="Enter full name"
-											type="text"
-											className="form-control"
-											value={passenger.nameOfFlyer}
-											onChange={(e) =>
-												handlePassengerChange(
-													index,
-													'nameOfFlyer',
-													e.target.value
-												)
-											}
-											required
-										/>
-									</div>
-									<div className="col-12 col-md-6">
-										<label className="form-label fw-semibold">
-											Date of Birth
-										</label>
-										<div className="form-control p-0 bg-white">
-											<DatePicker
-												selected={passenger.dateOfBirth}
-												onChange={(date) => handleDateChange(date, index)}
-												className="form-control border-0"
-												placeholderText="Select Date of Birth"
-												dateFormat="yyyy-MM-dd"
-												showMonthDropdown
-												showYearDropdown
-												dropdownMode="select"
-												maxDate={yesterday}
-												minDate={minDate}
-												excludeDateIntervals={[
-													{ start: today, end: new Date(2100, 0, 1) },
-												]}
-												required
-												yearDropdownItemNumber={100}
-												scrollableYearDropdown
-											/>
-										</div>
-									</div>
-								</div>
-								<div className="row g-3 mt-2">
-									<div className="col-12 col-md-6">
-										<label className="form-label fw-semibold">
-											Departure Flight Seat
-										</label>
-										<div className="d-flex align-items-center gap-2 bg-light rounded p-2">
-											<input
-												type="text"
-												className="form-control bg-white"
-												value={passenger.departureFlightSeatNumber || ''}
-												readOnly
-												placeholder="No seat selected"
-												style={{ width: 120 }}
-											/>
-											<button
-												type="button"
-												className="btn btn-outline-primary btn-sm"
-												onClick={() => openSeatMapModal(index, 'departure')}
-											>
-												Select Seat
-											</button>
-										</div>
-									</div>
-									{isRoundTrip && (
-										<div className="col-12 col-md-6">
-											<label className="form-label fw-semibold">
-												Return Flight Seat
-											</label>
-											<div className="d-flex align-items-center gap-2 bg-light rounded p-2">
-												<input
-													type="text"
-													className="form-control bg-white"
-													value={passenger.returnFlightSeatNumber || ''}
-													readOnly
-													placeholder="No seat selected"
-													style={{ width: 120 }}
-												/>
-												<button
-													type="button"
-													className="btn btn-outline-primary btn-sm"
-													onClick={() => openSeatMapModal(index, 'return')}
-												>
-													Select Seat
-												</button>
-											</div>
-										</div>
-									)}
-								</div>
-							</div>
-						))}
+						{passengerDetails.map((passenger, index) => {
+							// Determine passenger type based on index
+							let passengerType = 'adult';
+							if (index >= adultPassenger) {
+								if (index < adultPassenger + childrenPassenger) {
+									passengerType = 'child';
+								} else {
+									passengerType = 'infant';
+								}
+							}
+
+							return (
+								<PassengerDetailsCard
+									key={index}
+									passenger={passenger}
+									index={index}
+									isRoundTrip={isRoundTrip}
+									onPassengerChange={handlePassengerChange}
+									onDateChange={handleDateChange}
+									openSeatMapModal={openSeatMapModal}
+									yesterday={yesterday}
+									minDate={minDate}
+									today={today}
+									passengerType={passengerType}
+								/>
+							);
+						})}
 						<div className="text-center mt-4">
 							<button
 								type="submit"

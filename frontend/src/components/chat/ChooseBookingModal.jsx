@@ -1,45 +1,36 @@
 import React, { useState, useEffect } from 'react';
-import { useChat } from '../../context/ChatContext';
-import axios from 'axios';
-import Modal from '../common/Modal';
+import Modal from '../Modal';
+import { bookingService } from '../../services/booking.service';
+import { conversationService } from '../../services/conversation.service';
 
 const ChooseBookingModal = ({ isOpen, onClose }) => {
 	const [bookings, setBookings] = useState([]);
-	const [bookingsIds, setBookingsIds] = useState([]);
-	const [selectedBookingId, setSelectedBookingId] = useState([]);
+	const [bookingsPNRs, setBookingsPNRs] = useState([]);
+	const [selectedBookingPNR, setSelectedBookingPNR] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState('');
-	const { startNewConversation } = useChat();
 
 	useEffect(() => {
 		const fetchBookings = async () => {
 			try {
-				const allCustomerBookings = await axios.get(
-					'http://localhost:8000/api/bookings/get-all-bookings-for-customer',
-					{
-						withCredentials: true,
-					}
-				);
+				const allCustomerBookings =
+					await bookingService.getAllBookingsForCustomer();
 
-				const conversations = await axios.get(
-					'http://localhost:8000/api/conversations/get-conversations-for-customer',
-					{
-						withCredentials: true,
-					}
-				);
+				const conversations =
+					await conversationService.getConversations();
 
 				const bookings = allCustomerBookings.data.bookings.filter(
 					(b) =>
 						!conversations.data.conversations.some(
-							(conversation) => conversation.bookingId === b._id
+							(conversation) => conversation.pnr === b.pnr
 						)
 				);
 
 				setBookings(bookings);
 
-				const bookingIds = bookings.map((booking) => booking._id);
+				const bookingPNRs = bookings.map((booking) => booking.pnr);
 
-				setBookingsIds(bookingIds);
+				setBookingsPNRs(bookingPNRs);
 
 				setLoading(false);
 			} catch (error) {
@@ -53,20 +44,19 @@ const ChooseBookingModal = ({ isOpen, onClose }) => {
 		}
 	}, [isOpen]);
 
-	// console.log(bookingsIds);
-
 	const handleStartConversation = async (e) => {
 		e.preventDefault();
 
-		const selectedBooking = bookings.find((b) => b._id === selectedBookingId);
+		const selectedBooking = bookings.find((b) => b.pnr === selectedBookingPNR);
 
 		try {
-			const conversation = await startNewConversation(
+			const response = await conversationService.startConversation(
 				selectedBooking.tickets[0].departureFlight.airline._id,
-				selectedBooking._id
+				selectedBooking.pnr
 			);
-			if (conversation) {
+			if (response.data.conversation) {
 				onClose();
+				window.location.reload();
 			}
 		} catch (error) {
 			setError('Failed to start conversation');
@@ -81,7 +71,7 @@ const ChooseBookingModal = ({ isOpen, onClose }) => {
 		</div>
 	) : error ? (
 		<div className="alert alert-danger">{error}</div>
-	) : bookingsIds.length === 0 ? (
+	) : bookingsPNRs.length === 0 ? (
 		<div className="text-center text-muted p-3">No bookings available</div>
 	) : (
 		<form onSubmit={handleStartConversation} className="text-center">
@@ -89,12 +79,15 @@ const ChooseBookingModal = ({ isOpen, onClose }) => {
 				className="form-select"
 				name=""
 				id=""
-				onChange={(e) => setSelectedBookingId(e.target.value)}
+				onChange={(e) => setSelectedBookingPNR(e.target.value)}
 			>
 				<option value="">Select a booking</option>
-				{bookingsIds.map((bookingId) => (
-					<option key={bookingId} value={bookingId}>
-						{bookingId}
+				{bookings.map((booking) => (
+					<option key={booking.pnr} value={booking.pnr}>
+						{booking.pnr}:{' '}
+						{booking.tickets[0].departureFlight.departureAirport.city} to{' '}
+						{booking.tickets[0].departureFlight.arrivalAirport.city} (
+						{booking.tickets[0].departureFlight.airline.airlineName})
 					</option>
 				))}
 			</select>

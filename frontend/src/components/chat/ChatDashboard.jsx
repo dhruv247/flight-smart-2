@@ -2,13 +2,24 @@ import React, { useState } from 'react';
 import ChatBox from './ChatBox';
 import UserList from './UserList';
 
+/**
+ * ChatDashboard component
+ * @param {string} userType - (customer or airline)
+ * @param {string} emptyStateText - The text to display when there are no conversations
+ * @returns {JSX.Element} - The ChatDashboard component
+ */
 const ChatDashboard = ({ userType, emptyStateText }) => {
+
 	const [selectedConversation, setSelectedConversation] = useState(null);
 	const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+	/**
+	 * Handle conversation selection
+	 * @param {object} conversation - The conversation object
+	 */
 	const handleSelectConversation = (conversation) => {
 		setSelectedConversation(conversation);
-		setIsSidebarOpen(false); // Close sidebar after selection on mobile
+		setIsSidebarOpen(false);
 	};
 
 	return (
@@ -41,7 +52,7 @@ const ChatDashboard = ({ userType, emptyStateText }) => {
 					style={{ width: '280px' }}
 				>
 					<div className="offcanvas-header">
-						<h5 className="offcanvas-title">Conversations</h5>
+						
 						<button
 							type="button"
 							className="btn-close"

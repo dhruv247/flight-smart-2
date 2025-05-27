@@ -44,43 +44,43 @@ const BookingCard = ({ booking, type }) => {
 	const [isTicketsModalOpen, setIsTicketsModalOpen] = useState(false);
 	const [isCancelling, setIsCancelling] = useState(false);
 
-	const handleCancelBooking = async () => {
-		try {
-			setIsCancelling(true);
-			const response = await axios.patch(
-				`http://localhost:8000/api/bookings/cancel-booking/${booking._id}`,
-				{},
-				{
-					withCredentials: true,
-				}
-			);
+	// const handleCancelBooking = async () => {
+	// 	try {
+	// 		setIsCancelling(true);
+	// 		const response = await axios.patch(
+	// 			`http://localhost:8000/api/bookings/cancel-booking/${booking._id}`,
+	// 			{},
+	// 			{
+	// 				withCredentials: true,
+	// 			}
+	// 		);
 
-			if (response.status === 200) {
-				showSuccessToast('Booking cancelled successfully');
-				const departureFlightResponse = await axios.patch(
-					`http://localhost:8000/api/flights/update-flight-price/${booking.tickets[0].departureFlight._id}`,
-					{},
-					{
-						withCredentials: true,
-					}
-				);
-				if (booking.tickets[0].returnFlight) {
-					const returnFlightResponse = await axios.patch(
-						`http://localhost:8000/api/flights/update-flight-price/${booking.tickets[0].returnFlight._id}`,
-						{},
-						{
-							withCredentials: true,
-						}
-					);
-				}
-			}
-			window.location.reload();
-		} catch (error) {
-			console.error('Error cancelling booking:', error);
-			showErrorToast('Failed to cancel booking. Please try again.');
-			setIsCancelling(false);
-		}
-	};
+	// 		if (response.status === 200) {
+	// 			showSuccessToast('Booking cancelled successfully');
+	// 			const departureFlightResponse = await axios.patch(
+	// 				`http://localhost:8000/api/flights/update-flight-price/${booking.tickets[0].departureFlight._id}`,
+	// 				{},
+	// 				{
+	// 					withCredentials: true,
+	// 				}
+	// 			);
+	// 			if (booking.tickets[0].returnFlight) {
+	// 				const returnFlightResponse = await axios.patch(
+	// 					`http://localhost:8000/api/flights/update-flight-price/${booking.tickets[0].returnFlight._id}`,
+	// 					{},
+	// 					{
+	// 						withCredentials: true,
+	// 					}
+	// 				);
+	// 			}
+	// 		}
+	// 		window.location.reload();
+	// 	} catch (error) {
+	// 		console.error('Error cancelling booking:', error);
+	// 		showErrorToast('Failed to cancel booking. Please try again.');
+	// 		setIsCancelling(false);
+	// 	}
+	// };
 
 	if (!booking.tickets || booking.tickets.length === 0) {
 		return (
@@ -99,15 +99,18 @@ const BookingCard = ({ booking, type }) => {
 	if (isRoundTrip) {
 		return (
 			<div className="d-flex flex-column">
-				<div className="row border border rounded m-0 py-2 my-2 align-items-center">
-					{/* <div className="col-12 col-md-3 d-flex justify-content-center align-items-center">
-						<div className="d-flex flex-column align-items-center gap-2">
-							<p className="fw-bold">{booking._id}</p>
-						</div>
-					</div> */}
+				<div
+					className="row border border rounded m-0 py-2 my-2 align-items-center booking-card"
+					onClick={() => setIsTicketsModalOpen(true)}
+				>
 					<div className="col-12 col-md-2 d-flex justify-content-center align-items-center">
 						<div className="d-flex flex-column align-items-center gap-2">
-							<p className="fw-bold">
+							<p className="fw-bold">{booking.pnr}</p>
+						</div>
+					</div>
+					<div className="col-12 col-md-2 d-flex justify-content-center align-items-center">
+						<div className="d-flex flex-column align-items-center gap-2">
+							<p className="">
 								{booking.tickets[0].roundTrip ? 'Round' : 'One Way'}
 							</p>
 						</div>
@@ -194,8 +197,21 @@ const BookingCard = ({ booking, type }) => {
 							</div>
 						</div>
 					</div>
+					<div className="col-12 col-md-2 d-flex justify-content-center align-items-center">
+					<div className="d-flex flex-column align-items-center gap-2">
+						<p className="">
+							{booking.tickets[0].seatType.charAt(0).toUpperCase() +
+								booking.tickets[0].seatType.slice(1)}
+						</p>
+					</div>
+				</div>
+				<div className="col-12 col-md-2 d-flex justify-content-center align-items-center">
+					<div className="d-flex flex-column align-items-center gap-2">
+						<p className="">{booking.tickets.length}</p>
+					</div>
+				</div>
 
-					{type === 'customer' && (
+					{/* {type === 'customer' && (
 						<>
 							<div className="col-4 col-md-2 d-flex justify-content-center align-items-center ">
 								<button
@@ -258,7 +274,7 @@ const BookingCard = ({ booking, type }) => {
 						</>
 					)}
 					{type === 'airline' && (
-						<div className="col-12 col-md-6 d-flex justify-content-center align-items-center ">
+						<div className="col-12 col-md-4 d-flex justify-content-center align-items-center ">
 							<button
 								className="btn btn-success px-5 py-2"
 								onClick={() => setIsTicketsModalOpen(true)}
@@ -266,7 +282,7 @@ const BookingCard = ({ booking, type }) => {
 								View Tickets
 							</button>
 						</div>
-					)}
+					)} */}
 				</div>
 				<TicketsModal
 					isOpen={isTicketsModalOpen}
@@ -279,15 +295,18 @@ const BookingCard = ({ booking, type }) => {
 
 	return (
 		<div className="d-flex flex-column">
-			<div className="row border border rounded m-0 py-2 my-2 align-items-center">
-				{/* <div className="col-12 col-md-3 d-flex justify-content-center align-items-center">
-					<div className="d-flex flex-column align-items-center gap-2">
-						<p className="fw-bold">{booking._id}</p>
-					</div>
-				</div> */}
+			<div
+				className="row border border rounded m-0 py-2 my-2 align-items-center booking-card"
+				onClick={() => setIsTicketsModalOpen(true)}
+			>
 				<div className="col-12 col-md-2 d-flex justify-content-center align-items-center">
 					<div className="d-flex flex-column align-items-center gap-2">
-						<p className="fw-bold">
+						<p className="fw-bold">{booking.pnr}</p>
+					</div>
+				</div>
+				<div className="col-12 col-md-2 d-flex justify-content-center align-items-center">
+					<div className="d-flex flex-column align-items-center gap-2">
+						<p className="">
 							{booking.tickets[0].roundTrip ? 'Round Trip' : 'One Way'}
 						</p>
 					</div>
@@ -331,8 +350,21 @@ const BookingCard = ({ booking, type }) => {
 						</p>
 					</div>
 				</div>
+				<div className="col-12 col-md-2 d-flex justify-content-center align-items-center">
+					<div className="d-flex flex-column align-items-center gap-2">
+						<p className="">
+							{booking.tickets[0].seatType.charAt(0).toUpperCase() +
+								booking.tickets[0].seatType.slice(1)}
+						</p>
+					</div>
+				</div>
+				<div className="col-12 col-md-2 d-flex justify-content-center align-items-center">
+					<div className="d-flex flex-column align-items-center gap-2">
+						<p className="">{booking.tickets.length}</p>
+					</div>
+				</div>
 
-				{type === 'customer' && (
+				{/* {type === 'customer' && (
 					<>
 						<div className="col-4 col-md-2 d-flex justify-content-center align-items-center">
 							<button
@@ -390,7 +422,7 @@ const BookingCard = ({ booking, type }) => {
 					</>
 				)}
 				{type === 'airline' && (
-					<div className="col-12 col-md-6 d-flex justify-content-center align-items-center ">
+					<div className="col-12 col-md-4 d-flex justify-content-center align-items-center ">
 						<button
 							className="btn btn-success px-5 py-2"
 							onClick={() => setIsTicketsModalOpen(true)}
@@ -398,7 +430,7 @@ const BookingCard = ({ booking, type }) => {
 							View Tickets
 						</button>
 					</div>
-				)}
+				)} */}
 			</div>
 			<TicketsModal
 				isOpen={isTicketsModalOpen}

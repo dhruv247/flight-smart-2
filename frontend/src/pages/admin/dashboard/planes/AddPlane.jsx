@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { showSuccessToast, showErrorToast } from '../../../../utils/toast';
+import { planeService } from '../../../../services/plane.service';
 
 const AddPlane = () => {
 	const [planeDetails, setPlaneDetails] = useState({
@@ -12,8 +12,9 @@ const AddPlane = () => {
 	const [errors, setErrors] = useState({
 		planeName: '',
 		economyCapacity: '',
-		businessCapacity: '',
 	});
+
+	const [isLoading, setIsLoading] = useState(false);
 
 	const validateForm = () => {
 		const newErrors = {};
@@ -24,34 +25,14 @@ const AddPlane = () => {
 			isValid = false;
 		}
 
-		if (!planeDetails.businessCapacity) {
-			newErrors.businessCapacity = 'Business capacity is required';
-			isValid = false;
-		} else {
-			const businessCap = parseInt(planeDetails.businessCapacity);
-			if (businessCap < 4 || businessCap > 20) {
-				newErrors.businessCapacity =
-					'Business capacity must be between 4 and 20';
-				isValid = false;
-			} else if (businessCap % 2 !== 0) {
-				newErrors.businessCapacity = 'Business capacity must be divisible by 2';
-				isValid = false;
-			}
-		}
+		// Convert to numbers and check if they exist before comparing
+		const economyCap = Number(planeDetails.economyCapacity);
+		const businessCap = Number(planeDetails.businessCapacity);
 
-		if (!planeDetails.economyCapacity) {
-			newErrors.economyCapacity = 'Economy capacity is required';
+		if (economyCap && businessCap && economyCap <= businessCap) {
+			newErrors.economyCapacity =
+				'Economy capacity must be greater than business capacity';
 			isValid = false;
-		} else {
-			const economyCap = parseInt(planeDetails.economyCapacity);
-			if (economyCap < 12 || economyCap > 60) {
-				newErrors.economyCapacity =
-					'Economy capacity must be between 12 and 60';
-				isValid = false;
-			} else if (economyCap % 6 !== 0) {
-				newErrors.economyCapacity = 'Economy capacity must be divisible by 6';
-				isValid = false;
-			}
 		}
 
 		setErrors(newErrors);
@@ -74,18 +55,15 @@ const AddPlane = () => {
 	const handleAddPlane = async (event) => {
 		event.preventDefault();
 
+		setIsLoading(true);
+
 		if (!validateForm()) {
+			showErrorToast(errors.planeName || errors.economyCapacity);
 			return;
 		}
 
 		try {
-			const response = await axios.post(
-				'http://localhost:8000/api/planes/add-plane',
-				planeDetails,
-				{
-					withCredentials: true,
-				}
-			);
+			const response = await planeService.addPlane(planeDetails);
 
 			if (response.status === 201) {
 				showSuccessToast('Plane added successfully!');
@@ -98,7 +76,9 @@ const AddPlane = () => {
 				setErrors({});
 			}
 		} catch (error) {
-			showErrorToast(error.response?.data?.message || 'Failed to add plane');
+			showErrorToast(error.response.data.message);
+		} finally {
+			setIsLoading(false);
 		}
 	};
 
@@ -182,7 +162,13 @@ const AddPlane = () => {
 
 					<div>
 						<button type="submit" className="btn btn-primary px-5 py-3">
-							Add Plane
+							{isLoading ? (
+								<div className="spinner-border spinner-border-sm" role="status">
+									{/* <span className="visually-hidden">Loading...</span> */}
+								</div>
+							) : (
+								'Add Plane'
+							)}
 						</button>
 					</div>
 				</div>

@@ -9,28 +9,6 @@ import { sendBookingCancellationEmail } from '../utils/emailUtils.js';
 import otpGenerator from 'otp-generator';
 
 /**
- * Utility function to calculate age from date of birth
- * @param {*} dateOfBirth
- * @returns {Number} age
- */
-const calculateAge = (dateOfBirth) => {
-	const today = new Date();
-	const birthDate = new Date(dateOfBirth);
-	let age = today.getFullYear() - birthDate.getFullYear();
-	const monthDiff = today.getMonth() - birthDate.getMonth();
-
-	// if month difference is less than 0 or month difference is 0 and today's date is less than birth date, decrement age
-	if (
-		monthDiff < 0 ||
-		(monthDiff === 0 && today.getDate() < birthDate.getDate())
-	) {
-		age--;
-	}
-
-	return age;
-};
-
-/**
  * Create booking from tickets
  * @param {*} req
  * @param {*} res
@@ -48,19 +26,8 @@ const createBooking = async (req, res) => {
 			return res.status(404).json({ message: 'User not found' });
 		}
 
-		// get all tickets to validate ages
+		// get all tickets
 		const ticketDetails = await Ticket.find({ _id: { $in: tickets } });
-
-		// check if at least one passenger is 18 or older
-		const hasAdult = ticketDetails.some(
-			(ticket) => calculateAge(ticket.dateOfBirth) >= 18
-		);
-
-		if (!hasAdult) {
-			return res.status(400).json({
-				message: 'At least one passenger must be 18 years or older',
-			});
-		}
 
 		// calculate booking price
 		let bookingPrice = 0;
@@ -96,7 +63,7 @@ const createBooking = async (req, res) => {
 			upperCaseAlphabets: true,
 			lowerCaseAlphabets: false,
 			digits: true,
-			specialChars: false
+			specialChars: false,
 		});
 
 		const booking = new Booking({
@@ -112,8 +79,8 @@ const createBooking = async (req, res) => {
 		try {
 			await sendToEmailQueue(booking);
 		} catch (emailError) {
-			console.error('Error queuing confirmation email:', emailError);
 			// The booking is still successful even if email queuing fails (solves the past error)
+			console.error('Error queuing confirmation email:', emailError);
 		}
 
 		return res.status(201).json({
@@ -121,7 +88,7 @@ const createBooking = async (req, res) => {
 		});
 	} catch (error) {
 		return res.status(500).json({
-			message: error.message,
+			message: "Failed to create booking. Please try again later.",
 		});
 	}
 };
@@ -248,7 +215,7 @@ const cancelBooking = async (req, res) => {
 		});
 	} catch (error) {
 		return res.status(500).json({
-			message: error.message,
+			message: "Failed to cancel booking. Please try again later.",
 		});
 	}
 };
@@ -265,6 +232,7 @@ const searchBookingsForCustomer = async (req, res) => {
 	try {
 		const {
 			bookingId,
+			pnr,
 			flightFrom,
 			flightTo,
 			roundTrip,
@@ -296,6 +264,10 @@ const searchBookingsForCustomer = async (req, res) => {
 			} catch (error) {
 				return res.status(200).json({ booking: [], total: 0 });
 			}
+		}
+
+		if (pnr) {
+			matchCriteria['pnr'] = pnr;
 		}
 
 		if (flightFrom) {
@@ -372,19 +344,16 @@ const searchBookingsForCustomer = async (req, res) => {
 				},
 			]);
 		} catch (error) {
-			console.error('Search error:', error);
 			return res.status(200).json({ booking: [], total: 0 });
 		}
 
 		// return booking with total count
 		return res.status(200).json({
-			message: 'Booking retrieved successfully',
 			booking,
 			total,
 		});
 	} catch (error) {
-		console.error('Search error:', error);
-		return res.status(500).json({ message: error.message });
+		return res.status(500).json({ message: "Failed to search bookings. Please try again later." });
 	}
 };
 
@@ -400,6 +369,7 @@ const searchBookingsForAirlines = async (req, res) => {
 	try {
 		const {
 			bookingId,
+			pnr,
 			flightFrom,
 			flightTo,
 			roundTrip,
@@ -431,6 +401,10 @@ const searchBookingsForAirlines = async (req, res) => {
 			} catch (error) {
 				return res.status(200).json({ booking: [], total: 0 });
 			}
+		}
+
+		if (pnr) {
+			matchCriteria['pnr'] = pnr;
 		}
 
 		if (flightFrom) {
@@ -526,19 +500,17 @@ const searchBookingsForAirlines = async (req, res) => {
 					$limit: size,
 				},
 			]);
-		} catch (error) {
-			console.error('Search error:', error);
+		} catch (error) {	
 			return res.status(200).json({ booking: [], total: 0 });
 		}
 
 		// return booking with total count
 		return res.status(200).json({
-			message: 'Booking retrieved successfully',
 			booking,
 			total,
 		});
 	} catch (error) {
-		return res.status(500).json({ message: error.message });
+		return res.status(500).json({ message: "Failed to search bookings. Please try again later." });
 	}
 };
 
@@ -557,11 +529,10 @@ const getAllBookingsForCustomer = async (req, res) => {
 		});
 
 		return res.status(200).json({
-			message: 'Bookings retrieved successfully',
-			bookings,
+			bookings
 		});
 	} catch (error) {
-		return res.status(500).json({ message: error.message });
+		return res.status(500).json({ message: "Failed to get all bookings. Please try again later." });
 	}
 };
 

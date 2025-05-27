@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { useFlightContext } from '../../../hooks/useFlightContext';
 import FlightCard from './FlightCard';
 import Navbar from '../../../components/navbars/HomeNavbar';
@@ -8,6 +7,7 @@ import { showErrorToast } from '../../../utils/toast';
 import Loading from '../../../components/Loading';
 import Pagination from '../../../components/Pagination';
 import { Link } from 'react-router-dom';
+import { flightService } from '../../../services/flight.service';
 
 const ReturnFlights = () => {
 	// For the list of searched flights
@@ -49,8 +49,7 @@ const ReturnFlights = () => {
 				return `${year}-${month}-${day}`;
 			};
 
-			const response = await axios.post(
-				'http://localhost:8000/api/flights/search-flights',
+			const response = await flightService.searchFlights(
 				{
 					flightFrom: flightSearchData.flightFrom,
 					flightTo: flightSearchData.flightTo,
@@ -206,11 +205,11 @@ const ReturnFlights = () => {
 								</div>
 								<div className="col-12 col-md-3 d-flex justify-content-evenly align-items-center">
 									<div className="align-items-center">
-										<p className="mb-0">From</p>
+										<p className="mb-0">Departure</p>
 									</div>
 									<p className="mb-0"></p>
 									<div className="align-items-center">
-										<p className="mb-0">To</p>
+										<p className="mb-0">Arrival</p>
 									</div>
 								</div>
 								<div className="col-12 col-md-2">

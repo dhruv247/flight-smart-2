@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import Loading from '../../../components/Loading';
+import { seatsService } from '../../../services/seat.service';
 
 const SeatMap = ({ flightId, seatType, onSeatSelect, blockedSeats = [] }) => {
 	const [seats, setSeats] = useState([]);
@@ -15,9 +15,7 @@ const SeatMap = ({ flightId, seatType, onSeatSelect, blockedSeats = [] }) => {
 		const fetchSeats = async () => {
 			try {
 				setLoading(true);
-				const response = await axios.get(
-					`http://localhost:8000/api/seats/get-seats-for-flight/${flightId}`
-				);
+				const response = await seatsService.getSeatsForFlight(flightId);
 				setSeats(response.data.data);
 				setSelectedSeat(null); // Reset selected seat when flight changes
 				setLoading(false);
@@ -42,6 +40,7 @@ const SeatMap = ({ flightId, seatType, onSeatSelect, blockedSeats = [] }) => {
 		if (selectedSeat) {
 			onSeatSelect(parseInt(selectedSeat.seatNumber));
 		}
+		setSelectedSeat(null);
 	};
 
 	if (loading) return <Loading />;

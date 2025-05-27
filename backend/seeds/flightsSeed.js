@@ -5,13 +5,13 @@ import { User } from '../models/user.model.js';
 import { createSeats } from '../utils/seatUtils.js';
 
 /**
- * Generates a random date between today and 2025-05-26
+ * Generates a random date
  * @returns {Date} - Random date object
  */
 const generateRandomDate = () => {
 	const startDate = new Date(); // Current Day
 	startDate.setHours(0, 0, 0, 0); // Set to start of day to ensure we don't miss today
-	const endDate = new Date('2025-05-26');
+	const endDate = new Date('2025-06-02');
 	const randomDate = new Date(
 		startDate.getTime() +
 			Math.random() * (endDate.getTime() - startDate.getTime())

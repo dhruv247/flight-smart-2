@@ -1,49 +1,67 @@
 import { useEffect, useState } from 'react';
-import { useChat } from '../../context/ChatContext';
 import ChooseBookingModal from './ChooseBookingModal';
 import Loading from '../Loading';
+import { conversationService } from '../../services/conversation.service';
 
+/**
+ * UserList component
+ * @param {function} onSelectConversation - The function to handle conversation selection
+ * @param {object} selectedConversation - The selected conversation object
+ * @param {string} userType - (customer or airline)
+ * @returns {JSX.Element} - The UserList component
+ */
 const UserList = ({ onSelectConversation, selectedConversation, userType }) => {
-	const [loading, setLoading] = useState(true);
+	const [conversations, setConversations] = useState([]);
+	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState('');
-	const {
-		user,
-		conversations,
-		unreadMessages,
-		setActiveConversation,
-		lastError,
-	} = useChat();
+	const [searchQuery, setSearchQuery] = useState('');
+
 	const [isChooseBookingModalOpen, setIsChooseBookingModalOpen] =
 		useState(false);
 
+	// Fetch conversations when the component mounts
 	useEffect(() => {
-		// Set loading to false only when we have conversations or an error
-		if (conversations !== undefined) {
-			setLoading(false);
-		}
-		if (lastError) {
-			setError(lastError);
-			setLoading(false);
-		}
-	}, [conversations, lastError]);
+		const fetchConversations = async () => {
+			setLoading(true);
+			try {
+				const response = await conversationService.getConversations();
+				setConversations(response.data.conversations);
+			} catch (error) {
+				setError('Failed to load conversations');
+			} finally {
+				setLoading(false);
+			}
+		};
 
-	const handleSelectConversation = (conversation) => {
-		onSelectConversation(conversation);
-		setActiveConversation(conversation._id);
-	};
+		fetchConversations();
+	}, []);
 
+	// Get the other user in the conversation
 	const getOtherUser = (conversation) => {
 		if (!conversation) return null;
-		return user.userType === 'airline'
+		return userType === 'airline'
 			? conversation.customer
 			: conversation.airline;
 	};
+
+	// Filter conversations based on search query
+	const filteredConversations = conversations?.filter((conversation) => {
+		const otherUser = getOtherUser(conversation);
+		if (!otherUser) return false;
+
+		const searchLower = searchQuery.toLowerCase();
+		return (
+			otherUser.username.toLowerCase().includes(searchLower) ||
+			conversation.pnr.toLowerCase().includes(searchLower)
+		);
+	});
 
 	return (
 		<div className="h-100" style={{ width: '280px' }}>
 			<div className="d-flex flex-column h-100 bg-white border-end">
 				<div className="p-3 border-bottom d-flex justify-content-between align-items-center">
 					<h5 className="mb-0 fw-bold">Conversations</h5>
+					{/* Add a button to open the choose booking modal */}
 					{userType === 'customer' && (
 						<button
 							className="btn btn-primary"
@@ -54,9 +72,22 @@ const UserList = ({ onSelectConversation, selectedConversation, userType }) => {
 					)}
 				</div>
 
-				<div className="overflow-auto flex-grow-1">
-					{loading && <Loading />}
+				{/* Add a search input to filter conversations */}
+				<div className="d-flex justify-content-between align-items-center p-2">
+					<input
+						type="text"
+						className="form-control"
+						placeholder="Search by name or PNR"
+						value={searchQuery}
+						onChange={(e) => setSearchQuery(e.target.value)}
+					/>
+				</div>
 
+				{/* Add a loading indicator */}
+				{loading && <Loading />}
+
+				{/* Display the conversations */}
+				<div className="overflow-auto flex-grow-1">
 					{error && (
 						<div className="alert alert-danger m-2 py-2" role="alert">
 							{error}
@@ -64,8 +95,8 @@ const UserList = ({ onSelectConversation, selectedConversation, userType }) => {
 					)}
 
 					<div className="list-group list-group-flush">
-						{conversations &&
-							conversations.map((conversation) => {
+						{filteredConversations &&
+							filteredConversations.map((conversation) => {
 								const otherUser = getOtherUser(conversation);
 								if (!otherUser) return null;
 
@@ -78,7 +109,7 @@ const UserList = ({ onSelectConversation, selectedConversation, userType }) => {
 												? 'active'
 												: ''
 										}`}
-										onClick={() => handleSelectConversation(conversation)}
+										onClick={() => onSelectConversation(conversation)}
 									>
 										<div className="d-flex align-items-center">
 											<img
@@ -90,14 +121,9 @@ const UserList = ({ onSelectConversation, selectedConversation, userType }) => {
 											<div className="flex-grow-1">
 												<div className="d-flex justify-content-between align-items-center">
 													<span>{otherUser.username}</span>
-													{unreadMessages[conversation._id] > 0 && (
-														<span className="badge rounded-pill bg-danger">
-															{unreadMessages[conversation._id]}
-														</span>
-													)}
 												</div>
 												<small className="text-muted">
-													Booking #{conversation.bookingId}
+													PNR: {conversation.pnr}
 												</small>
 											</div>
 										</div>

@@ -5,12 +5,14 @@ import Loading from '../Loading';
 import { useAirports } from '../../hooks/useAirports';
 import Pagination from '../Pagination';
 import Select from 'react-select';
+import { bookingService } from '../../services/booking.service';
 
 const BookingsDashboard = ({ type }) => {
 	const [bookingsList, setBookingsList] = useState([]);
 	const { airports, isLoading: airportsLoading } = useAirports();
 	const [searchParams, setSearchParams] = useState({
 		bookingId: '',
+		pnr: '',
 		flightFrom: null,
 		flightTo: null,
 		roundTrip: null,
@@ -62,12 +64,14 @@ const BookingsDashboard = ({ type }) => {
 					}
 				});
 
-				const bookings = await axios.get(
-					`http://localhost:8000/api/bookings/search-bookings-for-${type}?${queryParams.toString()}`,
-					{
-						withCredentials: true,
-					}
-				);
+
+				let bookings;
+
+				if (type === 'customer') {
+					bookings = await bookingService.searchBookingsForCustomer(queryParams);
+				} else {
+					bookings = await bookingService.searchBookingsForAirlines(queryParams);
+				}				
 
 				setBookingsList(bookings.data.booking);
 
@@ -106,20 +110,25 @@ const BookingsDashboard = ({ type }) => {
 	return (
 		<div className="">
 			<div className="text-center mb-5">
-				<h1 className="my-3">Search Bookings</h1>
+				{type === 'customer' && (
+					<h1 className="my-3">My Bookings</h1>
+				)}
+				{type === 'airline' && (
+					<h1 className="my-3">Search Bookings</h1>
+				)}
 				<form action="" className="border rounded p-2">
 					<div className="row">
-						{/* <div className="col-md-3 col-12">
-							<p className="text-start fw-bold">Booking ID</p>
+						<div className="col-md-6 col-12 my-2">
+							<p className="text-start fw-bold">PNR</p>
 							<input
 								className="form-control"
 								type="text"
-								name="bookingId"
-								placeholder="Enter Booking ID"
+								name="pnr"
+								placeholder="Enter PNR"
 								onChange={handleChange}
 							/>
-						</div> */}
-						<div className="col-md-4 col-12 my-2">
+						</div>
+						{/* <div className="col-md-4 col-12 my-2">
 							<p className="text-start fw-bold">Flight From</p>
 							<Select
 								name="flightFrom"
@@ -140,8 +149,8 @@ const BookingsDashboard = ({ type }) => {
 								// 	}),
 								// }}
 							/>
-						</div>
-						<div className="col-md-4 col-12 my-2">
+						</div> */}
+						{/* <div className="col-md-4 col-12 my-2">
 							<p className="text-start fw-bold">Flight To</p>
 							<Select
 								name="flightTo"
@@ -162,16 +171,16 @@ const BookingsDashboard = ({ type }) => {
 								// 	}),
 								// }}
 							/>
-						</div>
-						<div className="col-md-4 col-12 my-2">
-							<p className="text-start fw-bold">Trip Date</p>
+						</div> */}
+						<div className="col-md-6 col-12 my-2">
+							<p className="text-start fw-bold">Trip Status</p>
 							<select
 								name="status"
 								className="form-select"
 								onChange={handleChange}
 							>
 								<option value="" selected>
-									Select Trip Date
+									Select Trip Status
 								</option>
 								<option value="future">Upcoming</option>
 								<option value="past">Past</option>
@@ -239,15 +248,21 @@ const BookingsDashboard = ({ type }) => {
 				</form>
 			</div>
 			<div className="row border border-subtle rounded m-0 mb-1 py-2 align-items-center bg-light fw-bold">
-				{/* <div className="col-12 col-md-3 d-flex justify-content-center align-items-center">
-					<p className="mb-0">Booking ID</p>
-				</div> */}
+				<div className="col-12 col-md-2 d-flex justify-content-center align-items-center">
+					<p className="mb-0">PNR</p>
+				</div>
 				<div className="col-12 col-md-2 d-flex justify-content-center align-items-center">
 					<p className="mb-0">Trip Type</p>
 				</div>
 				<div className="col-12 col-md-4 d-flex justify-content-between align-items-center">
-					<p className="mb-0">Flight From</p>
-					<p className="mb-0">Flight To</p>
+					<p className="mb-0">Departure</p>
+					<p className="mb-0">Arrival</p>
+				</div>
+				<div className="col-12 col-md-2 d-flex justify-content-center align-items-center">
+					<p className="mb-0">Travel Class</p>
+				</div>
+				<div className="col-12 col-md-2 d-flex justify-content-center align-items-center">
+					<p className="mb-0">No. of Tickets</p>
 				</div>
 			</div>
 			{bookingsList.length === 0 ? (

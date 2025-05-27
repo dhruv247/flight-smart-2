@@ -13,6 +13,7 @@ import { Message } from '../models/message.model.js';
  * 5. On disconnect, log the user out
  */
 const setupSocket = (server) => {
+	
 	const io = new Server(server, {
 		cors: {
 			origin: '*',

@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useFlightContext } from '../../../hooks/useFlightContext';
-import axios from 'axios';
 import Loading from '../../../components/Loading';
+import formatDateTime from '../../../utils/dateTime';
+import { flightService } from '../../../services/flight.service';
+import { discountService } from '../../../services/discount.service';
 
 const FlightDetails = () => {
 	const { currentBooking, flightSearchData } = useFlightContext();
@@ -17,37 +19,12 @@ const FlightDetails = () => {
 	const departureFlightId = currentBooking?.departureFlightId;
 	const returnFlightId = currentBooking?.returnFlightId;
 
-	/**
-	 * Format date and time from a Date object
-	 * @param {Date} dateTime - The date and time to format
-	 * @returns {Object} - Object containing formatted date and time
-	 */
-	const formatDateTime = (dateTime) => {
-		const date = new Date(dateTime);
-		return {
-			time: date.toLocaleTimeString('en-US', {
-				hour: '2-digit',
-				minute: '2-digit',
-				hour12: false,
-			}),
-			date: date
-				.toLocaleDateString('en-US', {
-					year: 'numeric',
-					month: '2-digit',
-					day: '2-digit',
-				})
-				.replace(/(\d+)\/(\d+)\/(\d+)/, '$3-$1-$2'),
-		};
-	};
-
 	useEffect(() => {
 		const fetchFlight = async (flightId, setter) => {
 			if (!flightId) return;
 			try {
 				setLoading(true);
-				const res = await axios.get(
-					`http://localhost:8000/api/flights/get-flight-by-id/${flightId}`
-				);
+				const res = await flightService.getFlightById(flightId);
 				setter(res.data.flight);
 			} catch (err) {
 				setError('Failed to fetch flight details');
@@ -61,9 +38,7 @@ const FlightDetails = () => {
 
 	useEffect(() => {
 		const fetchDiscounts = async () => {
-			const res = await axios.get(
-				'http://localhost:8000/api/discounts/get-discounts?discountType=ageBased'
-			);
+			const res = await discountService.getDiscounts();
 			res.data.forEach((discount) => {
 				if (discount.discountFor === 'adults') {
 					setAdultsDiscount(discount.discountValue);
@@ -438,9 +413,9 @@ const FlightDetails = () => {
 						<span className="fw-semibold">Total Booking Price: </span>
 						<span className="fw-semibold text-black ms-2">₹{totalBookingPrice}</span>
 					</div>
-					<div className="text-muted small">
+					{/* <div className="text-muted small">
 						Cancellation Refund Policy: 100% refund if cancelled 24 hours before departure (in case of round trip, 24 hours before the first flight).
-					</div>
+					</div> */}
 				</div>
 			</div>
 		</div>

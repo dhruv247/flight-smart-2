@@ -60,7 +60,7 @@ const ticketSchema = new mongoose.Schema(
 		userDetails: userDetailsSchema,
 		departureFlight: departureFlightSchema,
 		returnFlight: returnFlightSchema,
-		nameOfFlyer: { type: String, required: true },
+		nameOfFlyer: { type: String, required: true, trim: true },
 		dateOfBirth: { type: String, required: true }, // format: YYYY-MM-DD
 		roundTrip: { type: Boolean, required: true, default: false },
 		seatType: { type: String, enum: ['economy', 'business'], required: true },

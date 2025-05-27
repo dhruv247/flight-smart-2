@@ -5,7 +5,6 @@ import ProtectedAdminRoute from './routeProtection/ProtectedAdminRoute';
 import ProtectedCustomerRoute from './routeProtection/ProtectedCustomerRoute';
 import ProtectedAirlineRoute from './routeProtection/ProtectedAirlineRoute';
 import ProtectedHomePageRoute from './routeProtection/ProtectedHomePageRoute';
-import ProtectedDepartureFlightsRoute from './routeProtection/ProtectedDepartureFlightsRoute';
 import SignupPage from '../pages/common/register/SignupPage';
 import LoginForm from '../pages/common/LoginForm';
 import HomePage from '../pages/common/home/HomePage';
@@ -121,9 +120,9 @@ const AppRoutes = () => {
 			<Route
 				path="/customer/departureFlights"
 				element={
-					<ProtectedDepartureFlightsRoute>
+					<ProtectedHomePageRoute>
 						<DepartureFlights />
-					</ProtectedDepartureFlightsRoute>
+					</ProtectedHomePageRoute>
 				}
 			/>
 			{/* return flights */}

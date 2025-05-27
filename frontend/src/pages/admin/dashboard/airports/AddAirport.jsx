@@ -1,9 +1,14 @@
 import React, { useState, useRef } from 'react';
-import axios from 'axios';
+import { imageService } from '../../../../services/image.service';
 import { showSuccessToast, showErrorToast } from '../../../../utils/toast';
+import { airportsService } from '../../../../services/airport.service';
 
 const AddAirport = () => {
+	// form ref to reset form
 	const formRef = useRef(null);
+
+	const [isLoading, setIsLoading] = useState(false);
+
 	const [airportDetails, setAirportDetails] = useState({
 		airportName: '',
 		airportCode: '',
@@ -63,6 +68,8 @@ const AddAirport = () => {
 	};
 
 	const handleAddAirport = async (event) => {
+		setIsLoading(true);
+
 		event.preventDefault();
 
 		// Validate all fields before submission
@@ -82,15 +89,7 @@ const AddAirport = () => {
 		formData.append('image', airportDetails.image);
 
 		try {
-			const imageURLResponse = await axios.post(
-				'http://localhost:8000/api/images/upload-image',
-				formData,
-				{
-					headers: {
-						'Content-Type': 'multipart/form-data',
-					},
-				}
-			);
+			const imageURLResponse = await imageService.uploadImage(formData);
 
 			if (!imageURLResponse.data.url) {
 				throw new Error(
@@ -107,13 +106,7 @@ const AddAirport = () => {
 				image: airportImageUrl,
 			};
 
-			const response = await axios.post(
-				'http://localhost:8000/api/airports/add-airport',
-				airport,
-				{
-					withCredentials: true,
-				}
-			);
+			const response = await airportsService.addAirport(airport);
 
 			if (response.data.message === 'Airport created successfully') {
 				showSuccessToast('Airport added successfully!');
@@ -130,8 +123,9 @@ const AddAirport = () => {
 				formRef.current.reset();
 			}
 		} catch (error) {
-			const errorMessage = error.response?.data?.message || error.message;
-			showErrorToast(errorMessage);
+			showErrorToast(error.response.data.message);
+		} finally {
+			setIsLoading(false);
 		}
 	};
 
@@ -228,8 +222,14 @@ const AddAirport = () => {
 							type="submit"
 							className="btn btn-primary px-5 py-3"
 							disabled={errors.airportName || errors.airportCode}
-					>
-							Add Airport
+						>
+							{isLoading ? (
+								<div className="spinner-border spinner-border-sm" role="status">
+									{/* <span className="visually-hidden">Loading...</span> */}
+								</div>
+							) : (
+								'Add Airport'
+							)}
 						</button>
 					</div>
 				</div>

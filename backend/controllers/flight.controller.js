@@ -98,12 +98,12 @@ const createFlight = async (req, res) => {
 
 		// get current date without time
 		const currentDate = new Date();
-		currentDate.setHours(0, 0, 0, 0);
+		// currentDate.setHours(0, 0, 0, 0);
 
 		// validate departure date is today or later
 		if (departureDate < currentDate) {
 			return res.status(400).json({
-				message: 'Departure date must be today or later',
+				message: 'Departure date and time must be in the future',
 			});
 		}
 
@@ -184,7 +184,8 @@ const createFlight = async (req, res) => {
 		}
 
 		// calculate duration in minutes
-		const duration = Math.round((arrivalDate - departureDate) / (1000 * 60));
+		const durationInMs = arrivalDate.getTime() - departureDate.getTime();
+		const duration = Math.ceil(durationInMs / (1000 * 60));
 
 		// validate minimum duration of 1 hour (60 minutes)
 		if (duration < 60) {
@@ -235,7 +236,7 @@ const createFlight = async (req, res) => {
 		}
 
 		return res.status(500).json({
-			message: error.message,
+			message: 'Failed to create flight. Please try again later.',
 		});
 	}
 };
@@ -247,6 +248,7 @@ const createFlight = async (req, res) => {
  */
 const searchFlights = async (req, res) => {
 	try {
+		// destructure req body
 		const {
 			flightFrom,
 			flightTo,
@@ -256,7 +258,7 @@ const searchFlights = async (req, res) => {
 			passengers,
 			page = 0,
 			size = 10,
-			departureFlightArrivalTime
+			departureFlightArrivalTime,
 		} = req.body;
 
 		// validate required fields
@@ -308,7 +310,7 @@ const searchFlights = async (req, res) => {
 		const passengerCount = parseInt(passengers);
 		if (isNaN(passengerCount) || passengerCount < 1 || passengerCount > 9) {
 			return res.status(400).json({
-				message: 'Passenger count must be between 1 and 5',
+				message: 'Passenger count must be between 1 and 9',
 				details: {
 					passengerCount,
 				},
@@ -339,8 +341,10 @@ const searchFlights = async (req, res) => {
 		// match stage for departure flights with seat availability check
 		const departureMatchStage = {
 			$match: {
+				// match departure and arrival airports
 				'departureAirport._id': departureAirport._id,
 				'arrivalAirport._id': arrivalAirport._id,
+				// match departure date
 				departureDateTime: {
 					$gte: new Date(departureDate),
 					$lt: new Date(
@@ -351,6 +355,7 @@ const searchFlights = async (req, res) => {
 				},
 				$expr: {
 					$and: [
+						// match seat availability
 						{
 							$cond: {
 								if: { $eq: [travelClassStr, '1'] }, // economy class
@@ -378,6 +383,7 @@ const searchFlights = async (req, res) => {
 								},
 							},
 						},
+						// match flight time (departure)
 						{
 							$or: [
 								// If not same day, allow all flights
@@ -392,7 +398,7 @@ const searchFlights = async (req, res) => {
 										{ $dateToString: { format: '%Y-%m-%d', date: new Date() } },
 									],
 								},
-								// If same day, only allow flights at least 6 hours from now
+								// If same day, only allow flights at least 1 hour from now
 								{
 									$and: [
 										{
@@ -426,19 +432,7 @@ const searchFlights = async (req, res) => {
 			},
 		};
 
-		// Add debug logging stage
-		const debugStage = {
-			$addFields: {
-				availableEconomySeats: {
-					$subtract: ['$plane.economyCapacity', '$economyBookedCount'],
-				},
-				availableBusinessSeats: {
-					$subtract: ['$plane.businessCapacity', '$businessBookedCount'],
-				},
-			},
-		};
-
-		// sort stage (separate so that it can be removed easily in case best flight is written)
+		// sort stage (best flight)
 		const economySortStage = [
 			{
 				$addFields: {
@@ -477,19 +471,9 @@ const searchFlights = async (req, res) => {
 			sortStage = businessSortStage;
 		}
 
-		// Add a debug log
-		console.log('Search Parameters:', {
-			flightFrom,
-			flightTo,
-			departureDate,
-			travelClass: travelClassStr,
-			passengers: passengerCount,
-		});
-
 		// get departure flights using aggregation
 		const departureFlights = await Flight.aggregate([
 			departureMatchStage,
-			debugStage,
 			...sortStage,
 			{ $skip: page * size },
 			{ $limit: size },
@@ -502,19 +486,6 @@ const searchFlights = async (req, res) => {
 		]);
 
 		const totalPages = Math.ceil((totalDepartureFlights[0]?.total || 0) / size);
-
-		// Add debug log for results
-		console.log('Found departure flights:', departureFlights.length);
-		console.log(
-			'Flight details:',
-			departureFlights.map((flight) => ({
-				flightNo: flight.flightNo,
-				availableEconomySeats: flight.availableEconomySeats,
-				availableBusinessSeats: flight.availableBusinessSeats,
-				requestedSeats: passengerCount,
-				travelClass: travelClassStr,
-			}))
-		);
 
 		// if return date is provided, validate and search for return flights
 		let returnFlights = [];
@@ -543,16 +514,12 @@ const searchFlights = async (req, res) => {
 				});
 			}
 
-			// calculate minimum return date (next day)
-			const minReturnDate = new Date(departureDate);
-			minReturnDate.setDate(minReturnDate.getDate() + 1);
-			const minReturnDateStr = minReturnDate.toISOString().split('T')[0];
-
 			const returnMatchStage = {
 				$match: {
 					'departureAirport._id': arrivalAirport._id,
 					'arrivalAirport._id': departureAirport._id,
 					departureDateTime: {
+						// match departure time (return)
 						$gte: new Date(
 							new Date(departureFlightArrivalTime).setHours(
 								new Date(departureFlightArrivalTime).getHours() + 1
@@ -594,7 +561,6 @@ const searchFlights = async (req, res) => {
 
 			returnFlights = await Flight.aggregate([
 				returnMatchStage,
-				debugStage,
 				...sortStage,
 				{ $skip: page * size },
 				{ $limit: size },
@@ -607,18 +573,6 @@ const searchFlights = async (req, res) => {
 			]);
 
 			totalReturnPages = Math.ceil((totalReturnFlights[0]?.total || 0) / size);
-
-			console.log('Found return flights:', returnFlights.length);
-			console.log(
-				'Return flight details:',
-				returnFlights.map((flight) => ({
-					flightNo: flight.flightNo,
-					availableEconomySeats: flight.availableEconomySeats,
-					availableBusinessSeats: flight.availableBusinessSeats,
-					requestedSeats: passengerCount,
-					travelClass: travelClassStr,
-				}))
-			);
 
 			if (returnFlights.length === 0) {
 				if (departureFlights.length === 0) {
@@ -637,7 +591,6 @@ const searchFlights = async (req, res) => {
 		}
 
 		return res.status(200).json({
-			message: 'Flights retrieved successfully',
 			departureFlights,
 			returnFlights: returnFlights || [],
 			totalPages,
@@ -646,7 +599,7 @@ const searchFlights = async (req, res) => {
 		});
 	} catch (error) {
 		return res.status(500).json({
-			message: error.message,
+			message: 'Failed to search for flights. Please try again later.',
 		});
 	}
 };
@@ -697,7 +650,7 @@ const updateFlightPrice = async (req, res) => {
 		});
 	} catch (error) {
 		return res.status(500).json({
-			message: error.message,
+			message: 'Failed to update flight price. Please try again later.',
 		});
 	}
 };
@@ -724,12 +677,11 @@ const getFlightById = async (req, res) => {
 
 		// return success message
 		return res.status(200).json({
-			message: 'Flight retrieved successfully',
 			flight,
 		});
 	} catch (error) {
 		return res.status(500).json({
-			message: error.message,
+			message: 'Failed to get flight by id. Please try again later.',
 		});
 	}
 };
@@ -757,14 +709,13 @@ const getAllFlightsForAirline = async (req, res) => {
 
 		// return success message
 		return res.status(200).json({
-			message: 'Flights retrieved successfully',
 			flights,
 			totalPages,
 			totalFlights,
 		});
 	} catch (error) {
 		return res.status(500).json({
-			message: error.message,
+			message: 'Failed to get all flights for airline. Please try again later.',
 		});
 	}
 };
@@ -812,20 +763,18 @@ const searchFlightsForAirline = async (req, res) => {
 		// Get total count of matching flights
 		const total = await Flight.countDocuments(matchCriteria);
 
-		// Use find() instead of aggregate for simpler querying
 		const flights = await Flight.find(matchCriteria)
 			.skip(page * size)
 			.limit(size)
-			.sort({ createdAt: -1 }); // Sort by departure date and time
+			.sort({ createdAt: -1 });
 
 		return res.status(200).json({
-			message: 'Flights retrieved successfully',
 			flights,
 			total,
 		});
 	} catch (error) {
 		return res.status(500).json({
-			message: error.message,
+			message: 'Failed to search for flights. Please try again later.',
 		});
 	}
 };

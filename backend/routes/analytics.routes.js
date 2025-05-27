@@ -10,9 +10,11 @@ import {
 	flightByDuration,
 	topDestinations,
 	topRoutesByNumberOfFlights,
-	topTravelClassByOccupancy,
+	topTravelClass,
 	topEconomyOccupancyFlights,
 	topBusinessOccupancyFlights,
+	mostExpensiveBusinessClassFlights,
+	cheapestEconomyClassFlights,
 } from '../controllers/analytics.controller.js';
 import { verifyAirline, verifyAdmin } from '../middlewares/auth.middlewares.js';
 
@@ -41,9 +43,9 @@ router.get(
 	topRoutesByNumberOfFlights
 );
 router.get(
-	'/top-travel-class-by-occupancy',
+	'/top-travel-class',
 	verifyAdmin,
-	topTravelClassByOccupancy
+	topTravelClass
 );
 
 // Airline Analytics Routes
@@ -72,6 +74,16 @@ router.get(
 	'/top-business-occupancy-flights',
 	verifyAirline,
 	topBusinessOccupancyFlights
+);
+router.get(
+	'/cheapest-economy-class-flights',
+	verifyAirline,
+	cheapestEconomyClassFlights
+);
+router.get(
+	'/most-expensive-business-class-flights',
+	verifyAirline,
+	mostExpensiveBusinessClassFlights
 );
 
 // Customer Analytics Routes (not protected as data is not sensitive)

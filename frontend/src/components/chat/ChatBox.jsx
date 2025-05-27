@@ -1,16 +1,23 @@
-import { useState, useEffect, useRef } from 'react';
-import { useChat } from '../../context/ChatContext';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { io } from 'socket.io-client';
+import useGetUserDetails from '../../hooks/useGetUserDetails';
+import { messageService } from '../../services/message.service';
+import { imageService } from '../../services/image.service';
 import Loading from '../Loading';
 
+const PORT = import.meta.env.VITE_PORT;
+
 const ChatBox = ({ selectedConversation, emptyStateText }) => {
+	const { user } = useGetUserDetails();
+	const [socket, setSocket] = useState(null);
+	const [messages, setMessages] = useState({});
+	const [isConnected, setIsConnected] = useState(false);
+	const [lastError, setLastError] = useState(null);
 	const [newMessage, setNewMessage] = useState('');
 	const [loading, setLoading] = useState(false);
 	const [selectedImage, setSelectedImage] = useState(null);
 	const [isUploading, setIsUploading] = useState(false);
 	const fileInputRef = useRef(null);
-	const { user, sendMessage, sendImageMessage, messages, isConnected } =
-		useChat();
-
 	const messagesEndRef = useRef(null);
 
 	// Get messages for the selected conversation
@@ -18,10 +25,162 @@ const ChatBox = ({ selectedConversation, emptyStateText }) => {
 		? messages[selectedConversation._id] || []
 		: [];
 
+	// Initialize socket connection
+	useEffect(() => {
+		if (!user) return;
+
+		const newSocket = io(`http://localhost:${PORT}`, {
+			reconnectionAttempts: 5,
+			reconnectionDelay: 1000,
+		});
+
+		newSocket.on('connect', () => {
+			setIsConnected(true);
+			newSocket.emit('join', user._id);
+		});
+
+		newSocket.on('disconnect', () => {
+			setIsConnected(false);
+		});
+
+		newSocket.on('connect_error', (error) => {
+			setLastError('Connection error - please refresh');
+		});
+
+		setSocket(newSocket);
+
+		return () => {
+			newSocket.disconnect();
+		};
+	}, [user]);
+
+	// Listen for incoming messages
+	useEffect(() => {
+		if (!socket || !user) return;
+
+		const handleReceiveMessage = (message) => {
+			setMessages((prev) => {
+				const conversationMessages = prev[message.conversation] || [];
+				const messageExists = conversationMessages.some(
+					(msg) => msg._id === message._id
+				);
+
+				if (messageExists) return prev;
+
+				return {
+					...prev,
+					[message.conversation]: [...conversationMessages, message],
+				};
+			});
+			
+		};
+
+		socket.on('receiveMessage', handleReceiveMessage);
+
+		return () => {
+			socket.off('receiveMessage', handleReceiveMessage);
+		};
+	}, [socket, user, selectedConversation]);
+
+	// Fetch messages when active conversation changes
+	useEffect(() => {
+		if (!user || !selectedConversation) return;
+
+		const fetchMessages = async () => {
+			try {
+				setLoading(true);
+				const response = await messageService.getMessages(
+					selectedConversation._id
+				);
+				setMessages((prev) => ({
+					...prev,
+					[selectedConversation._id]: response.data,
+				}));
+				
+			} catch (error) {
+				setLastError('Failed to load messages');
+			} finally {
+				setLoading(false);
+			}
+		};
+
+		fetchMessages();
+	}, [selectedConversation, user]);
+
 	// Scroll to bottom when messages change
 	useEffect(() => {
 		messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
 	}, [conversationMessages]);
+
+	const sendMessage = useCallback(
+		(text, conversationId, imageUrl = null) => {
+			if (!socket || (!text.trim() && !imageUrl) || !conversationId || !user) {
+				return;
+			}
+
+			// Get receiver ID directly from selectedConversation
+			const receiverId =
+				user.userType === 'airline'
+					? selectedConversation.customer._id
+					: selectedConversation.airline._id;
+
+			const messageData = {
+				sender: user._id,
+				receiver: receiverId,
+				conversation: conversationId,
+				messageType: imageUrl ? 'image' : 'text',
+			};
+
+			if (imageUrl) {
+				messageData.imageUrl = imageUrl;
+				messageData.text = text.trim() || '';
+			} else {
+				messageData.text = text.trim();
+			}
+
+			socket.emit('sendMessage', messageData);
+
+			// Optimistically add message to the UI
+			setMessages((prev) => {
+				const conversationMessages = prev[conversationId] || [];
+				return {
+					...prev,
+					[conversationId]: [
+						...conversationMessages,
+						{
+							...messageData,
+							_id: Date.now().toString(), // Temporary ID
+							createdAt: new Date().toISOString(),
+						},
+					],
+				};
+			});
+		},
+		[socket, user, selectedConversation]
+	);
+
+	const sendImageMessage = useCallback(
+		async (file, text, conversationId) => {
+			if (!file || !conversationId || !user) return;
+
+			try {
+				const formData = new FormData();
+				formData.append('image', file);
+
+				const response = await imageService.uploadImage(formData);
+
+				if (response.data && response.data.url) {
+					sendMessage(text, conversationId, response.data.url);
+					return true;
+				}
+				return false;
+			} catch (error) {
+				console.error('Error uploading image:', error);
+				return false;
+			}
+		},
+		[user, sendMessage]
+	);
 
 	const handleSendMessage = (e) => {
 		e.preventDefault();
@@ -136,7 +295,7 @@ const ChatBox = ({ selectedConversation, emptyStateText }) => {
 					<div>
 						<h5 className="mb-0 fw-bold">{otherUser.username}</h5>
 						<small className="text-muted">
-							Booking #{selectedConversation.bookingId}
+							PNR: {selectedConversation.pnr}
 						</small>
 					</div>
 					{!isConnected && (
@@ -150,7 +309,7 @@ const ChatBox = ({ selectedConversation, emptyStateText }) => {
 					<Loading />
 				) : (
 					<div className="py-3">
-						{filteredMessages.length === 0 ? (
+						{!loading && filteredMessages.length === 0 ? (
 							<div className="text-center text-muted">
 								<i className="bi bi-chat-dots fs-1 mb-3 d-block opacity-50"></i>
 								<p>No messages yet. Start the conversation!</p>

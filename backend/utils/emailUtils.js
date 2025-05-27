@@ -272,7 +272,7 @@ const sendBookingConfirmationEmail = async (booking) => {
 			<div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0;">
 				<h3 style="color: #2c3e50;">Booking Information</h3>
 				<div style="margin-bottom: 10px;">
-					<strong>Booking ID:</strong> ${booking._id.toString()}
+					<strong>PNR:</strong> ${booking.pnr}
 				</div>
 				<div style="margin-bottom: 10px;">
 					<strong>Status:</strong> 
@@ -292,13 +292,6 @@ const sendBookingConfirmationEmail = async (booking) => {
 						0
 					)}
 				</div>
-			</div>
-
-			<!-- Cancellation Rules -->
-			<div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0;">
-				<h3 style="color: #2c3e50;">Cancellation Rules</h3>
-				<p>Bookings can only be cancelled 24 hours before the departure time (in case of round trip, 24 hours before the
-					departure time of the first flight).</p>
 			</div>
 			
 			<p>Best regards,<br>Flight Smart Team</p>
@@ -374,7 +367,7 @@ const sendBookingConfirmationEmail = async (booking) => {
 			)
 			.join('')}
 		Booking Information:\n
-		Booking ID: ${booking._id.toString()}
+		PNR: ${booking.pnr}
 		Status: Confirmed
 		Booked On: ${booking.createdAt.split('T')[0]}
 		Total Passengers: ${booking.tickets.length}
@@ -382,9 +375,6 @@ const sendBookingConfirmationEmail = async (booking) => {
 			(sum, ticket) => sum + ticket.ticketPrice,
 			0
 		)}\n
-		Cancellation Rules:\n
-		Bookings can only be cancelled 24 hours before the departure time (in case of round trip, 24 hours before the
-		departure time of the first flight).\n
 		Best regards,\n
 		Flight Smart Team`;
 
@@ -403,14 +393,14 @@ const sendBookingCancellationEmail = async (booking) => {
 		<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
 			<h2 style="color: #2c3e50;">Booking Cancellation</h2>
 			<p>Hello ${booking.userDetails.username},</p>
-			<p>Your booking <strong>${booking._id.toString()}</strong> has been cancelled successfully. If this was an error, please contact the airline through the chat</p>
+			<p>Your booking <strong>${booking.pnr}</strong> has been cancelled successfully. If this was an error, please contact the airline through the chat</p>
 			<p>Best regards,<br>Flight Smart Team</p>
 		</div>
 	`;
 
 	const text = `Hello ${
 		booking.userDetails.username
-	},\n\nYour booking ${booking._id.toString()} has been cancelled successfully.\n\nBest regards,\nFlight Smart Team`;
+	},\n\nYour booking ${booking.pnr} has been cancelled successfully.\n\nBest regards,\nFlight Smart Team`;
 
 	return sendEmail(booking.userDetails.email, subject, text, html);
 };

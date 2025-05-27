@@ -8,6 +8,7 @@ import { planeService } from '../../../../services/plane.service';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { setHours, setMinutes, addDays } from 'date-fns';
+import Select from 'react-select';
 
 const AddFlight = () => {
 	const { airports, isLoading: isLoadingAirports } = useAirports();
@@ -27,15 +28,10 @@ const AddFlight = () => {
 	});
 
 	// New state for separate date and time
-	const [departureDate, setDepartureDate] = useState(null);
+	const [departureDate, setDepartureDate] = useState(new Date());
 	const [departureTime, setDepartureTime] = useState('');
-	const [arrivalDate, setArrivalDate] = useState(null);
+	const [arrivalDate, setArrivalDate] = useState(new Date());
 	const [arrivalTime, setArrivalTime] = useState('');
-
-	const airportOptions = airports?.map((airport) => ({
-		value: airport.airportName,
-		label: airport.airportName + ' (' + airport.code + ') - ' + airport.city,
-	}));
 
 	const now = new Date();
 	const tomorrow = addDays(now, 1);
@@ -69,7 +65,7 @@ const AddFlight = () => {
 		const fetchPlanes = async () => {
 			try {
 				const response = await planeService.getAllPlanes();
-				setPlanes(response.planes);
+				setPlanes(response.data.planes);
 			} catch (error) {
 				console.error('Error fetching planes:', error);
 				showErrorToast('Failed to fetch planes');
@@ -84,6 +80,13 @@ const AddFlight = () => {
 		setFlightDetails((prevData) => ({
 			...prevData,
 			[name]: value,
+		}));
+	};
+
+	const handleAirportChange = (selectedOption, { name }) => {
+		setFlightDetails((prevData) => ({
+			...prevData,
+			[name]: selectedOption?.value || '',
 		}));
 	};
 
@@ -137,14 +140,33 @@ const AddFlight = () => {
 		}
 	};
 
+	const airportOptions = React.useMemo(() => {
+		return airports?.map((airport) => ({
+			value: airport.name,
+			label: airport.name + ' (' + airport.code + ') - ' + airport.city,
+		}));
+	}, [airports]);
+
+	const departureAirportOptions = React.useMemo(() => {
+		return airportOptions.filter(
+			(option) => option.value !== flightDetails.arrivalAirportName
+		);
+	}, [airportOptions, flightDetails.arrivalAirportName]);
+
+	const arrivalAirportOptions = React.useMemo(() => {
+		return airportOptions.filter(
+			(option) => option.value !== flightDetails.departureAirportName
+		);
+	}, [airportOptions, flightDetails.departureAirportName]);
+
 	return (
 		<div className="mt-5">
 			{isSubmitting && <Loading />}
 			{!isSubmitting && (
 				<form onSubmit={handleAddFlight} className="border rounded p-3">
 					<h3 className="text-center mb-3">Flight Details</h3>
-					<div className="d-flex flex-column flex-md-row justify-content-center gap-3 mb-3">
-						<div className="border rounded p-2">
+					<div className="d-flex flex-column flex-md-row gap-3 mb-3">
+						<div className="border rounded p-2 w-100">
 							<p className="text-start fw-semibold">Flight Number</p>
 							<div className="input-group">
 								<span className="input-group-text">
@@ -161,7 +183,7 @@ const AddFlight = () => {
 								/>
 							</div>
 						</div>
-						<div className="border rounded p-2">
+						<div className="border rounded p-2 w-100">
 							<p className="text-start fw-semibold">Plane</p>
 
 							<select
@@ -182,45 +204,51 @@ const AddFlight = () => {
 						</div>
 					</div>
 					<h3 className="text-center mb-3">Departure Details</h3>
-					<div className="d-flex flex-column flex-md-row justify-content-center gap-3 mb-3">
-						<div className="border rounded p-2">
+					<div className="d-flex flex-column flex-md-row gap-3 mb-3">
+						<div className="border rounded p-2 w-100">
 							<p className="text-start fw-semibold">Departure Airport</p>
 
-							<select
-								className="form-control"
+							<Select
+								className="text-start"
 								name="departureAirportName"
-								value={flightDetails.departureAirportName}
-								onChange={handleFlightDetailsChange}
+								value={
+									airportOptions?.find(
+										(option) =>
+											option.value === flightDetails.departureAirportName
+									) || null
+								}
+								onChange={(option) =>
+									handleAirportChange(option, { name: 'departureAirportName' })
+								}
 								required
-							>
-								<option value="">Select Departure Airport</option>
-								{!isLoadingAirports &&
-									airports.map((airport) => (
-										<option key={airport.code} value={airport.name}>
-											{airport.name} ({airport.code}) - {airport.city}
-										</option>
-									))}
-							</select>
+								options={departureAirportOptions}
+								placeholder="Select Departure Airport"
+								isSearchable
+								isClearable
+							/>
 						</div>
-						<div className="border rounded p-2">
+						<div className="border rounded p-2 w-100">
 							<p className="text-start fw-semibold">Departure Date</p>
 
 							<DatePicker
 								selected={departureDate}
 								onChange={setDepartureDate}
-								minDate={tomorrow}
+								minDate={new Date()}
+								maxDate={arrivalDate}
 								dateFormat="yyyy-MM-dd"
 								placeholderText="Select Departure Date"
-								className="form-control"
+								className="form-control custom-datepicker2"
 								required
 							/>
 						</div>
-						<div className="border rounded p-2">
+						<div className="border rounded p-2 w-100">
 							<p className="text-start fw-semibold">Departure Time</p>
 
 							<input
 								type="time"
 								className="form-control"
+								min={setHours(setMinutes(new Date(), 0), 0)}
+								max={setHours(setMinutes(new Date(), 0), 23)}
 								value={departureTime}
 								onChange={(e) => setDepartureTime(e.target.value)}
 								required
@@ -228,40 +256,43 @@ const AddFlight = () => {
 						</div>
 					</div>
 					<h3 className="text-center mb-3">Arrival Details</h3>
-					<div className="d-flex flex-column flex-md-row justify-content-center gap-3 mb-3">
-						<div className="border rounded p-2">
+					<div className="d-flex flex-column flex-md-row gap-3 mb-3">
+						<div className="border rounded p-2 w-100">
 							<p className="text-start fw-semibold">Arrival Airport</p>
 
-							<select
-								className="form-control"
+							<Select
+								className="text-start"
 								name="arrivalAirportName"
-								value={flightDetails.arrivalAirportName}
-								onChange={handleFlightDetailsChange}
+								value={
+									airportOptions?.find(
+										(option) =>
+											option.value === flightDetails.arrivalAirportName
+									) || null
+								}
+								onChange={(option) =>
+									handleAirportChange(option, { name: 'arrivalAirportName' })
+								}
 								required
-							>
-								<option value="">Select Arrival Airport</option>
-								{!isLoadingAirports &&
-									airports.map((airport) => (
-										<option key={airport.code} value={airport.name}>
-											{airport.name} ({airport.code}) - {airport.city}
-										</option>
-									))}
-							</select>
+								options={arrivalAirportOptions}
+								placeholder="Select Arrival Airport"
+								isSearchable
+								isClearable
+							/>
 						</div>
-						<div className="border rounded p-2">
+						<div className="border rounded p-2 w-100">
 							<p className="text-start fw-semibold">Arrival Date</p>
 
 							<DatePicker
 								selected={arrivalDate}
 								onChange={setArrivalDate}
-								minDate={departureDate || tomorrow}
+								minDate={departureDate}
 								dateFormat="yyyy-MM-dd"
 								placeholderText="Select Arrival Date"
-								className="form-control"
+								className="form-control custom-datepicker2"
 								required
 							/>
 						</div>
-						<div className="border rounded p-2">
+						<div className="border rounded p-2 w-100">
 							<p className="text-start fw-semibold">Arrival Time</p>
 
 							<input
@@ -274,8 +305,8 @@ const AddFlight = () => {
 						</div>
 					</div>
 					<h3 className="text-center mb-3">Price Details</h3>
-					<div className="d-flex flex-column flex-md-row justify-content-center gap-3 mb-3">
-						<div className="border rounded p-2">
+					<div className="d-flex flex-column flex-md-row gap-3 mb-3">
+						<div className="border rounded p-2 w-100">
 							<p className="text-start fw-semibold">Economy Base Price</p>
 
 							<input
@@ -290,7 +321,7 @@ const AddFlight = () => {
 								max={10000}
 							/>
 						</div>
-						<div className="border rounded p-2">
+						<div className="border rounded p-2 w-100">
 							<p className="text-start fw-semibold">Business Base Price</p>
 
 							<input

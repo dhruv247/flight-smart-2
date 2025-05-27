@@ -3,6 +3,10 @@ import ProfitableEconomy from './ProfitableEconomy';
 import ProfitableBusiness from './ProfitableBusiness';
 import FlightByDuration from './FlightByDuration';
 import BusyDates from './BusyDates';
+import TopEconomyOccupancyFlights from './TopEconomyOccupancyFlights';
+import TopBusinessOccupancyFlights from './TopBusinessOccupanyFlights';
+import CheapestEconomyClassFlights from './CheapestEconomyClassFlights';
+import MostExpensiveBusinessClassFlights from './MostExpensiveBusinessClassFlights';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
@@ -23,6 +27,7 @@ const AirlineDashboardAnalytics = () => {
 						className="form-control"
 						name="startDate"
 						id="startDate"
+						maxDate={endDate}
 						dateFormat="yyyy-MM-dd"
 						onChange={(date) => setStartDate(date)}
 					/>
@@ -31,7 +36,7 @@ const AirlineDashboardAnalytics = () => {
 					<p className="mb-1 fw-semibold">End Date</p>
 					<DatePicker
 						selected={endDate}
-						minDate={new Date(startDate.getTime() + 24 * 60 * 60 * 1000)}
+						minDate={startDate}
 						className="form-control"
 						name="endDate"
 						id="endDate"
@@ -55,6 +60,23 @@ const AirlineDashboardAnalytics = () => {
 				</div>
 			</div>
 
+			{/* Economy Occupancy Flights Chart */}
+			{/* <div className="col-12 col-xl-6">
+				<div className="bg-white rounded-3 p-4 h-100 shadow-sm">
+					<TopEconomyOccupancyFlights startDate={startDate} endDate={endDate} />
+				</div>
+			</div> */}
+
+			{/* Business Occupancy Flights Chart */}
+			{/* <div className="col-12 col-xl-6">
+				<div className="bg-white rounded-3 p-4 h-100 shadow-sm">
+					<TopBusinessOccupancyFlights
+						startDate={startDate}
+						endDate={endDate}
+					/>
+				</div>
+			</div> */}
+
 			{/* Flights by Duration Chart */}
 			<div className="col-12 col-xl-6">
 				<div className="bg-white rounded-3 p-4 h-100 shadow-sm">
@@ -66,6 +88,25 @@ const AirlineDashboardAnalytics = () => {
 			<div className="col-12 col-xl-6">
 				<div className="bg-white rounded-3 p-4 h-100 shadow-sm">
 					<BusyDates startDate={startDate} endDate={endDate} />
+				</div>
+			</div>
+			{/* Cheapest Economy Class Flights Chart */}
+			<div className="col-12 col-xl-6">
+				<div className="bg-white rounded-3 p-4 h-100 shadow-sm">
+					<CheapestEconomyClassFlights
+						startDate={startDate}
+						endDate={endDate}
+					/>
+				</div>
+			</div>
+
+			{/* Most Expensive Business Class Flights Chart */}
+			<div className="col-12 col-xl-6">
+				<div className="bg-white rounded-3 p-4 h-100 shadow-sm">
+					<MostExpensiveBusinessClassFlights
+						startDate={startDate}
+						endDate={endDate}
+					/>
 				</div>
 			</div>
 		</div>

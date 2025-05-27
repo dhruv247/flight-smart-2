@@ -3,15 +3,17 @@ import TopAirlines from './TopAirlines';
 import TopCities from './TopCities';
 import TopPlanes from './TopPlanes';
 import TopDepartureTimes from './TopDepartureTimes';
+import TopTravelClass from './TopTravelClass';
+import TopRoutes from './TopRoutes';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
 const AdminDashboardAnalytics = () => {
-	
 	const [numFlights, setNumFlights] = useState(5);
 	const [numAirlines, setNumAirlines] = useState(5);
 	const [numCities, setNumCities] = useState(5);
 	const [numPlanes, setNumPlanes] = useState(5);
+	const [numRoutes, setNumRoutes] = useState(5);
 	const [startDate, setStartDate] = useState(new Date());
 	const [endDate, setEndDate] = useState(
 		new Date(new Date().setDate(new Date().getDate() + 7))
@@ -35,7 +37,7 @@ const AdminDashboardAnalytics = () => {
 					<p className="mb-1 fw-semibold">End Date</p>
 					<DatePicker
 						selected={endDate}
-						minDate={new Date()}
+						minDate={startDate}
 						className="form-control"
 						name="endDate"
 						id="endDate"
@@ -44,10 +46,25 @@ const AdminDashboardAnalytics = () => {
 					/>
 				</div>
 			</div>
-			{/* Top Flights Chart */}
+
+			{/* Top Planes by Number of Flights */}
 			<div className="col-12 col-xl-6">
 				<div className="bg-white rounded-3 p-4 h-100 shadow-sm">
-					<TopDepartureTimes
+					<div className="d-flex justify-content-between align-items-center mb-4">
+						{/* <h5 className="mb-0">Top Planes</h5> */}
+						<select
+							className="form-select form-select-sm w-auto"
+							value={numPlanes}
+							onChange={(e) => setNumPlanes(Number(e.target.value))}
+						>
+							<option value="5">Top 5</option>
+							<option value="10">Top 10</option>
+							<option value="15">Top 15</option>
+							<option value="20">Top 20</option>
+						</select>
+					</div>
+					<TopPlanes
+						noOfTopPlanes={numPlanes}
 						startDate={startDate}
 						endDate={endDate}
 					/>
@@ -102,15 +119,21 @@ const AdminDashboardAnalytics = () => {
 				</div>
 			</div>
 
-			{/* Top Planes by Number of Flights */}
+			{/* Top Flights Chart */}
+			<div className="col-12 col-xl-6">
+				<div className="bg-white rounded-3 p-4 h-100 shadow-sm">
+					<TopDepartureTimes startDate={startDate} endDate={endDate} />
+				</div>
+			</div>
+
+			{/* Top Routes */}
 			<div className="col-12 col-xl-6">
 				<div className="bg-white rounded-3 p-4 h-100 shadow-sm">
 					<div className="d-flex justify-content-between align-items-center mb-4">
-						{/* <h5 className="mb-0">Top Planes</h5> */}
 						<select
 							className="form-select form-select-sm w-auto"
-							value={numPlanes}
-							onChange={(e) => setNumPlanes(Number(e.target.value))}
+							value={numRoutes}
+							onChange={(e) => setNumRoutes(Number(e.target.value))}
 						>
 							<option value="5">Top 5</option>
 							<option value="10">Top 10</option>
@@ -118,11 +141,18 @@ const AdminDashboardAnalytics = () => {
 							<option value="20">Top 20</option>
 						</select>
 					</div>
-					<TopPlanes
-						noOfTopPlanes={numPlanes}
+					<TopRoutes
+						noOfTopRoutes={numRoutes}
 						startDate={startDate}
 						endDate={endDate}
 					/>
+				</div>
+			</div>
+
+			{/* Travel Class Distribution */}
+			<div className="col-12 col-xl-6">
+				<div className="bg-white rounded-3 p-4 h-100 shadow-sm">
+					<TopTravelClass startDate={startDate} endDate={endDate} />
 				</div>
 			</div>
 		</div>

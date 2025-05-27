@@ -9,7 +9,7 @@ const FlightCard = ({ flight }) => {
 			<div className="col-12 col-md-1">
 				<p>{flight.flightNo}</p>
 			</div>
-			<div className="col-12 col-md-1">
+			<div className="col-12 col-md-1 my-3">
 				<p>{flight.plane.planeName}</p>
 			</div>
 			<div className="col-12 col-md-3 d-flex justify-content-evenly align-items-center">
@@ -25,17 +25,17 @@ const FlightCard = ({ flight }) => {
 					<p>{formatDateTime(flight.arrivalDateTime).date}</p>
 				</div>
 			</div>
-			<div className="col-12 col-md-1">
+			<div className="col-12 col-md-1 my-3">
 				<p>
 					{Math.floor(flight.duration / 60)} hr : {(flight.duration % 60).toString().padStart(2, '0')} min
 				</p>
 			</div>
 			<div className="col-12 col-md-3 d-flex justify-content-around align-items-center">
-				<div className="col-6 ">
+				<div className="col-6 my-3">
 					<p>B: ₹{flight.businessBasePrice}</p>
 					<p>E: ₹{flight.economyBasePrice}</p>
 				</div>
-				<div className="col-6">
+				<div className="col-6 my-3">
 					<p>B: ₹{flight.businessCurrentPrice}</p>
 					<p>E: ₹{flight.economyCurrentPrice}</p>
 				</div>

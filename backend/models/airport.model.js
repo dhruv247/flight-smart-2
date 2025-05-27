@@ -7,8 +7,6 @@ const airportSchema = new mongoose.Schema(
 			required: true,
 			unique: true,
 			trim: true,
-			minlength: [3, 'Airport name must be at least 3 characters long'],
-			maxlength: [100, 'Airport name cannot exceed 100 characters'],
 		},
 		airportCode: {
 			type: String,
@@ -16,15 +14,11 @@ const airportSchema = new mongoose.Schema(
 			unique: true,
 			trim: true,
 			uppercase: true,
-			minlength: [3, 'Airport code must be exactly 3 characters'],
-			maxlength: [3, 'Airport code must be exactly 3 characters'],
 		},
 		city: {
 			type: String,
 			required: true,
 			trim: true,
-			minlength: [2, 'City name must be at least 2 characters long'],
-			maxlength: [50, 'City name cannot exceed 50 characters'],
 		},
 		state: { type: String },
 		country: { type: String, required: true, default: 'India' },
@@ -42,6 +36,7 @@ const airportSchema = new mongoose.Schema(
 
 // Pre-save validation
 airportSchema.pre('save', function (next) {
+	
 	// Validate airport code format (must be 3 uppercase letters)
 	const airportCodeRegex = /^[A-Z]{3}$/;
 	if (!airportCodeRegex.test(this.airportCode)) {

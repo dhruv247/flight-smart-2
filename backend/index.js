@@ -23,7 +23,7 @@ import { router as discountRoutes } from './routes/discount.routes.js';
 
 const app = express();
 const server = http.createServer(app);
-const io = setupSocket(server);
+setupSocket(server);
 
 app.use(express.json());
 app.use(

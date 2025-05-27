@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import VerifiedAirlineCard from './VerifiedAirlineCard';
-import axios from 'axios';
+import { authService } from '../../../../services/auth.service';
 
 const VerifiedAirlineList = () => {
 	const [airlines, setAirlines] = useState([]);
@@ -10,12 +10,7 @@ const VerifiedAirlineList = () => {
 	useEffect(() => {
 		const fetchVerifiedAirlines = async () => {
 			try {
-				const response = await axios.get(
-					'http://localhost:8000/api/auth/get-all-airlines',
-					{
-						withCredentials: true,
-					}
-				);
+				const response = await authService.getAllAirlines();
 				// Filter only verified airlines
 				const verifiedAirlines = response.data.airlines.filter(
 					(airline) => airline.verificationStatus
@@ -41,7 +36,12 @@ const VerifiedAirlineList = () => {
 			</div>
 		);
 	if (error) return <div>Error: {error}</div>;
-	if (airlines.length === 0) return <div>No verified airlines found</div>;
+	if (airlines.length === 0) return (
+		<div className="text-center p-5">
+			<h3 className="text-muted mb-3">No Verified Airlines</h3>
+			<p className="text-muted">There are currently no verified airlines.</p>
+		</div>
+	);
 
 	return (
 		<div className="container mt-3">

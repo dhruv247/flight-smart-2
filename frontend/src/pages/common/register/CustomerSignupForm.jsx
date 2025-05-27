@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { showSuccessToast, showErrorToast } from '../../../utils/toast';
 import { Link } from 'react-router-dom';
+import { imageService } from '../../../services/image.service';
+import { authService } from '../../../services/auth.service';
 
 const CustomerSignupForm = () => {
 	const navigate = useNavigate();
 
-	const [profilePicture, setProfilePicture] = useState('');
+	const [profilePicture, setProfilePicture] = useState('https://flight-smart-1-images.s3.amazonaws.com/1746975947571-default.jpeg');
 	const [isImageUploading, setIsImageUploading] = useState(false);
 	const [confirmPassword, setConfirmPassword] = useState('');
 	const [isFormValid, setIsFormValid] = useState(false);
@@ -16,7 +17,7 @@ const CustomerSignupForm = () => {
 		username: '',
 		password: '',
 		userType: 'customer',
-		profilePicture: '',
+		profilePicture: 'https://flight-smart-1-images.s3.amazonaws.com/1746975947571-default.jpeg',
 	});
 
 	useEffect(() => {
@@ -58,8 +59,7 @@ const CustomerSignupForm = () => {
 		formData.append('image', file);
 
 		try {
-			const response = await axios.post(
-				'http://localhost:8000/api/images/upload-image',
+			const response = await imageService.uploadImage(
 				formData,
 				{
 					headers: {
@@ -100,13 +100,7 @@ const CustomerSignupForm = () => {
 				return;
 			}
 
-			const res = await axios.post(
-				'http://localhost:8000/api/auth/register',
-				formData,
-				{
-					withCredentials: true,
-				}
-			);
+			const res = await authService.register(formData);
 			showSuccessToast('Registration successful!');
 			navigate('/login');
 		} catch (error) {

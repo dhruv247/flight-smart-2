@@ -9,13 +9,20 @@ export const airportsService = {
 			const response = await axios.get(`${API_URL}/get-all-airports`, {
 				withCredentials: true,
 			});
-			return response.data.airports.map((airport) => ({
-				name: airport.airportName,
-				city: airport.city,
-				code: airport.airportCode,
-			}));
+			return response;
 		} catch (error) {
 			throw new Error(error.message);
+		}
+	},
+
+	addAirport: async (airport) => {
+		try {
+			const response = await axios.post(`${API_URL}/add-airport`, airport, {
+				withCredentials: true,
+			});
+			return response;
+		} catch (error) {
+			throw error;
 		}
 	},
 };

@@ -345,7 +345,7 @@ const TicketsModal = ({ isOpen, onClose, booking }) => {
 								</div>
 
 								{/* Booking Information */}
-								<div className="card mb-4">
+								<div className="card">
 									<div className="card-body">
 										<h6 className="card-subtitle mb-3 text-muted">
 											Booking Information
@@ -353,8 +353,8 @@ const TicketsModal = ({ isOpen, onClose, booking }) => {
 										<div className="row g-3">
 											<div className="col-md-6">
 												<div>
-													<strong>Booking ID:</strong>{' '}
-													<span className="font-monospace">{booking._id}</span>
+													<strong>PNR:</strong>{' '}
+													<span className="font-monospace">{booking.pnr}</span>
 												</div>
 												<div>
 													<strong>Status:</strong>{' '}
@@ -390,7 +390,7 @@ const TicketsModal = ({ isOpen, onClose, booking }) => {
 								</div>
 
 								{/* Cancellation Rules */}
-								<div className="card">
+								{/* <div className="card mt-4">
 									<div className="card-body">
 										<h6 className="card-subtitle mb-3 text-muted">
 											Cancellation Rules
@@ -401,7 +401,7 @@ const TicketsModal = ({ isOpen, onClose, booking }) => {
 											departure time of the first flight).
 										</p>
 									</div>
-								</div>
+								</div> */}
 							</div>
 						) : (
 							<div className="text-center text-muted py-4">

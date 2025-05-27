@@ -1,16 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import './PopularDestinations.css';
+import { analyticsService } from '../../../services/analytics.service';
 
 const PopularDestinations = ({ changeFlightTo }) => {
 	const [popularDestinations, setPopularDestinations] = useState([]);
 
 	useEffect(() => {
 		const fetchPopularDestinations = async () => {
-			const response = await axios.get(
-				'http://localhost:8000/api/analytics/top-destinations'
-			);
-			setPopularDestinations(response.data);
+			const response = await analyticsService.getTopDestinations();
+			setPopularDestinations(response);
 		};
 		fetchPopularDestinations();
 	}, []);

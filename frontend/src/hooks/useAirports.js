@@ -10,7 +10,11 @@ export const useAirports = () => {
 		const fetchAirports = async () => {
 			try {
 				const airportsData = await airportsService.getAllAirports();
-				setAirports(airportsData);
+				setAirports(airportsData.data.airports.map((airport) => ({
+						name: airport.airportName,
+						city: airport.city,
+						code: airport.airportCode,
+					})));
 			} catch (error) {
 				setError(error.message);
 				// console.error('Error fetching airports:', error);

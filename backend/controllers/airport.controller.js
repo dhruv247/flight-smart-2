@@ -8,7 +8,6 @@ import { Airport } from '../models/airport.model.js';
  */
 const addAirport = async (req, res) => {
 	try {
-		
 		// destructure req body
 		const { airportName, airportCode, city, image } = req.body;
 
@@ -24,16 +23,24 @@ const addAirport = async (req, res) => {
 			airport,
 		});
 	} catch (error) {
+		
+		// Handle duplicate key errors
 		if (error.code === 11000) {
-			// mongo db duplicate key error
 			return res.status(400).json({
 				message: 'Airport with this name or code already exists',
 			});
 		}
 
-		// return error message
+		// Handle validation errors from pre-save middleware
+		if (error.message) {
+			return res.status(400).json({
+				message: error.message,
+			});
+		}
+
+		// Handle other errors
 		return res.status(500).json({
-			message: error.message,
+			message: 'Failed to create airport. Please try again later.',
 		});
 	}
 };
@@ -52,11 +59,10 @@ const getAllAirports = async (req, res) => {
 		// return success message
 		return res.status(200).json({
 			airports,
-			message: 'Airports retrieved Successfully',
 		});
 	} catch (error) {
 		return res.status(500).json({
-			message: error.message,
+			message: 'Failed to retrieve airports. Please try again later.',
 		});
 	}
 };

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Bar } from 'react-chartjs-2';
+import { Line } from 'react-chartjs-2';
 import {
 	Chart as ChartJS,
 	CategoryScale,
 	LinearScale,
-	BarElement,
+	PointElement,
+	LineElement,
 	Title,
 	Tooltip,
 	Legend,
@@ -15,13 +16,14 @@ import { analyticsService } from '../../../../services/analytics.service';
 ChartJS.register(
 	CategoryScale,
 	LinearScale,
-	BarElement,
+	PointElement,
+	LineElement,
 	Title,
 	Tooltip,
 	Legend
 );
 
-const TopBusinessOccupancyFlights = ({ startDate, endDate }) => {
+const MostExpensiveBusinessClassFlights = ({ startDate, endDate }) => {
 	const [data, setData] = useState({});
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState(null);
@@ -36,7 +38,7 @@ const TopBusinessOccupancyFlights = ({ startDate, endDate }) => {
 			},
 			title: {
 				display: true,
-				text: 'Top Business Class Occupancy Flights',
+				text: 'Most Expensive Business Class Flights',
 				font: {
 					size: 16,
 					weight: 'normal',
@@ -51,12 +53,7 @@ const TopBusinessOccupancyFlights = ({ startDate, endDate }) => {
 				beginAtZero: true,
 				title: {
 					display: true,
-					text: 'Occupancy Percentage',
-				},
-				ticks: {
-					callback: function (value) {
-						return value * 100 + '%';
-					},
+					text: 'Price ($)',
 				},
 			},
 			x: {
@@ -69,44 +66,42 @@ const TopBusinessOccupancyFlights = ({ startDate, endDate }) => {
 	};
 
 	useEffect(() => {
-		const getTopBusinessOccupancyFlights = async () => {
+		const getMostExpensiveBusinessFlights = async () => {
 			try {
-				const response = await analyticsService.getTopBusinessOccupancyFlights(
-					numFlights,
-					startDate,
-					endDate
-				);
+				const response =
+					await analyticsService.getMostExpensiveBusinessClassFlights(
+						numFlights,
+						startDate,
+						endDate
+					);
 
 				const flightNumbers = response.map((item) => item.flightNo);
-				const occupancyPercentages = response.map(
-					(item) => item.businessOccupancyPercentage
-				);
-
-				console.log('Mapped flightNumbers:', flightNumbers);
-				console.log('Mapped occupancyPercentages:', occupancyPercentages);
+				const prices = response.map((item) => item.businessCurrentPrice);
 
 				setData({
 					labels: flightNumbers,
 					datasets: [
 						{
-							label: 'Occupancy Percentage',
-							data: occupancyPercentages,
-							backgroundColor: 'rgba(75, 192, 192, 0.5)',
-							borderColor: 'rgba(75, 192, 192, 1)',
-							borderWidth: 1,
+							label: 'Price',
+							data: prices,
+							borderColor: 'rgba(153, 102, 255, 1)',
+							backgroundColor: 'rgba(153, 102, 255, 0.5)',
+							tension: 0.1,
+							pointRadius: 4,
+							pointHoverRadius: 6,
 						},
 					],
 				});
 
 				setIsLoading(false);
 			} catch (error) {
-				console.error('Error fetching business occupancy flights:', error);
-				setError('Failed to load business occupancy flights data');
+				console.error('Error fetching most expensive business flights:', error);
+				setError('Failed to load most expensive business flights data');
 				setIsLoading(false);
 			}
 		};
 
-		getTopBusinessOccupancyFlights();
+		getMostExpensiveBusinessFlights();
 	}, [numFlights, startDate, endDate]);
 
 	const handleNumFlightsChange = (e) => {
@@ -141,11 +136,11 @@ const TopBusinessOccupancyFlights = ({ startDate, endDate }) => {
 				<Loading />
 			) : (
 				<div style={{ height: '400px' }}>
-					<Bar data={data} options={options} />
+					<Line data={data} options={options} />
 				</div>
 			)}
 		</div>
 	);
 };
 
-export default TopBusinessOccupancyFlights;
+export default MostExpensiveBusinessClassFlights;

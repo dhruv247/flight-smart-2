@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getUserDetails } from '../services/auth.service';
+import { authService } from '../services/auth.service';
 
 /**
  * React hook to get the details of the logged in user
@@ -13,8 +13,8 @@ const useGetUserDetails = () => {
 	useEffect(() => {
 		const fetchUserDetails = async () => {
 			try {
-				const userData = await getUserDetails();
-				setUser(userData);
+				const userData = await authService.getUserDetails();
+				setUser(userData.data);
 				setError(null);
 			} catch (err) {
 				setError(err);

@@ -204,16 +204,31 @@ const createTicket = async (req, res) => {
 
 		if (age < 2) {
 			// get discount
-			const discount = await Discount.findOne({ discountType: 'ageBased', discountFor: 'infants' });
-			ticketPrice = Math.round(ticketPrice * (100 - discount.discountValue) / 100);
+			const discount = await Discount.findOne({
+				discountType: 'ageBased',
+				discountFor: 'infants',
+			});
+			ticketPrice = Math.round(
+				(ticketPrice * (100 - discount.discountValue)) / 100
+			);
 		} else if (age < 12) {
 			// get discount
-			const discount = await Discount.findOne({ discountType: 'ageBased', discountFor: 'children' });
-			ticketPrice = Math.round(ticketPrice * (100 - discount.discountValue) / 100);
+			const discount = await Discount.findOne({
+				discountType: 'ageBased',
+				discountFor: 'children',
+			});
+			ticketPrice = Math.round(
+				(ticketPrice * (100 - discount.discountValue)) / 100
+			);
 		} else {
 			// get discount
-			const discount = await Discount.findOne({ discountType: 'ageBased', discountFor: 'adults' });
-			ticketPrice = Math.round(ticketPrice * (100 - discount.discountValue) / 100);
+			const discount = await Discount.findOne({
+				discountType: 'ageBased',
+				discountFor: 'adults',
+			});
+			ticketPrice = Math.round(
+				(ticketPrice * (100 - discount.discountValue)) / 100
+			);
 		}
 
 		// start a session for transaction (because we are updating multiple documents)
@@ -272,7 +287,7 @@ const createTicket = async (req, res) => {
 		}
 	} catch (error) {
 		return res.status(500).json({
-			message: error.message,
+			message: 'Failed to create ticket. Please try again later.',
 		});
 	}
 };
@@ -300,7 +315,7 @@ const getTicketById = async (req, res) => {
 		return res.status(200).json({ ticket });
 	} catch (error) {
 		return res.status(500).json({
-			message: error.message,
+			message: 'Failed to get ticket by id. Please try again later.',
 		});
 	}
 };

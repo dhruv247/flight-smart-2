@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import { airportsService } from '../../../../services/airport.service';
 
 const ViewAirports = () => {
 	const [airports, setAirports] = useState([]);
@@ -9,10 +9,7 @@ const ViewAirports = () => {
 	useEffect(() => {
 		const getAirports = async () => {
 			try {
-				const airportsResponse = await axios.get(
-					'http://localhost:8000/api/airports/get-all-airports',
-					{ withCredentials: true }
-				);
+				const airportsResponse = await airportsService.getAllAirports();
 				setAirports(airportsResponse.data.airports);
 				setLoading(false);
 			} catch (err) {

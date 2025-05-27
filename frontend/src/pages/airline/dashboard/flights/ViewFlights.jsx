@@ -3,10 +3,10 @@ import Loading from '../../../../components/Loading';
 import Pagination from '../../../../components/Pagination';
 import FlightCard from './FlightCard';
 import { useAirports } from '../../../../hooks/useAirports';
-import axios from 'axios';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import Select from 'react-select';
+import { flightService } from '../../../../services/flight.service';
 
 const ViewFlights = () => {
 	const [flightsList, setFlightsList] = useState([]);
@@ -30,6 +30,24 @@ const ViewFlights = () => {
 			label: airport.city,
 		})) || [];
 
+	// Filter options for To dropdown based on From selection
+	const toOptions = React.useMemo(() => {
+		return cityOptions.filter(
+			(option) =>
+				!searchParams.flightFrom ||
+				option.value !== searchParams.flightFrom.value
+		);
+	}, [cityOptions, searchParams.flightFrom]);
+
+	// Filter options for From dropdown based on To selection
+	const fromOptions = React.useMemo(() => {
+		return cityOptions.filter(
+			(option) =>
+				!searchParams.flightTo ||
+				option.value !== searchParams.flightTo.value
+		);
+	}, [cityOptions, searchParams.flightTo]);
+
 	useEffect(() => {
 		const fetchFlights = async () => {
 			try {
@@ -52,11 +70,8 @@ const ViewFlights = () => {
 					}
 				});
 
-				const response = await axios.get(
-					`http://localhost:8000/api/flights/search-flights-for-airline?${queryParams.toString()}`,
-					{
-						withCredentials: true,
-					}
+				const response = await flightService.searchFlightsForAirline(
+					queryParams
 				);
 				setFlightsList(response.data.flights);
 				setTotalPages(Math.ceil(response.data.total / searchParams.size));
@@ -134,7 +149,7 @@ const ViewFlights = () => {
 								onChange={(option) =>
 									handleSelectChange(option, { name: 'flightFrom' })
 								}
-								options={cityOptions}
+								options={fromOptions}
 								placeholder="Enter Flight From"
 								isSearchable
 								isClearable
@@ -164,7 +179,7 @@ const ViewFlights = () => {
 								onChange={(option) =>
 									handleSelectChange(option, { name: 'flightTo' })
 								}
-								options={cityOptions}
+								options={toOptions}
 								placeholder="Enter Flight To"
 								isSearchable
 								isClearable
@@ -201,6 +216,11 @@ const ViewFlights = () => {
 						</div>
 					</div>
 				</form>
+			</div>
+
+			<div className="d-flex justify-content-center align-items-center gap-3 mb-2">
+				<p className="fw-bold">B: Business</p>
+				<p className="fw-bold">E: Economy</p>
 			</div>
 
 			<div className="row border border-subtle rounded m-0 mb-3 py-2 align-items-center bg-light">

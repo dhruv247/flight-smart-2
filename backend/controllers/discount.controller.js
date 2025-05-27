@@ -1,5 +1,11 @@
 import Discount from '../models/discount.model.js';
 
+/**
+ * Create a discount
+ * @param {*} req
+ * @param {*} res
+ * @returns {Object} discount
+ */
 const createDiscount = async (req, res) => {
   try {
     const { discountType, discountStyle, discountFor, discountValue } = req.body;
@@ -12,10 +18,16 @@ const createDiscount = async (req, res) => {
 
     res.status(201).json(discount);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Failed to create discount. Please try again later." });
   }
 };
 
+/**
+ * Get all discounts
+ * @param {*} req
+ * @param {*} res
+ * @returns {Object} discounts
+ */
 const getDiscounts = async (req, res) => {
   try {
 
@@ -25,7 +37,7 @@ const getDiscounts = async (req, res) => {
 
     res.status(200).json(discounts);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Failed to get discounts. Please try again later." });
   }
 };
 

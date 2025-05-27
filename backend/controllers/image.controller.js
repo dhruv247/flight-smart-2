@@ -21,7 +21,7 @@ const uploadImage = (req, res) => {
 		});
 	} catch (error) {
 		return res.status(500).json({
-			message: error.message,
+			message: "Failed to upload image. Please try again later.",
 		});
 	}
 };

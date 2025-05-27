@@ -13,3 +13,22 @@ p {
 .custom-datepicker {
   min-width: 285px;
 }
+
+.custom-datepicker2 {
+  @media (min-width: 768px) {
+    min-width: 365px;
+  }
+  @media (max-width: 768px) {
+    min-width: 250px;
+  }
+}
+
+.booking-card {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.booking-card:hover {
+  background-color: #d2e3f2;
+  transform: scale(1.01);
+}

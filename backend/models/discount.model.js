@@ -6,7 +6,7 @@ const discountSchema = new mongoose.Schema(
 			type: String,
 			enum: ['ageBased'],
 			required: true,
-			unique: false, // Explicitly set unique to false
+			unique: false,
 		},
 		discountStyle: {
 			type: String,
@@ -26,6 +26,8 @@ const discountSchema = new mongoose.Schema(
 	{
 		// Disable automatic index creation
 		autoIndex: false,
+		strict: true,
+		timestamps: true,
 	}
 );
 

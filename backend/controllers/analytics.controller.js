@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import { Booking } from '../models/booking.model.js';
 import { Flight } from '../models/flight.model.js';
 import { Ticket } from '../models/ticket.model.js';
 import { getCache, setCache } from '../utils/redisUtils.js';
@@ -9,30 +8,30 @@ import { getCache, setCache } from '../utils/redisUtils.js';
 // ------------------------------------------------------------------------------------------------
 
 /**
- * Get's the top departure times
+ * Get's the top departure times (for flights)
  * @param {*} req
  * @param {*} res
  * @returns {Object} topDepartureTimes
  */
 const topDepartureTimes = async (req, res) => {
 	try {
-		// const startDate = new Date(req.query.startDate);
-		// const endDate = new Date(req.query.endDate);
+		const startDate = new Date(req.query.startDate);
+		const endDate = new Date(req.query.endDate);
 
-		// // Set time to start and end of day
-		// startDate.setHours(0, 0, 0, 0);
-		// endDate.setHours(23, 59, 59, 999);
+		// Set time to start and end of day
+		startDate.setHours(0, 0, 0, 0);
+		endDate.setHours(23, 59, 59, 999);
 
 		// get top departure times
 		const topDepartureTimes = await Flight.aggregate([
-			// {
-			// 	$match: {
-			// 		departureDateTime: {
-			// 			$gte: startDate,
-			// 			$lte: endDate,
-			// 		},
-			// 	},
-			// },
+			{
+				$match: {
+					departureDateTime: {
+						$gte: startDate,
+						$lte: endDate,
+					},
+				},
+			},
 			{
 				$group: {
 					_id: {
@@ -45,7 +44,7 @@ const topDepartureTimes = async (req, res) => {
 											{ $lte: [{ $hour: '$departureDateTime' }, 6] },
 										],
 									},
-									then: '0001-0600',
+									then: '00:01-06:00',
 								},
 								{
 									case: {
@@ -54,7 +53,7 @@ const topDepartureTimes = async (req, res) => {
 											{ $lte: [{ $hour: '$departureDateTime' }, 12] },
 										],
 									},
-									then: '0601-1200',
+									then: '06:01-12:00',
 								},
 								{
 									case: {
@@ -63,7 +62,7 @@ const topDepartureTimes = async (req, res) => {
 											{ $lte: [{ $hour: '$departureDateTime' }, 18] },
 										],
 									},
-									then: '1201-1800',
+									then: '12:01-18:00',
 								},
 								{
 									case: {
@@ -72,10 +71,10 @@ const topDepartureTimes = async (req, res) => {
 											{ $lte: [{ $hour: '$departureDateTime' }, 23] },
 										],
 									},
-									then: '1801-0000',
+									then: '18:01-00:00',
 								},
 							],
-							default: '0001-0600',
+							default: '00:01-06:00',
 						},
 					},
 					count: { $sum: 1 },
@@ -87,7 +86,10 @@ const topDepartureTimes = async (req, res) => {
 		// return top departure times
 		res.status(200).json(topDepartureTimes);
 	} catch (error) {
-		res.status(500).json({ message: error.message });
+		res.status(500).json({
+			message:
+				'Failed to retrieve top departure times. Please try again later.',
+		});
 	}
 };
 
@@ -146,12 +148,15 @@ const topAirlinesByNumberOfFlights = async (req, res) => {
 		// return top airlines
 		res.status(200).json(topAirlines);
 	} catch (error) {
-		res.status(500).json({ message: error.message });
+		res.status(500).json({
+			message:
+				'Failed to retrieve top airlines by number of flights. Please try again later.',
+		});
 	}
 };
 
 /**
- * Get's the top cities by number of flights (only departure flights for now - change this in the future to also include return flights)
+ * Get's the top cities (destinations) by number of flights
  * @param {*} req
  * @param {*} res
  * @returns {Object} topCities
@@ -202,7 +207,10 @@ const topCitiesByNumberOfFlights = async (req, res) => {
 		// return top cities
 		res.status(200).json(topCities);
 	} catch (error) {
-		res.status(500).json({ message: error.message });
+		res.status(500).json({
+			message:
+				'Failed to retrieve top cities by number of flights. Please try again later.',
+		});
 	}
 };
 
@@ -262,7 +270,10 @@ const topPlanesByNumberOfFlights = async (req, res) => {
 		// return top planes
 		res.status(200).json(topPlanes);
 	} catch (error) {
-		res.status(500).json({ message: error.message });
+		res.status(500).json({
+			message:
+				'Failed to retrieve top planes by number of flights. Please try again later.',
+		});
 	}
 };
 
@@ -317,12 +328,20 @@ const topRoutesByNumberOfFlights = async (req, res) => {
 		// return top routes
 		res.status(200).json(topRoutes);
 	} catch (error) {
-		console.error('Error in topRoutesByNumberOfFlights:', error);
-		res.status(500).json({ message: error.message });
+		res.status(500).json({
+			message:
+				'Failed to retrieve top routes by number of flights. Please try again later.',
+		});
 	}
 };
 
-const topTravelClassByOccupancy = async (req, res) => {
+/**
+ * Get's the top travel class by number of tickets sold in a given date range
+ * @param {*} req
+ * @param {*} res
+ * @returns {Object} topTravelClass
+ */
+const topTravelClass = async (req, res) => {
 	try {
 		const startDate = new Date(req.query.startDate);
 		const endDate = new Date(req.query.endDate);
@@ -331,27 +350,33 @@ const topTravelClassByOccupancy = async (req, res) => {
 		startDate.setHours(0, 0, 0, 0);
 		endDate.setHours(23, 59, 59, 999);
 
-		const topTravelClass = await Flight.aggregate([
+		const counts = await Ticket.aggregate([
 			{
 				$match: {
-					departureDateTime: {
-						$gte: startDate,
-						$lte: endDate,
-					},
+					createdAt: { $gte: startDate, $lte: endDate },
 				},
 			},
 			{
 				$group: {
-					_id: '$travelClass',
+					_id: '$seatType',
 					count: { $sum: 1 },
+				},
+			},
+			{
+				$project: {
+					_id: 0,
+					seatType: '$_id',
+					count: 1,
 				},
 			},
 		]);
 
-		// return top travel class
-		res.status(200).json(topTravelClass);
+		res.status(200).json(counts);
 	} catch (error) {
-		res.status(500).json({ message: error.message });
+		res.status(500).json({
+			message:
+				'Failed to retrieve booking counts by travel class. Please try again later.',
+		});
 	}
 };
 
@@ -412,7 +437,10 @@ const profitableEconomyFlights = async (req, res) => {
 		// return profitable flights
 		res.status(200).json(profitableFlights);
 	} catch (error) {
-		res.status(500).json({ message: 'Error fetching profitable flights data' });
+		res.status(500).json({
+			message:
+				'Failed to retrieve profitable economy flights. Please try again later.',
+		});
 	}
 };
 
@@ -469,7 +497,10 @@ const profitableBusinessFlights = async (req, res) => {
 		// return profitable flights
 		res.status(200).json(profitableFlights);
 	} catch (error) {
-		res.status(500).json({ message: 'Error fetching profitable flights data' });
+		res.status(500).json({
+			message:
+				'Failed to retrieve profitable business flights. Please try again later.',
+		});
 	}
 };
 
@@ -527,7 +558,9 @@ const topDatesByNumberOfFlights = async (req, res) => {
 		// return busy dates
 		res.status(200).json(busyDates);
 	} catch (error) {
-		res.status(500).json({ message: 'Error fetching busy dates data' });
+		res.status(500).json({
+			message: 'Failed to retrieve busy dates. Please try again later.',
+		});
 	}
 };
 
@@ -587,7 +620,9 @@ const flightByDuration = async (req, res) => {
 		// return trip types
 		res.status(200).json(tripTypes);
 	} catch (error) {
-		res.status(500).json({ message: 'Error fetching trip types data' });
+		res.status(500).json({
+			message: 'Failed to retrieve trip types. Please try again later.',
+		});
 	}
 };
 
@@ -601,10 +636,51 @@ const topEconomyOccupancyFlights = async (req, res) => {
 	try {
 		// get airline id
 		const airlineId = req.user._id;
+
+		const startDate = new Date(req.query.startDate);
+		const endDate = new Date(req.query.endDate);
+
+		// Set time to start and end of day
+		startDate.setHours(0, 0, 0, 0);
+		endDate.setHours(23, 59, 59, 999);
+
+		const limit = parseInt(req.query.limit) || 5;
+
+		const topEconomyOccupancyFlights = await Flight.aggregate([
+			{
+				$match: {
+					'airline._id': new mongoose.Types.ObjectId(airlineId),
+					departureDateTime: {
+						$gte: startDate,
+						$lte: endDate,
+					},
+				},
+			},
+			{
+				$addFields: {
+					economyOccupancyPercentage: {
+						$divide: ['$economyBookedCount', '$plane.economyCapacity'],
+					},
+				},
+			},
+			{ $sort: { economyOccupancyPercentage: -1 } },
+			{ $limit: limit },
+			{
+				$project: {
+					flightNo: 1,
+					economyOccupancyPercentage: 1,
+					_id: 0,
+				},
+			},
+		]);
+
+		// return top economy occupancy flights
+		res.status(200).json(topEconomyOccupancyFlights);
 	} catch (error) {
-		res
-			.status(500)
-			.json({ message: 'Error fetching top economy occupancy flights data' });
+		res.status(500).json({
+			message:
+				'Failed to retrieve top economy occupancy flights. Please try again later.',
+		});
 	}
 };
 
@@ -618,12 +694,145 @@ const topBusinessOccupancyFlights = async (req, res) => {
 	try {
 		// get airline id
 		const airlineId = req.user._id;
+
+		const startDate = new Date(req.query.startDate);
+		const endDate = new Date(req.query.endDate);
+
+		// Set time to start and end of day
+		startDate.setHours(0, 0, 0, 0);
+		endDate.setHours(23, 59, 59, 999);
+
+		const limit = parseInt(req.query.limit) || 5;
+
+		const topBusinessOccupancyFlights = await Flight.aggregate([
+			{
+				$match: {
+					'airline._id': new mongoose.Types.ObjectId(airlineId),
+					departureDateTime: {
+						$gte: startDate,
+						$lte: endDate,
+					},
+				},
+			},
+			{
+				$addFields: {
+					businessOccupancyPercentage: {
+						$divide: ['$businessBookedCount', '$plane.businessCapacity'],
+					},
+				},
+			},
+			{ $sort: { businessOccupancyPercentage: -1 } },
+			{ $limit: limit },
+			{
+				$project: {
+					flightNo: 1,
+					businessOccupancyPercentage: 1,
+					_id: 0,
+				},
+			},
+		]);
+
+		// return top business occupancy flights
+		res.status(200).json(topBusinessOccupancyFlights);
 	} catch (error) {
-		res
-			.status(500)
-			.json({ message: 'Error fetching top business occupancy flights data' });
+		res.status(500).json({
+			message:
+				'Failed to retrieve top business occupancy flights. Please try again later.',
+		});
 	}
 };
+
+const cheapestEconomyClassFlights = async (req, res) => {
+	try {
+		// get airline id
+		const airlineId = req.user._id;
+
+		const startDate = new Date(req.query.startDate);
+		const endDate = new Date(req.query.endDate);
+
+		// Set time to start and end of day
+		startDate.setHours(0, 0, 0, 0);
+		endDate.setHours(23, 59, 59, 999);
+
+		const limit = parseInt(req.query.limit) || 5;
+
+		const cheapestEconomyClassFlights = await Flight.aggregate([
+			{
+				$match: {
+					'airline._id': new mongoose.Types.ObjectId(airlineId),
+					departureDateTime: {
+						$gte: startDate,
+						$lte: endDate,
+					},
+				},
+			},
+			{
+				$sort: { economyCurrentPrice: 1 },
+			},
+			{ $limit: limit },
+			{
+				$project: {
+					flightNo: 1,
+					economyCurrentPrice: 1,
+					_id: 0,
+				},
+			},
+		]);
+
+		// return cheapest economy class flights
+		res.status(200).json(cheapestEconomyClassFlights);
+	} catch (error) {
+		res.status(500).json({
+			message: 'Failed to retrieve cheapest economy class flights. Please try again later.',
+		});
+	}
+}
+
+const mostExpensiveBusinessClassFlights = async (req, res) => {
+	try {
+		// get airline id
+		const airlineId = req.user._id;
+
+		const startDate = new Date(req.query.startDate);
+		const endDate = new Date(req.query.endDate);
+
+		// Set time to start and end of day
+		startDate.setHours(0, 0, 0, 0);
+		endDate.setHours(23, 59, 59, 999);
+
+		const limit = parseInt(req.query.limit) || 5;
+
+		const mostExpensiveBusinessClassFlights = await Flight.aggregate([
+			{
+				$match: {
+					'airline._id': new mongoose.Types.ObjectId(airlineId),
+					departureDateTime: {
+						$gte: startDate,
+						$lte: endDate,
+					},
+				},
+			},
+			{
+				$sort: { businessCurrentPrice: -1 },
+			},
+			{ $limit: limit },
+			{
+				$project: {
+					flightNo: 1,
+					businessCurrentPrice: 1,
+					_id: 0,
+				},
+			},
+		]);
+
+		// return most expensive business class flights
+		res.status(200).json(mostExpensiveBusinessClassFlights);
+	} catch (error) {
+		res.status(500).json({
+			message: 'Failed to retrieve most expensive business class flights. Please try again later.',
+		});
+	}
+}
 
 // ------------------------------------------------------------------------------------------------
 // Customer Analytics Functions
@@ -642,11 +851,10 @@ const topDestinations = async (req, res) => {
 
 		// try to get data from cache first
 		const cachedData = await getCache(cacheKey);
+
 		if (cachedData) {
 			return res.status(200).json(cachedData);
 		}
-
-		console.log('Cache miss for top destinations, querying database');
 
 		// get popular destinations
 		const popularDestinations = await Ticket.aggregate([
@@ -713,7 +921,10 @@ const topDestinations = async (req, res) => {
 		// return popular destinations
 		res.status(200).json(popularDestinations);
 	} catch (error) {
-		res.status(500).json({ message: error.message });
+		res.status(500).json({
+			message:
+				'Failed to retrieve popular destinations. Please try again later.',
+		});
 	}
 };
 
@@ -723,7 +934,7 @@ export {
 	topCitiesByNumberOfFlights,
 	topPlanesByNumberOfFlights,
 	topRoutesByNumberOfFlights,
-	topTravelClassByOccupancy,
+	topTravelClass,
 	profitableEconomyFlights,
 	profitableBusinessFlights,
 	topDatesByNumberOfFlights,
@@ -731,4 +942,6 @@ export {
 	topDestinations,
 	topEconomyOccupancyFlights,
 	topBusinessOccupancyFlights,
+	cheapestEconomyClassFlights,
+	mostExpensiveBusinessClassFlights,
 };

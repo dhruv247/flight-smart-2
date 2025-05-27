@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { showSuccessToast, showErrorToast } from '../../../utils/toast';
 import { useNavigate, Link } from 'react-router-dom';
+import { imageService } from '../../../services/image.service';
+import { authService } from '../../../services/auth.service';
 
 const AirlineSignupForm = () => {
 	const navigate = useNavigate();
@@ -61,15 +62,7 @@ const AirlineSignupForm = () => {
 		formData.append('image', file);
 
 		try {
-			const response = await axios.post(
-				'http://localhost:8000/api/images/upload-image',
-				formData,
-				{
-					headers: {
-						'Content-Type': 'multipart/form-data',
-					},
-				}
-			);
+			const response = await imageService.uploadImage(formData);
 
 			setProfilePicture(response.data.url);
 			setFormData((prevData) => ({
@@ -103,13 +96,7 @@ const AirlineSignupForm = () => {
 				return;
 			}
 
-			const res = await axios.post(
-				'http://localhost:8000/api/auth/register',
-				formData,
-				{
-					withCredentials: true,
-				}
-			);
+			const res = await authService.register(formData);
 			showSuccessToast(
 				'Registration Request Sent! Please wait for response from site admin.'
 			);

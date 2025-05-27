@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import UnverifiedAirlineList from './UnverifiedAirlineList';
 import VerifiedAirlineList from './VerifiedAirlineList';
 
+/**
+ * Admin dashboard airlines page - choose between unverified and verified airlines
+ */
 const AdminDashboardAirlines = () => {
 	const [airlineFilter, setAirlineFilter] = useState('unverified');
 

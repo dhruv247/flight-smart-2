@@ -4,7 +4,7 @@ import useGetUserDetails from '../../hooks/useGetUserDetails';
 import Loading from '../../components/Loading';
 
 /**
- * Protected route for public pages
+ * Protected route for public pages (login/signup pages)
  * @param {React.ReactNode} children - The child components to be protected
  * @returns {React.ReactNode} The protected content or a loading indicator
  */

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getAllAirlines } from '../../../../services/auth.service';
+import { authService } from '../../../../services/auth.service';
 import UnverifiedAirlineCard from './UnverifiedAirlineCard';
 import Loading from '../../../../components/Loading';
 
@@ -11,9 +11,9 @@ const UnverifiedAirlineList = () => {
 	useEffect(() => {
 		const fetchAirlines = async () => {
 			try {
-				const response = await getAllAirlines();
+				const response = await authService.getAllAirlines();
 				// Filter only unverified airlines
-				const unverifiedAirlines = response.airlines.filter(
+				const unverifiedAirlines = response.data.airlines.filter(
 					(airline) => !airline.verificationStatus
 				);
 				setAirlines(unverifiedAirlines);
@@ -29,7 +29,12 @@ const UnverifiedAirlineList = () => {
 
 	if (loading) return <Loading />;
 	if (error) return <div>Error: {error}</div>;
-	if (airlines.length === 0) return <div>No unverified airlines found</div>;
+	if (airlines.length === 0) return (
+		<div className="text-center p-5">
+			<h3 className="text-muted mb-3">No Unverified Airlines</h3>
+			<p className="text-muted">There are currently no airlines pending verification.</p>
+		</div>
+	);
 
 	return (
 		<div className="container mt-3">

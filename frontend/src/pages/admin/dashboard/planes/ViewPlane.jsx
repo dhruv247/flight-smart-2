@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { showSuccessToast, showErrorToast } from '../../../../utils/toast';
+import { showErrorToast } from '../../../../utils/toast';
 import Loading from '../../../../components/Loading';
+import { planeService } from '../../../../services/plane.service';
 
 const ViewPlane = () => {
 	const [planesList, setPlanesList] = useState([]);
@@ -10,10 +10,7 @@ const ViewPlane = () => {
 	useEffect(() => {
 		const getPlanes = async () => {
 			try {
-				const response = await axios.get(
-					'http://localhost:8000/api/planes/get-all-planes',
-					{ withCredentials: true }
-				);
+				const response = await planeService.getAllPlanes();
 
 				if (response) {
 					setPlanesList(response.data.planes);

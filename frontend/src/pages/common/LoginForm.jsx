@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { showSuccessToast, showErrorToast } from '../../utils/toast';
 import { Link } from 'react-router-dom';
+import { authService } from '../../services/auth.service';
 
 const LoginForm = () => {
 	const navigate = useNavigate();
@@ -25,13 +25,7 @@ const LoginForm = () => {
 	const handleLogin = async (event) => {
 		event.preventDefault();
 		try {
-			const userRes = await axios.post(
-				'http://localhost:8000/api/auth/login',
-				formData,
-				{
-					withCredentials: true,
-				}
-			);
+			const userRes = await authService.login(formData);
 			showSuccessToast('Login successful!');
 			if (userRes.data.userType === 'customer') {
 				if (localStorage.getItem('flightSearchData')) {

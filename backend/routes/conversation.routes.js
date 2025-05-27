@@ -1,15 +1,14 @@
 import express from 'express';
 import {
+  verifyUser,
   verifyCustomer,
-  verifyAirline
 } from '../middlewares/auth.middlewares.js';
-import { startConversation, getConversationsForCustomer, getConversationsForAirline } from '../controllers/conversation.controller.js';
+import { startConversation, getConversations } from '../controllers/conversation.controller.js';
 
 const router = express.Router();
 
 // Customer / Airline Routes
 router.post('/start-conversation', verifyCustomer, startConversation);
-router.get('/get-conversations-for-customer', verifyCustomer, getConversationsForCustomer);
-router.get('/get-conversations-for-airline', verifyAirline, getConversationsForAirline);
+router.get('/get-conversations', verifyUser, getConversations);
 
 export { router };

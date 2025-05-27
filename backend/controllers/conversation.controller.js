@@ -6,13 +6,13 @@ const startConversation = async (req, res) => {
 	try {
 		const customerId = req.user._id;
 
-		const { airlineId, bookingId } = req.body;
+		const { airlineId, pnr } = req.body;
 
-		if (!airlineId || !bookingId) {
+		if (!airlineId || !pnr) {
 			return res.status(400).json({ message: 'Missing required fields' });
 		}
 
-		const booking = await Booking.findById(bookingId);
+		const booking = await Booking.findOne({ pnr });
 
 		if (!booking) {
 			return res.status(404).json({ message: 'Booking not found' });
@@ -47,7 +47,7 @@ const startConversation = async (req, res) => {
 		const existingConversation = await Conversation.findOne({
 			customer,
 			airline,
-			bookingId,
+			pnr,
 		});
 
 		if (existingConversation) {
@@ -70,7 +70,7 @@ const startConversation = async (req, res) => {
 			const conversation = await Conversation.create({
 				customer,
 				airline,
-				bookingId,
+				pnr,
 			});
 
 			return res.status(201).json({
@@ -85,13 +85,20 @@ const startConversation = async (req, res) => {
 	}
 };
 
-const getConversationsForCustomer = async (req, res) => {
+const getConversations = async (req, res) => {
 	try {
+
+		let searchQuery = {};
+		
 		const user = req.user._id;
 
-		const conversations = await Conversation.find({
-			'customer._id': user,
-		});
+		if (req.user.userType === 'customer') {
+			searchQuery['customer._id'] = user;
+		} else {
+			searchQuery['airline._id'] = user;
+		}
+
+		const conversations = await Conversation.find(searchQuery);
 
 		return res.status(200).json({
 			conversations,
@@ -99,30 +106,11 @@ const getConversationsForCustomer = async (req, res) => {
 	} catch (error) {
 		res
 			.status(500)
-			.json({ message: 'Error getting conversations for customer!' });
-	}
-};
-
-const getConversationsForAirline = async (req, res) => {
-	try {
-		const user = req.user._id;
-
-		const conversations = await Conversation.find({
-			'airline._id': user,
-		});
-
-		return res.status(200).json({
-			conversations,
-		});
-	} catch (error) {
-		res
-			.status(500)
-			.json({ message: 'Error getting conversations for airline!' });
+			.json({ message: 'Error getting conversations!' });
 	}
 };
 
 export {
 	startConversation,
-	getConversationsForCustomer,
-	getConversationsForAirline,
+	getConversations,
 };
