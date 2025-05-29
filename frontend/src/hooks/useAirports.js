@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
 import { airportsService } from '../services/airport.service';
 
+/**
+ * Custom hook to fetch airports
+ * @returns - The airports data
+ */
 export const useAirports = () => {
 	const [airports, setAirports] = useState([]);
 	const [isLoading, setIsLoading] = useState(true);

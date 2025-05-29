@@ -1,30 +1,11 @@
 import React from 'react';
+import formatDateTime from '../../utils/dateTime';
 
+/**
+ * Tickets Modal
+ */
 const TicketsModal = ({ isOpen, onClose, booking }) => {
 	if (!isOpen) return null;
-
-	/**
-	 * Format date and time from a Date object
-	 * @param {Date} dateTime - The date and time to format
-	 * @returns {Object} - Object containing formatted date and time
-	 */
-	const formatDateTime = (dateTime) => {
-		const date = new Date(dateTime);
-		return {
-			time: date.toLocaleTimeString('en-US', {
-				hour: '2-digit',
-				minute: '2-digit',
-				hour12: false,
-			}),
-			date: date
-				.toLocaleDateString('en-US', {
-					year: 'numeric',
-					month: '2-digit',
-					day: '2-digit',
-				})
-				.replace(/(\d+)\/(\d+)\/(\d+)/, '$3-$1-$2'),
-		};
-	};
 
 	return (
 		<div

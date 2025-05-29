@@ -1,5 +1,8 @@
 import React from 'react'
 
+/**
+ * Loading
+ */
 const Loading = () => {
   return (
     <div className="text-center my-5">

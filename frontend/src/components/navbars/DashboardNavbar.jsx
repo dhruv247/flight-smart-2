@@ -3,6 +3,9 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useFlightContext } from '../../hooks/useFlightContext';
 import { authService } from '../../services/auth.service';
 
+/**
+ * Dashboard Navbar (common for all dashboards)
+ */
 const DashboardNavbar = ({ navItems = [] }) => {
 	const navigate = useNavigate();
 	const location = useLocation();
@@ -25,6 +28,11 @@ const DashboardNavbar = ({ navItems = [] }) => {
 		}
 	};
 
+	/**
+	 * Nav Buttons
+	 * @param {Object} isMobile - Whether the navbar is mobile (because we collapse the navbar on mobile)
+	 * @returns {JSX.Element} - The nav buttons component
+	 */
 	const NavButtons = ({ isMobile = false }) => (
 		<div className={`${isMobile ? 'd-flex flex-column' : 'd-flex'}`}>
 			{navItems.map((item) => (

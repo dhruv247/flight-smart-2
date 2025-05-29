@@ -3,42 +3,23 @@ import axios from 'axios';
 import TicketsModal from './TicketsModal';
 import { showSuccessToast, showErrorToast } from '../../utils/toast';
 import { Link } from 'react-router-dom';
+import formatDateTime from '../../utils/dateTime';
+
+// /**
+//  * Calculate time difference in hours between now and departure time
+//  * @param {string} departureDateTime - The departure date and time
+//  * @returns {number} - Time difference in hours
+//  */
+// const getTimeDifferenceInHours = (departureDateTime) => {
+// 	const departure = new Date(departureDateTime);
+// 	const now = new Date();
+// 	const diffInMs = departure - now;
+// 	return diffInMs / (1000 * 60 * 60); // Convert to hours
+// };
 
 /**
- * Format date and time from a Date object
- * @param {Date} dateTime - The date and time to format
- * @returns {Object} - Object containing formatted date and time
+ * Booking Card - to disply each individual booking
  */
-const formatDateTime = (dateTime) => {
-	const date = new Date(dateTime);
-	return {
-		time: date.toLocaleTimeString('en-US', {
-			hour: '2-digit',
-			minute: '2-digit',
-			hour12: false,
-		}),
-		date: date
-			.toLocaleDateString('en-US', {
-				year: 'numeric',
-				month: '2-digit',
-				day: '2-digit',
-			})
-			.replace(/(\d+)\/(\d+)\/(\d+)/, '$3-$1-$2'),
-	};
-};
-
-/**
- * Calculate time difference in hours between now and departure time
- * @param {string} departureDateTime - The departure date and time
- * @returns {number} - Time difference in hours
- */
-const getTimeDifferenceInHours = (departureDateTime) => {
-	const departure = new Date(departureDateTime);
-	const now = new Date();
-	const diffInMs = departure - now;
-	return diffInMs / (1000 * 60 * 60); // Convert to hours
-};
-
 const BookingCard = ({ booking, type }) => {
 	const bookingState = booking.confirmed ? 'Confirmed' : 'Cancelled';
 	const [isTicketsModalOpen, setIsTicketsModalOpen] = useState(false);

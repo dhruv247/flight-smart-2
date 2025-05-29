@@ -97,7 +97,7 @@ const createBooking = async (req, res) => {
  * Cancels a booking
  * @param {*} req
  * @param {*} res
- * @returns {Object} message
+ * @returns
  */
 const cancelBooking = async (req, res) => {
 	try {
@@ -518,7 +518,7 @@ const searchBookingsForAirlines = async (req, res) => {
  * Get all bookings for customer
  * @param {*} req
  * @param {*} res
- * @returns {Object} bookings
+ * @returns
  */
 const getAllBookingsForCustomer = async (req, res) => {
 	const user = req.user._id;

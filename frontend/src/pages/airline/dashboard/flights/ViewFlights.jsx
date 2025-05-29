@@ -8,6 +8,9 @@ import 'react-datepicker/dist/react-datepicker.css';
 import Select from 'react-select';
 import { flightService } from '../../../../services/flight.service';
 
+/**
+ * View Flights
+ */
 const ViewFlights = () => {
 	const [flightsList, setFlightsList] = useState([]);
 	const { airports, isLoading: airportsLoading } = useAirports();
@@ -48,6 +51,7 @@ const ViewFlights = () => {
 		);
 	}, [cityOptions, searchParams.flightTo]);
 
+	// Fetch flights from the database
 	useEffect(() => {
 		const fetchFlights = async () => {
 			try {
@@ -120,7 +124,7 @@ const ViewFlights = () => {
 	return (
 		<div>
 			<div className="text-center mt-5 mb-5">
-				<h1 className="my-3">Search Flights</h1>
+				{/* <h1 className="my-3">Search Flights</h1> */}
 				<form action="" className="border rounded p-2">
 					<div className="row">
 						<div className="col-md-3 col-12 my-2">
@@ -234,7 +238,7 @@ const ViewFlights = () => {
 					<div className="align-items-center">
 						<p className="fw-bold">Departure</p>
 					</div>
-					<p>-</p>
+					<i className="bi bi-arrow-right"></i>
 					<div className="align-items-center">
 						<p className="fw-bold">Arrival</p>
 					</div>

@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { authService } from '../services/auth.service';
 
 /**
- * React hook to get the details of the logged in user
- * @returns {Object} { user, loading, error }
+ * Custom hook to get the details of the logged in user
+ * @returns - { user, loading, error }
  */
 const useGetUserDetails = () => {
 	const [user, setUser] = useState(null);

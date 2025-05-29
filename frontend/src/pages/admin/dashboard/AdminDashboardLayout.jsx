@@ -1,6 +1,9 @@
 import React from 'react';
 import DashboardNavbar from '../../../components/navbars/DashboardNavbar';
 
+/**
+ * Admin Dashboard Layout - for the base dashboard
+ */
 const AdminDashboardLayout = ({ children }) => {
 	const adminNavItems = [
 		{

@@ -6,8 +6,10 @@ import { createDiscount, getDiscounts } from '../controllers/discount.controller
 
 const router = express.Router();
 
-// Customer / Airline Routes
+// Admin Routes
 router.post('/create-discount', verifyAdmin, createDiscount);
+
+// Common Routes
 router.get('/get-discounts', getDiscounts);
 
 export { router };

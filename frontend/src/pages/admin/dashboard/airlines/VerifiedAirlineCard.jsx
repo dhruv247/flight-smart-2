@@ -1,5 +1,8 @@
 import React from 'react';
 
+/**
+ * Verified Airline Card
+ */
 const VerifiedAirlineCard = ({airline}) => {
   return (
     <div className="row">

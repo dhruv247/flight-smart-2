@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { showSuccessToast, showErrorToast } from '../../../../utils/toast';
 import { planeService } from '../../../../services/plane.service';
 
+/**
+ * Add Plane
+ */
 const AddPlane = () => {
 	const [planeDetails, setPlaneDetails] = useState({
 		planeName: '',
@@ -16,6 +19,10 @@ const AddPlane = () => {
 
 	const [isLoading, setIsLoading] = useState(false);
 
+	/**
+	 * Validate the form (frontend validation)
+	 * @returns {boolean} - Whether the form is valid
+	 */
 	const validateForm = () => {
 		const newErrors = {};
 		let isValid = true;
@@ -39,6 +46,10 @@ const AddPlane = () => {
 		return isValid;
 	};
 
+	/**
+	 * Handle plane details change
+	 * @param {Object} e - The event object
+	 */
 	const handlePlaneDetailsChange = (e) => {
 		const { name, value } = e.target;
 		setPlaneDetails((prevData) => ({
@@ -52,6 +63,10 @@ const AddPlane = () => {
 		}));
 	};
 
+	/**
+	 * Handle add plane
+	 * @param {Object} event - The event object
+	 */
 	const handleAddPlane = async (event) => {
 		event.preventDefault();
 
@@ -59,6 +74,7 @@ const AddPlane = () => {
 
 		if (!validateForm()) {
 			showErrorToast(errors.planeName || errors.economyCapacity);
+			setIsLoading(false);
 			return;
 		}
 
@@ -107,7 +123,7 @@ const AddPlane = () => {
 					</div>
 
 					<div className="mb-4">
-						<p className="text-start fw-bold">Business Class Capacity</p>
+						<p className="text-start fw-bold">Business Class Capacity (Less than Economy Capacity)</p>
 						<div className="input-group">
 							<select
 								name="businessCapacity"
@@ -134,7 +150,7 @@ const AddPlane = () => {
 					</div>
 
 					<div className="mb-4">
-						<p className="text-start fw-bold">Economy Class Capacity</p>
+						<p className="text-start fw-bold">Economy Class Capacity (Greater than Business Capacity)</p>
 						<div className="input-group">
 							<select
 								name="economyCapacity"

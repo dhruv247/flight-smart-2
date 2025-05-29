@@ -5,8 +5,6 @@ import Loading from '../../components/Loading';
 
 /**
  * Protected route for home page
- * @param {React.ReactNode} children - The child components to be protected
- * @returns {React.ReactNode} The protected content or a loading indicator
  */
 const ProtectedHomePageRoute = ({ children }) => {
 	const { user, isLoading, error } = useGetUserDetails();

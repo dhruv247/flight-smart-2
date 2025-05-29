@@ -10,6 +10,9 @@ import MostExpensiveBusinessClassFlights from './MostExpensiveBusinessClassFligh
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
+/**
+ * Airline Dashboard Analytics
+ */
 const AirlineDashboardAnalytics = () => {
 	const [startDate, setStartDate] = useState(new Date());
 	const [endDate, setEndDate] = useState(

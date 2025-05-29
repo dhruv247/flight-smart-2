@@ -11,6 +11,9 @@ import { Link } from 'react-router-dom';
 import Pagination from '../../../components/Pagination';
 import { flightService } from '../../../services/flight.service';
 
+/**
+ * Departure Flights - used to search for departure flights
+ */
 const DepartureFlights = () => {
 	// For the list of searched flights
 	const [responseMessage, setResponseMessage] = useState(null);
@@ -23,7 +26,7 @@ const DepartureFlights = () => {
 	const pageSize = 10;
 
 	/**
-	 * Load the flights when the page loades
+	 * Load the flights (hits search) when the page loades
 	 */
 	useEffect(() => {
 		if (flightSearchData) {
@@ -71,76 +74,112 @@ const DepartureFlights = () => {
 
 			setFlightSearchData(updatedFormData);
 
-			const response = await flightService.searchFlights(
-				{
-					flightFrom: formData.flightFrom,
-					flightTo: formData.flightTo,
-					departureDate: formatDate(formData.departureDate),
-					returnDate:
-						formData.tripType === 'roundTrip'
-							? formatDate(formData.returnDate)
-							: null,
-					travelClass: formData.travelClass,
-					passengers: formData.adultPassengers + formData.childPassengers + formData.infantPassengers,
-					page: currentPage,
-					size: pageSize,
-				},
-				{ withCredentials: true }
-			);
+			// const queryString = new URLSearchParams({
+			// 		flightFrom: formData.flightFrom,
+			// 		flightTo: formData.flightTo,
+			// 		departureDate: formatDate(formData.departureDate),
+			// 		returnDate:
+			// 			formData.tripType === 'roundTrip'
+			// 				? formatDate(formData.returnDate)
+			// 				: null,
+			// 		travelClass: formData.travelClass,
+			// 		passengers: formData.adultPassengers + formData.childPassengers + formData.infantPassengers,
+			// 		page: currentPage,
+			// 		size: pageSize,
+			// 	}).toString()
+
+			const params = {
+  				flightFrom: formData.flightFrom,
+  				flightTo: formData.flightTo,
+  				departureDate: formatDate(formData.departureDate),
+  				travelClass: formData.travelClass,
+  				passengers: formData.adultPassengers + formData.childPassengers + formData.infantPassengers,
+  				page: currentPage,
+  				size: pageSize,
+			};
+			
+			if (formData.tripType === 'roundTrip' && formData.returnDate) {
+  				params.returnDate = formatDate(formData.returnDate);
+			}
+			
+			const queryString = new URLSearchParams(params).toString();
+			
+			const response = await flightService.searchFlightsForCustomer(queryString);
+
+			// const response = await flightService.searchFlights(
+			// 	{
+			// 		flightFrom: formData.flightFrom,
+			// 		flightTo: formData.flightTo,
+			// 		departureDate: formatDate(formData.departureDate),
+			// 		returnDate:
+			// 			formData.tripType === 'roundTrip'
+			// 				? formatDate(formData.returnDate)
+			// 				: null,
+			// 		travelClass: formData.travelClass,
+			// 		passengers: formData.adultPassengers + formData.childPassengers + formData.infantPassengers,
+			// 		page: currentPage,
+			// 		size: pageSize,
+			// 	},
+				
+			// 	{ withCredentials: true }
+			// );
 			setResponseMessage(response.data.message);
 			setDepartureFlightsList(response.data.departureFlights);
 			setTotalPages(response.data.totalPages);
 			setIsLoading(false);
 		} catch (error) {
 			setIsLoading(false);
-			console.error('Error searching flights:', error);
 
-			if (error.response) {
-				const { message, details } = error.response.data;
+			showErrorToast(error.response.data.message);
 
-				// Handle specific error cases
-				if (error.response.status === 400) {
-					if (message === 'All fields are required') {
-						showErrorToast('Please fill in all required fields');
-					} else if (message === 'Cannot search for flights in the past') {
-						showErrorToast('Please select a future date for your flight');
-					} else if (
-						message === 'Cannot search for return flights in the past'
-					) {
-						showErrorToast(
-							'Please select a future date for your return flight'
-						);
-					} else if (
-						message === 'Return date cannot be before departure date'
-					) {
-						showErrorToast('Return date must be after departure date');
-					} else if (message === 'Passenger count must be between 1 and 5') {
-						showErrorToast('Please select between 1 and 5 passengers');
-					} else if (
-						message === 'Departure airport not found' ||
-						message === 'Arrival airport not found'
-					) {
-						showErrorToast('Please select valid airports from the list');
-					} else if (
-						message === 'Departure and arrival airports must be different'
-					) {
-						showErrorToast(
-							'Please select different airports for departure and arrival'
-						);
-					} else {
-						showErrorToast(message);
-					}
-				} else {
-					showErrorToast('An error occurred while searching for flights');
-				}
-			} else {
-				showErrorToast('Network error. Please try again later');
-			}
+			// console.error('Error searching flights:', error);
+
+			// if (error.response) {
+			// 	const { message, details } = error.response.data;
+
+			// 	// Handle specific error cases
+			// 	if (error.response.status === 400) {
+			// 		if (message === 'All fields are required') {
+			// 			showErrorToast('Please fill in all required fields');
+			// 		} else if (message === 'Cannot search for flights in the past') {
+			// 			showErrorToast('Please select a future date for your flight');
+			// 		} else if (
+			// 			message === 'Cannot search for return flights in the past'
+			// 		) {
+			// 			showErrorToast(
+			// 				'Please select a future date for your return flight'
+			// 			);
+			// 		} else if (
+			// 			message === 'Return date cannot be before departure date'
+			// 		) {
+			// 			showErrorToast('Return date must be after departure date');
+			// 		} else if (message === 'Passenger count must be between 1 and 5') {
+			// 			showErrorToast('Please select between 1 and 5 passengers');
+			// 		} else if (
+			// 			message === 'Departure airport not found' ||
+			// 			message === 'Arrival airport not found'
+			// 		) {
+			// 			showErrorToast('Please select valid airports from the list');
+			// 		} else if (
+			// 			message === 'Departure and arrival airports must be different'
+			// 		) {
+			// 			showErrorToast(
+			// 				'Please select different airports for departure and arrival'
+			// 			);
+			// 		} else {
+			// 			showErrorToast(message);
+			// 		}
+			// 	} else {
+			// 		showErrorToast('An error occurred while searching for flights');
+			// 	}
+			// } else {
+			// 	showErrorToast('Network error. Please try again later');
+			// }
 		}
 	};
 
 	/**
-	 * // Helper function to get a default return date (1 day after departure)
+	 * // Helper function to get a default return date (1 day after departure) for redundancy
 	 * @param {*} departureDate
 	 * @returns
 	 */
@@ -200,12 +239,12 @@ const DepartureFlights = () => {
 	};
 
 	return (
-		<div className="bg-light vh-100 text-center">
+		<div className="bg-light min-vh-100 text-center">
 			<Navbar />
 			<div className="d-flex justify-content-start container mt-5">
 				<Link to="/">
 					<button className="btn btn-primary px-3 py-2">
-						<i class="bi bi-arrow-left"></i> Go Back
+						<i className="bi bi-arrow-left"></i> Go Back
 					</button>
 				</Link>
 			</div>
@@ -240,7 +279,7 @@ const DepartureFlights = () => {
 					</div>
 				) : (
 					<>
-						<div id="sampleFlights">
+						<div id="sampleFlights" className=''>
 							<div className="row border border-subtle rounded m-0 mb-3 py-2 align-items-center bg-white fw-bold">
 								<div className="col-12 col-md-1">
 									<p className="mb-0">Flight No</p>

@@ -2,6 +2,9 @@ import React from 'react';
 import useGetUserDetails from '../../../hooks/useGetUserDetails';
 import Loading from '../../../components/Loading';
 
+/**
+ * Airline Dashboard Profile (more things to add here)
+ */
 const AirlineDashboardProfile = () => {
 	const { user, isLoading } = useGetUserDetails();
 

@@ -9,7 +9,11 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { setHours, setMinutes, addDays } from 'date-fns';
 import Select from 'react-select';
+import { Tooltip } from 'bootstrap';
 
+/**
+ * Add Flight
+ */
 const AddFlight = () => {
 	const { airports, isLoading: isLoadingAirports } = useAirports();
 	const { user: airlineDetails, isLoading: isLoadingUser } =
@@ -53,6 +57,7 @@ const AddFlight = () => {
 		}));
 	}, [departureDate, departureTime]);
 
+	// Update flightDetails when arrival date or time changes
 	useEffect(() => {
 		const arrDateTime = combineDateAndTime(arrivalDate, arrivalTime);
 		setFlightDetails((prev) => ({
@@ -61,6 +66,7 @@ const AddFlight = () => {
 		}));
 	}, [arrivalDate, arrivalTime]);
 
+	// Fetch planes from the database
 	useEffect(() => {
 		const fetchPlanes = async () => {
 			try {
@@ -75,6 +81,23 @@ const AddFlight = () => {
 		fetchPlanes();
 	}, []);
 
+	// Initialize tooltips (used during hover)
+	useEffect(() => {
+		// Initialize all tooltips
+		const tooltipTriggerList = document.querySelectorAll(
+			'[data-bs-toggle="tooltip"]'
+		);
+		const tooltipList = [...tooltipTriggerList].map(
+			(tooltipTriggerEl) => new Tooltip(tooltipTriggerEl)
+		);
+
+		// Cleanup tooltips on component unmount
+		return () => {
+			tooltipList.forEach((tooltip) => tooltip.dispose());
+		};
+	}, []);
+
+	// Handle flight details change
 	const handleFlightDetailsChange = (e) => {
 		const { name, value } = e.target;
 		setFlightDetails((prevData) => ({
@@ -83,6 +106,7 @@ const AddFlight = () => {
 		}));
 	};
 
+	// Handle airport change
 	const handleAirportChange = (selectedOption, { name }) => {
 		setFlightDetails((prevData) => ({
 			...prevData,
@@ -90,6 +114,7 @@ const AddFlight = () => {
 		}));
 	};
 
+	// Handle flight number change
 	const handleFlightNumberChange = (e) => {
 		const { value } = e.target;
 		// Only allow digits and limit to 4 characters
@@ -100,6 +125,7 @@ const AddFlight = () => {
 		}));
 	};
 
+	// add flight
 	const handleAddFlight = async (event) => {
 		event.preventDefault();
 		setIsSubmitting(true);
@@ -140,6 +166,7 @@ const AddFlight = () => {
 		}
 	};
 
+	// Airport options
 	const airportOptions = React.useMemo(() => {
 		return airports?.map((airport) => ({
 			value: airport.name,
@@ -147,12 +174,14 @@ const AddFlight = () => {
 		}));
 	}, [airports]);
 
+	// Departure airport options (remove arrival airport)
 	const departureAirportOptions = React.useMemo(() => {
 		return airportOptions.filter(
 			(option) => option.value !== flightDetails.arrivalAirportName
 		);
 	}, [airportOptions, flightDetails.arrivalAirportName]);
 
+	// Arrival airport options (remove departure airport)
 	const arrivalAirportOptions = React.useMemo(() => {
 		return airportOptions.filter(
 			(option) => option.value !== flightDetails.departureAirportName
@@ -241,8 +270,12 @@ const AddFlight = () => {
 								required
 							/>
 						</div>
-						<div className="border rounded p-2 w-100">
-							<p className="text-start fw-semibold">Departure Time</p>
+						<div className="border rounded p-2 w-100" data-bs-toggle="tooltip"
+								data-bs-placement="top"
+								title="At least 1 hour from now">
+							<p className="text-start fw-semibold">
+								Departure Time
+							</p>
 
 							<input
 								type="time"
@@ -292,8 +325,14 @@ const AddFlight = () => {
 								required
 							/>
 						</div>
-						<div className="border rounded p-2 w-100">
-							<p className="text-start fw-semibold">Arrival Time</p>
+						<div className="border rounded p-2 w-100" data-bs-toggle="tooltip"
+								data-bs-placement="top"
+								title="At least 1 hour and at most 4 hours from departure time">
+							<p
+								className="text-start fw-semibold"
+							>
+								Arrival Time
+							</p>
 
 							<input
 								type="time"
@@ -306,8 +345,12 @@ const AddFlight = () => {
 					</div>
 					<h3 className="text-center mb-3">Price Details</h3>
 					<div className="d-flex flex-column flex-md-row gap-3 mb-3">
-						<div className="border rounded p-2 w-100">
-							<p className="text-start fw-semibold">Economy Base Price</p>
+						<div className="border rounded p-2 w-100" data-bs-toggle="tooltip"
+								data-bs-placement="top"
+								title="₹1000 - ₹10000">
+							<p className="text-start fw-semibold">
+								Economy Base Price
+							</p>
 
 							<input
 								type="number"
@@ -321,8 +364,12 @@ const AddFlight = () => {
 								max={10000}
 							/>
 						</div>
-						<div className="border rounded p-2 w-100">
-							<p className="text-start fw-semibold">Business Base Price</p>
+						<div className="border rounded p-2 w-100" data-bs-toggle="tooltip"
+								data-bs-placement="top"
+								title="₹3000 - ₹30000">
+							<p className="text-start fw-semibold">
+								Business Base Price
+							</p>
 
 							<input
 								type="number"

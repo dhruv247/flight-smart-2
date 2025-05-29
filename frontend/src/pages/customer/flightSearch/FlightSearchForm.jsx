@@ -8,6 +8,9 @@ import Select from 'react-select';
 import 'react-datepicker/dist/react-datepicker.css';
 import { showErrorToast } from '../../../utils/toast';
 
+/**
+ * Flight Search Form - used to search for flights
+ */
 const FlightSearchForm = ({
 	onSubmit,
 	initialTripType = 'oneWay',
@@ -42,8 +45,12 @@ const FlightSearchForm = ({
 		tripType: initialTripType,
 	});
 
+	const [departureDate, setDepartureDate] = useState(new Date());
+	const [returnDate, setReturnDate] = useState(null);
+
 	const [passengerDropdownOpen, setPassengerDropdownOpen] = useState(false);
 
+	// set the initial flight to
 	useEffect(() => {
 		setFormData((prev) => {
 			if (initialFlightTo) {
@@ -56,6 +63,7 @@ const FlightSearchForm = ({
 		});
 	}, [initialFlightTo]);
 
+	// set the initial values for the form
 	useEffect(() => {
 		setFormData((prev) => ({
 			...prev,
@@ -77,13 +85,20 @@ const FlightSearchForm = ({
 		}));
 	};
 
+	// handle the date change
 	const handleDateChange = (date, name) => {
+		if (name === 'departureDate') {
+			setDepartureDate(date);
+		} else if (name === 'returnDate') {
+			setReturnDate(date);
+		}
 		setFormData((prev) => ({
 			...prev,
 			[name]: date,
 		}));
 	};
 
+	// handle the trip type change
 	const handleTripTypeChange = (e) => {
 		const newTripType = e.target.value;
 		setTripType(newTripType);
@@ -93,6 +108,7 @@ const FlightSearchForm = ({
 		}));
 	};
 
+	// handle the select change
 	const handleSelectChange = (selectedOption, { name }) => {
 		setFormData((prev) => ({
 			...prev,
@@ -100,6 +116,7 @@ const FlightSearchForm = ({
 		}));
 	};
 
+	// swap the locations (from and to)
 	const swapLocations = () => {
 		setFormData((prev) => ({
 			...prev,
@@ -108,6 +125,7 @@ const FlightSearchForm = ({
 		}));
 	};
 
+	// handle the form submission (search)
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		try {
@@ -140,14 +158,6 @@ const FlightSearchForm = ({
 		const month = String(date.getMonth() + 1).padStart(2, '0');
 		const day = String(date.getDate()).padStart(2, '0');
 		return `${year}-${month}-${day}`;
-	};
-
-	const handleLoginRedirect = () => {
-		const loginModal = Modal.getInstance(
-			document.getElementById('loginRequiredModal')
-		);
-		loginModal.hide();
-		navigate('/login');
 	};
 
 	// Get today's date for min date
@@ -327,7 +337,7 @@ const FlightSearchForm = ({
 										placeholderText="Select Departure Date"
 										dateFormat="yyyy-MM-dd"
 										minDate={today}
-										maxDate={maxDate}
+										maxDate={returnDate ? returnDate : maxDate}
 										required
 										disabled={isReadOnly}
 									/>
@@ -341,9 +351,7 @@ const FlightSearchForm = ({
 										className="form-control"
 										placeholderText="Select Return Date"
 										dateFormat="yyyy-MM-dd"
-										minDate={
-											formData.departureDate ? formData.departureDate : today
-										}
+										minDate={formData.departureDate ? formData.departureDate : today}
 										maxDate={maxDate}
 										required
 										disabled={isReadOnly}
@@ -515,53 +523,6 @@ const FlightSearchForm = ({
 					</div>
 				</div>
 			</form>
-
-			{/* Login Required Modal */}
-			<div
-				className="modal fade"
-				id="loginRequiredModal"
-				tabIndex="-1"
-				aria-labelledby="loginRequiredModalLabel"
-				aria-hidden="true"
-			>
-				<div className="modal-dialog modal-dialog-centered">
-					<div className="modal-content">
-						<div className="modal-header">
-							<h5 className="modal-title" id="loginRequiredModalLabel">
-								Login Required
-							</h5>
-							<button
-								type="button"
-								className="btn-close"
-								data-bs-dismiss="modal"
-								aria-label="Close"
-							></button>
-						</div>
-						<div className="modal-body">
-							<p>
-								You need to be logged in to search for flights. Would you like
-								to login now?
-							</p>
-						</div>
-						<div className="modal-footer">
-							<button
-								type="button"
-								className="btn btn-secondary"
-								data-bs-dismiss="modal"
-							>
-								Cancel
-							</button>
-							<button
-								type="button"
-								className="btn btn-primary"
-								onClick={handleLoginRedirect}
-							>
-								Login
-							</button>
-						</div>
-					</div>
-				</div>
-			</div>
 		</div>
 	);
 };

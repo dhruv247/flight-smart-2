@@ -4,7 +4,8 @@ const PORT = import.meta.env.VITE_PORT;
 const API_URL = `http://localhost:${PORT}/api/conversations`;
 
 export const conversationService = {
-	getConversations: async () => {
+	
+  getConversations: async () => {
 		try {
 			const response = await axios.get(`${API_URL}/get-conversations`, {
         withCredentials: true,
@@ -30,4 +31,5 @@ export const conversationService = {
       throw error;
     }
   },
+  
 };

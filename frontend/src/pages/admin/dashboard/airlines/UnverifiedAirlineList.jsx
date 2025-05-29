@@ -3,11 +3,17 @@ import { authService } from '../../../../services/auth.service';
 import UnverifiedAirlineCard from './UnverifiedAirlineCard';
 import Loading from '../../../../components/Loading';
 
+/**
+ * Unverified Airline List
+ */
 const UnverifiedAirlineList = () => {
 	const [airlines, setAirlines] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
 
+	/**
+	 * Fetch airlines from the database
+	 */
 	useEffect(() => {
 		const fetchAirlines = async () => {
 			try {

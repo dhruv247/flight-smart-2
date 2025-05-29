@@ -148,12 +148,12 @@ const SeatMap = ({ flightId, seatType, onSeatSelect, blockedSeats = [] }) => {
 											>
 												{seat.seatNumber}
 											</button>
-											{/* Add aisle after every 3 seats */}
+											{/* aisle after every 3 seats */}
 											{index % 3 === 2 &&
 												index < seatRows[rowNum].length - 1 && (
 													<div
 														className="d-inline-block mx-2"
-														style={{ width: '20px' }}
+														style={{ width: '10px' }}
 													>
 														<div className="border-start border-2 h-100"></div>
 													</div>

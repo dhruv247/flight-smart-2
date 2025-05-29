@@ -2,11 +2,12 @@ import express from 'express';
 import { verifyAirline } from '../middlewares/auth.middlewares.js';
 import {
 	createFlight,
-	searchFlights,
+	// searchFlights,
 	updateFlightPrice,
 	getFlightById,
 	getAllFlightsForAirline,
 	searchFlightsForAirline,
+	searchFlightsForCustomer
 } from '../controllers/flight.controller.js';
 
 const router = express.Router();
@@ -17,7 +18,8 @@ router.get('/get-all-flights-for-airline', verifyAirline, getAllFlightsForAirlin
 router.get('/search-flights-for-airline', verifyAirline, searchFlightsForAirline);
 
 // Common Routes
-router.post('/search-flights', searchFlights);
+// router.post('/search-flights', searchFlights);
+router.get('/search-flights-for-customer', searchFlightsForCustomer);
 router.patch('/update-flight-price/:id', updateFlightPrice);
 router.get('/get-flight-by-id/:id', getFlightById);
 

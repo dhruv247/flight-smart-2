@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import './PopularDestinations.css';
 import { analyticsService } from '../../../services/analytics.service';
 
+/**
+ * Popular Destinations (from the db)
+ */
 const PopularDestinations = ({ changeFlightTo }) => {
 	const [popularDestinations, setPopularDestinations] = useState([]);
 

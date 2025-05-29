@@ -115,13 +115,10 @@ const createTicket = async (req, res) => {
 
 		// initialize return flight
 		let returnFlight = null;
-
 		// initialize return seat
 		let returnSeat = null;
-
 		// initialize round trip
 		let roundTrip = false;
-
 		// initialize return flight details
 		let returnFlightDetails = null;
 
@@ -202,6 +199,7 @@ const createTicket = async (req, res) => {
 		// calculate age
 		const age = calculateAge(dateOfBirth);
 
+		// apply age based discount
 		if (age < 2) {
 			// get discount
 			const discount = await Discount.findOne({

@@ -15,8 +15,8 @@ const sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
 
 /**
  * Send a message to SQS queue
- * @param {Object} messageBody - The message body to send
- * @returns {object} - The result of the send operation
+ * @param {*} messageBody 
+ * @returns 
  */
 export const sendToEmailQueue = async (messageBody) => {
 	const params = {
@@ -32,7 +32,7 @@ export const sendToEmailQueue = async (messageBody) => {
 
 	try {
 		const result = await sqs.sendMessage(params).promise();
-		console.log('Message sent to SQS queue:', result.MessageId);
+		// console.log('Message sent to SQS queue:', result.MessageId);
 		return result;
 	} catch (error) {
 		console.error('Error sending message to SQS:', error);
@@ -48,7 +48,7 @@ export const setupQueues = async () => {
 		// Check if queue exists
 		const queueName = 'booking-emails';
 		const queueData = await sqs.getQueueUrl({ QueueName: queueName }).promise();
-		console.log(`Queue already exists: ${queueData.QueueUrl}`);
+		console.log('SQS Queue already exists');
 	} catch (error) {
 		console.error('Error: Queue does not exist!', error);
 	}

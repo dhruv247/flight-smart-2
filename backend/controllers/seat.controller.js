@@ -5,7 +5,7 @@ import { Seat } from '../models/seat.model.js';
  * Gets all the seats for a flight using flight id
  * @param {*} req
  * @param {*} res
- * @returns {Object} seats
+ * @returns
  */
 const getSeatsForFlight = async (req, res) => {
 	try {
@@ -46,4 +46,37 @@ const getSeatsForFlight = async (req, res) => {
 	}
 };
 
-export { getSeatsForFlight };
+/**
+ * gets the seat from the db (function to renamed in the futrue)
+ * @param {*} req 
+ * @param {*} res 
+ * @returns 
+ */
+const getSeatStatus = async (req, res) => {
+	try {
+		const flightId = req.params.id;
+		const seatNumber = req.params.seatNumber;
+
+		// get seat status
+		const seat = await Seat.findOne({ flight: flightId, seatNumber: seatNumber });
+
+		// validate seat
+		if (!seat) {
+			return res.status(404).json({
+				message: 'Seat not found',
+			});
+		}
+
+		return res.status(200).json({
+			message: 'Seat is available',
+			seat: seat,
+		});
+		
+	} catch (error) {
+		return res.status(500).json({
+			message: error.message,
+		});
+	}
+};
+
+export { getSeatsForFlight, getSeatStatus };

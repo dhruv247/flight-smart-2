@@ -32,7 +32,7 @@ const sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
 
 /**
  * Process a message from the SQS queue
- * @param {Object} message - The SQS message
+ * @param - message
  */
 const processMessage = async (message) => {
 	try {

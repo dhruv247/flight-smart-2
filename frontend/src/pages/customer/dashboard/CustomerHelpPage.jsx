@@ -1,6 +1,7 @@
 import React from 'react';
 import DashboardChat from '../../../components/chat/ChatDashboard';
 
+// customer chat page
 const CustomerHelpPage = () => {
 	return (
 		<DashboardChat

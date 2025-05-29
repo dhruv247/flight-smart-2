@@ -3,6 +3,9 @@ import { imageService } from '../../../../services/image.service';
 import { showSuccessToast, showErrorToast } from '../../../../utils/toast';
 import { airportsService } from '../../../../services/airport.service';
 
+/**
+ * Add Airport
+ */
 const AddAirport = () => {
 	// form ref to reset form
 	const formRef = useRef(null);
@@ -21,6 +24,11 @@ const AddAirport = () => {
 		airportCode: '',
 	});
 
+	/**
+	 * Validate airport name
+	 * @param {string} name - The airport name
+	 * @returns {string} - The error message
+	 */
 	const validateAirportName = (name) => {
 		if (/\d/.test(name)) {
 			return 'Airport name cannot contain numbers';
@@ -28,6 +36,11 @@ const AddAirport = () => {
 		return '';
 	};
 
+	/**
+	 * Validate airport code
+	 * @param {string} code - The airport code
+	 * @returns {string} - The error message
+	 */
 	const validateAirportCode = (code) => {
 		if (!/^[A-Za-z]{3}$/.test(code)) {
 			return 'Airport code must be exactly 3 letters';
@@ -35,6 +48,7 @@ const AddAirport = () => {
 		return '';
 	};
 
+	
 	const handleAirportChange = (e) => {
 		const { name, value } = e.target;
 		setAirportDetails((prevData) => ({
@@ -56,6 +70,10 @@ const AddAirport = () => {
 		}
 	};
 
+	/**
+	 * Handle airport image change
+	 * @param {Object} e - The event object
+	 */
 	const handleAirportImageChange = (e) => {
 		const { name } = e.target;
 		const file = e.target.files[0];
@@ -67,6 +85,10 @@ const AddAirport = () => {
 		}
 	};
 
+	/**
+	 * Handle add airport
+	 * @param {Object} event - The event object
+	 */
 	const handleAddAirport = async (event) => {
 		setIsLoading(true);
 

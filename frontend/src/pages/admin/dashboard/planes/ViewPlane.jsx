@@ -3,10 +3,16 @@ import { showErrorToast } from '../../../../utils/toast';
 import Loading from '../../../../components/Loading';
 import { planeService } from '../../../../services/plane.service';
 
+/**
+ * View Planes
+ */
 const ViewPlane = () => {
 	const [planesList, setPlanesList] = useState([]);
 	const [isLoading, setIsLoading] = useState(true);
 
+	/**
+	 * Fetch planes from the database
+	 */
 	useEffect(() => {
 		const getPlanes = async () => {
 			try {

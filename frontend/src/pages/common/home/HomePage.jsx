@@ -5,6 +5,9 @@ import Navbar from '../../../components/navbars/HomeNavbar';
 import FlightSearchForm from '../../customer/flightSearch/FlightSearchForm';
 import PopularDestinations from './PopularDestinations';
 
+/**
+ * Home Page
+ */
 const HomePage = () => {
 	const navigate = useNavigate();
 

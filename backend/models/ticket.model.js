@@ -61,7 +61,18 @@ const ticketSchema = new mongoose.Schema(
 		departureFlight: departureFlightSchema,
 		returnFlight: returnFlightSchema,
 		nameOfFlyer: { type: String, required: true, trim: true },
-		dateOfBirth: { type: String, required: true }, // format: YYYY-MM-DD
+		dateOfBirth: {
+			type: String,
+			required: true,
+			validate: {
+				validator: function (dob) {
+					const dobDate = new Date(dob);
+					const today = new Date();
+					return dobDate <= today;
+				},
+				message: 'Date of birth cannot be in the future',
+			},
+		},
 		roundTrip: { type: Boolean, required: true, default: false },
 		seatType: { type: String, enum: ['economy', 'business'], required: true },
 		departureFlightSeatNumber: { type: Number, required: true },

@@ -2,6 +2,9 @@ import React, {useState} from 'react';
 import AddFlight from './AddFlight';
 import ViewFlights from './ViewFlights';
 
+/**
+ * Airline Dashboard Flights - dashboard to add and view flights
+ */
 const AirlineDashboardFlights = () => {
 	const [dashboardOption, setDashboardOption] = useState('addFlight');
 

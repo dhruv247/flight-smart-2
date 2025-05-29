@@ -6,7 +6,6 @@ import { createSeats } from '../utils/seatUtils.js';
 
 /**
  * Generates a random date
- * @returns {Date} - Random date object
  */
 const generateRandomDate = () => {
 	const startDate = new Date(); // Current Day
@@ -21,8 +20,6 @@ const generateRandomDate = () => {
 
 /**
  * Generates a random time between 6 AM and 10 PM
- * @param {Date} date - The date to add time to
- * @returns {Date} - Date with random time
  */
 const generateRandomTime = (date) => {
 	const startHour = 6;

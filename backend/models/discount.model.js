@@ -24,7 +24,7 @@ const discountSchema = new mongoose.Schema(
 		},
 	},
 	{
-		// Disable automatic index creation
+		// Disable auto index
 		autoIndex: false,
 		strict: true,
 		timestamps: true,

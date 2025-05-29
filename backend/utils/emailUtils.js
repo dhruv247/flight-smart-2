@@ -14,11 +14,12 @@ const transporter = nodemailer.createTransport({
 });
 
 /**
- * Send email
- * @param {string} to - The email address of the recipient
- * @param {string} subject - The subject of the email
- * @param {string} text - The text of the email
- * @param {string} html - The HTML of the email
+ * send email
+ * @param {*} to 
+ * @param {*} subject 
+ * @param {*} text 
+ * @param {*} html 
+ * @returns 
  */
 const sendEmail = async (to, subject, text, html = null) => {
 	try {
@@ -40,8 +41,8 @@ const sendEmail = async (to, subject, text, html = null) => {
 
 /**
  * Send airline verification email
- * @param {object} airline - The airline object
- * @returns {object} - The email info
+ * @param {*} airline 
+ * @returns 
  */
 const sendAirlineVerificationEmail = async (airline) => {
 	const subject = 'Flight Smart - Airline Verification';
@@ -62,8 +63,8 @@ const sendAirlineVerificationEmail = async (airline) => {
 
 /**
  * Send airline deletion email
- * @param {object} airline - The airline object
- * @returns {object} - The email info
+ * @param {*} airline 
+ * @returns 
  */
 const sendAirlineDeletionEmail = async (airline) => {
 	const subject = 'Flight Smart Registration Request Denied';
@@ -84,8 +85,8 @@ const sendAirlineDeletionEmail = async (airline) => {
 
 /**
  * Send booking confirmation email
- * @param {object} booking - The booking object
- * @returns {object} - The email info
+ * @param {*} booking 
+ * @returns 
  */
 const sendBookingConfirmationEmail = async (booking) => {
 	const subject = 'Flight Smart - Booking Confirmation';
@@ -383,8 +384,8 @@ const sendBookingConfirmationEmail = async (booking) => {
 
 /**
  * Send booking cancellation email
- * @param {object} booking - The booking object
- * @returns {object} - The email info
+ * @param {*} booking 
+ * @returns 
  */
 const sendBookingCancellationEmail = async (booking) => {
 	const subject = 'Flight Smart - Booking Cancellation';

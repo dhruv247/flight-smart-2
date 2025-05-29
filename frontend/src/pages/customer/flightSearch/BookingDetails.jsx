@@ -4,6 +4,10 @@ import FlightDetails from './FlightDetails';
 import { Link } from 'react-router-dom';
 import { useFlightContext } from '../../../hooks/useFlightContext';
 import HomeNavbar from '../../../components/navbars/HomeNavbar';
+
+/**
+ * Booking Details - used to display flights details and passenger details components
+ */
 const BookingDetails = () => {
 
 	const [route, setRoute] = useState('/customer/departureFlights');

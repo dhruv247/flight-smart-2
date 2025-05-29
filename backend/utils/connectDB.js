@@ -4,7 +4,6 @@ dotenv.config();
 
 /**
  * Connect to MongoDB Atlas
- * @returns {Promise<void>} - A promise that resolves when the connection is successful
  */
 const connectDB = async function () {
 	return mongoose

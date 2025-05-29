@@ -5,8 +5,6 @@ import Loading from '../../components/Loading';
 
 /**
  * Protected route for admin users
- * @param {React.ReactNode} children - The child components to be protected
- * @returns {React.ReactNode} The protected content or a loading indicator
  */
 const ProtectedAdminRoute = ({ children }) => {
 	

@@ -5,10 +5,6 @@ import { conversationService } from '../../services/conversation.service';
 
 /**
  * UserList component
- * @param {function} onSelectConversation - The function to handle conversation selection
- * @param {object} selectedConversation - The selected conversation object
- * @param {string} userType - (customer or airline)
- * @returns {JSX.Element} - The UserList component
  */
 const UserList = ({ onSelectConversation, selectedConversation, userType }) => {
 	const [conversations, setConversations] = useState([]);

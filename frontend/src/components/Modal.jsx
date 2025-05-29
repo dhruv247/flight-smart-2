@@ -1,5 +1,8 @@
 import React from 'react';
 
+/**
+ * custom Modal component
+ */
 const Modal = ({ isOpen, onClose, title, children, footer }) => {
 	if (!isOpen) return null;
 

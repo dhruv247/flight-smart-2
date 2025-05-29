@@ -2,11 +2,17 @@ import React, { useState, useEffect } from 'react';
 import VerifiedAirlineCard from './VerifiedAirlineCard';
 import { authService } from '../../../../services/auth.service';
 
+/**
+ * Verified Airline List
+ */
 const VerifiedAirlineList = () => {
 	const [airlines, setAirlines] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
 
+	/**
+	 * Fetch verified airlines from the database
+	 */
 	useEffect(() => {
 		const fetchVerifiedAirlines = async () => {
 			try {

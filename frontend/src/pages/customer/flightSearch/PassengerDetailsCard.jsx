@@ -50,8 +50,8 @@ const PassengerDetailsCard = ({
 		<div className="mb-4 pb-3 border-bottom">
 			<div className="mb-3">
 				<span className="badge bg-secondary fs-6">
-					{passengerType.charAt(0).toUpperCase() + passengerType.slice(1)}{' '}
-					Passenger {index + 1}
+					Passenger {index + 1}{' '}
+					({passengerType.charAt(0).toUpperCase() + passengerType.slice(1)})
 				</span>
 			</div>
 			<div className="row g-3">

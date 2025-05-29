@@ -1,5 +1,8 @@
 import React from 'react';
 
+/**
+ * Pagination componenet
+ */
 const Pagination = ({ searchParams, handlePageChange, totalPages }) => {
 	
 	const currentPage = searchParams.page;

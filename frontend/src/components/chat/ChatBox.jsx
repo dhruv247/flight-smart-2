@@ -7,6 +7,9 @@ import Loading from '../Loading';
 
 const PORT = import.meta.env.VITE_PORT;
 
+/**
+ * Chat Box
+ */
 const ChatBox = ({ selectedConversation, emptyStateText }) => {
 	const { user } = useGetUserDetails();
 	const [socket, setSocket] = useState(null);
@@ -24,6 +27,8 @@ const ChatBox = ({ selectedConversation, emptyStateText }) => {
 	const conversationMessages = selectedConversation
 		? messages[selectedConversation._id] || []
 		: [];
+	
+	// console.log(conversationMessages)
 
 	// Initialize socket connection
 	useEffect(() => {
@@ -72,7 +77,6 @@ const ChatBox = ({ selectedConversation, emptyStateText }) => {
 					[message.conversation]: [...conversationMessages, message],
 				};
 			});
-			
 		};
 
 		socket.on('receiveMessage', handleReceiveMessage);
@@ -96,7 +100,6 @@ const ChatBox = ({ selectedConversation, emptyStateText }) => {
 					...prev,
 					[selectedConversation._id]: response.data,
 				}));
-				
 			} catch (error) {
 				setLastError('Failed to load messages');
 			} finally {
@@ -112,6 +115,7 @@ const ChatBox = ({ selectedConversation, emptyStateText }) => {
 		messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
 	}, [conversationMessages]);
 
+	// Send message
 	const sendMessage = useCallback(
 		(text, conversationId, imageUrl = null) => {
 			if (!socket || (!text.trim() && !imageUrl) || !conversationId || !user) {
@@ -140,7 +144,7 @@ const ChatBox = ({ selectedConversation, emptyStateText }) => {
 
 			socket.emit('sendMessage', messageData);
 
-			// Optimistically add message to the UI
+			// Optimisically add message to the UI (to reduce lag)
 			setMessages((prev) => {
 				const conversationMessages = prev[conversationId] || [];
 				return {
@@ -159,6 +163,7 @@ const ChatBox = ({ selectedConversation, emptyStateText }) => {
 		[socket, user, selectedConversation]
 	);
 
+	// Send image message
 	const sendImageMessage = useCallback(
 		async (file, text, conversationId) => {
 			if (!file || !conversationId || !user) return;
@@ -182,6 +187,7 @@ const ChatBox = ({ selectedConversation, emptyStateText }) => {
 		[user, sendMessage]
 	);
 
+	// Handle send message
 	const handleSendMessage = (e) => {
 		e.preventDefault();
 
@@ -197,12 +203,14 @@ const ChatBox = ({ selectedConversation, emptyStateText }) => {
 		setNewMessage('');
 	};
 
+	// Handle image selection
 	const handleImageSelection = (e) => {
 		if (e.target.files && e.target.files[0]) {
 			setSelectedImage(e.target.files[0]);
 		}
 	};
 
+	// Handle send image message
 	const handleSendImageMessage = async () => {
 		if (!selectedImage || !selectedConversation || !isConnected) return;
 
@@ -226,6 +234,7 @@ const ChatBox = ({ selectedConversation, emptyStateText }) => {
 		}
 	};
 
+	// Cancel image selection
 	const cancelImageSelection = () => {
 		setSelectedImage(null);
 		if (fileInputRef.current) {
@@ -233,7 +242,7 @@ const ChatBox = ({ selectedConversation, emptyStateText }) => {
 		}
 	};
 
-	// Filter out duplicate messages before rendering
+	// Filter out duplicate messages (to prevent spamming by sending same message within short periods) before rendering
 	const filteredMessages = conversationMessages.filter(
 		(message, index, self) => {
 			return (

@@ -2,10 +2,14 @@ import React, { useState } from 'react';
 import { authService } from '../../../../services/auth.service';
 import { showSuccessToast, showErrorToast } from '../../../../utils/toast';
 
+/**
+ * Unverified Airline Card
+ */
 const UnverifiedAirlineCard = ({ airline }) => {
 	const [isVerifying, setIsVerifying] = useState(false);
 	const [isRejecting, setIsRejecting] = useState(false);
 
+	// Handle verify
 	const handleVerify = async () => {
 		setIsVerifying(true);
 		try {
@@ -20,6 +24,7 @@ const UnverifiedAirlineCard = ({ airline }) => {
 		}
 	};
 
+	// Handle reject
 	const handleReject = async () => {
 		setIsRejecting(true);
 		try {

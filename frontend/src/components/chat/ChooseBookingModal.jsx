@@ -3,13 +3,19 @@ import Modal from '../Modal';
 import { bookingService } from '../../services/booking.service';
 import { conversationService } from '../../services/conversation.service';
 
+/**
+ * Choose Booking Modal
+ */
 const ChooseBookingModal = ({ isOpen, onClose }) => {
 	const [bookings, setBookings] = useState([]);
 	const [bookingsPNRs, setBookingsPNRs] = useState([]);
-	const [selectedBookingPNR, setSelectedBookingPNR] = useState([]);
+	const [selectedBookingPNR, setSelectedBookingPNR] = useState('');
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState('');
 
+	/**
+	 * Fetch bookings from the database
+	 */
 	useEffect(() => {
 		const fetchBookings = async () => {
 			try {
@@ -44,6 +50,10 @@ const ChooseBookingModal = ({ isOpen, onClose }) => {
 		}
 	}, [isOpen]);
 
+	/**
+	 * Handle start conversation
+	 * @param {Object} e - The event object
+	 */
 	const handleStartConversation = async (e) => {
 		e.preventDefault();
 
@@ -63,6 +73,7 @@ const ChooseBookingModal = ({ isOpen, onClose }) => {
 		}
 	};
 
+	// Modal content
 	const modalContent = loading ? (
 		<div className="text-center p-3">
 			<div className="spinner-border text-primary" role="status">

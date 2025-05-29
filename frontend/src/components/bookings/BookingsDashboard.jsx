@@ -7,6 +7,9 @@ import Pagination from '../Pagination';
 import Select from 'react-select';
 import { bookingService } from '../../services/booking.service';
 
+/**
+ * Bookings Dashboard
+ */
 const BookingsDashboard = ({ type }) => {
 	const [bookingsList, setBookingsList] = useState([]);
 	const { airports, isLoading: airportsLoading } = useAirports();
@@ -33,15 +36,18 @@ const BookingsDashboard = ({ type }) => {
 	// 		label: airport.city,
 	// 	})) || [];
 
-	// Transform cities data for react-select and remove duplicates
-	const cityOptions = React.useMemo(() => {
-		const uniqueCities = [...new Set(airports.map((airport) => airport.city))];
-		return uniqueCities.map((city) => ({
-			value: city,
-			label: city,
-		}));
-	}, [airports]);
+	// // Transform cities data for react-select and remove duplicates
+	// const cityOptions = React.useMemo(() => {
+	// 	const uniqueCities = [...new Set(airports.map((airport) => airport.city))];
+	// 	return uniqueCities.map((city) => ({
+	// 		value: city,
+	// 		label: city,
+	// 	}));
+	// }, [airports]);
 
+	/**
+	 * Get bookings from the database
+	 */
 	useEffect(() => {
 		const getBookingsFromDB = async () => {
 			try {
@@ -87,19 +93,32 @@ const BookingsDashboard = ({ type }) => {
 		getBookingsFromDB();
 	}, [searchParams]);
 
+	/**
+	 * Handle change in the search params
+	 * @param {Object} e - The event object
+	 */
 	const handleChange = (e) => {
 		const { name, value } = e.target;
 		setSearchParams({ ...searchParams, [name]: value, page: 0 });
 	};
 
-	const handleSelectChange = (selectedOption, { name }) => {
-		setSearchParams((prev) => ({
-			...prev,
-			[name]: selectedOption,
-			page: 0,
-		}));
-	};
+	// /**
+	//  * Handle change in the select options
+	//  * @param {Object} selectedOption - The selected option
+	//  * @param {Object} name - The name of the select option
+	//  */
+	// const handleSelectChange = (selectedOption, { name }) => {
+	// 	setSearchParams((prev) => ({
+	// 		...prev,
+	// 		[name]: selectedOption,
+	// 		page: 0,
+	// 	}));
+	// };
 
+	/**
+	 * Handle change in the page number
+	 * @param {number} newPage - The new page number
+	 */
 	const handlePageChange = (newPage) => {
 		setSearchParams({ ...searchParams, page: newPage });
 	};

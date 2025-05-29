@@ -1,10 +1,10 @@
 import { Airport } from '../models/airport.model.js';
 
 /**
- * Adds a new airport to the database
- * @param {*} req
- * @param {*} res
- * @returns {Object} airport
+ * adds a new airport to the db
+ * @param {*} req 
+ * @param {*} res 
+ * @returns 
  */
 const addAirport = async (req, res) => {
 	try {

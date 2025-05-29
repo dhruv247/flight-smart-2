@@ -5,8 +5,6 @@ import Loading from '../../components/Loading';
 
 /**
  * Protected route for airline users
- * @param {React.ReactNode} children - The child components to be protected
- * @returns {React.ReactNode} The protected content or a loading indicator
  */
 const ProtectedAirlineRoute = ({ children }) => {
 	const { user, isLoading, error } = useGetUserDetails();

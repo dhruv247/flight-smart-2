@@ -11,7 +11,7 @@ dotenv.config();
 /**
  * Utility function create a jwt
  * @param {*} user
- * @returns {String} token
+ * @returns
  */
 const createToken = (user) => {
 	return jwt.sign(
@@ -25,7 +25,7 @@ const createToken = (user) => {
  * Register a new customer
  * @param {*} req
  * @param {*} res
- * @returns {Object} user
+ * @returns
  */
 const register = async (req, res) => {
 	try {
@@ -80,7 +80,7 @@ const register = async (req, res) => {
  * Login an user
  * @param {*} req
  * @param {*} res
- * @returns {Object} user
+ * @returns
  */
 const login = async (req, res) => {
 	try {
@@ -156,7 +156,7 @@ const login = async (req, res) => {
  * Logout user
  * @param {*} req
  * @param {*} res
- * @returns {Object} message
+ * @returns
  */
 const logout = (req, res) => {
 	try {
@@ -183,7 +183,7 @@ const logout = (req, res) => {
  * get logged in (current) user details
  * @param {*} req
  * @param {*} res
- * @returns {Object} user
+ * @returns
  */
 const getMe = async (req, res) => {
 	try {
@@ -216,7 +216,7 @@ const getMe = async (req, res) => {
  * Changes an airline's verification status to true
  * @param {*} req
  * @param {*} res
- * @returns {Object} message
+ * @returns
  */
 const verifyAirline = async (req, res) => {
 	try {
@@ -279,7 +279,7 @@ const verifyAirline = async (req, res) => {
  * Deletes an airline
  * @param {*} req
  * @param {*} res
- * @returns {Object} message
+ * @returns
  */
 const deleteAirline = async (req, res) => {
 	try {
@@ -334,7 +334,7 @@ const deleteAirline = async (req, res) => {
  * Get's airlines from db
  * @param {*} req
  * @param {*} res
- * @returns {Object} message
+ * @returns
  */
 const getAllAirlines = async (req, res) => {
 	try {

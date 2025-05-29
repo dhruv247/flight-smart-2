@@ -3,6 +3,9 @@ import CustomerSignupForm from './CustomerSignupForm';
 import AirlineSignupForm from './AirlineSignupForm';
 import { Link } from 'react-router-dom';
 
+/**
+ * Signup Page - choose between customer and airline
+ */
 const SignupPage = () => {
 	const [userType, setUserType] = useState('customer');
 

@@ -2,6 +2,9 @@ import React, {useState} from 'react';
 import AddPlane from './AddPlane';
 import ViewPlane from './ViewPlane';
 
+/**
+ * Admin Dashboard Planes - dashboard to add and view planes
+ */
 const AdminDashboardPlanes = () => {
 
   const [dashboardOption, setDashboardOption] = useState('addPlane');

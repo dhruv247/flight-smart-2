@@ -4,7 +4,7 @@ import Discount from '../models/discount.model.js';
  * Create a discount
  * @param {*} req
  * @param {*} res
- * @returns {Object} discount
+ * @returns
  */
 const createDiscount = async (req, res) => {
   try {
@@ -26,7 +26,7 @@ const createDiscount = async (req, res) => {
  * Get all discounts
  * @param {*} req
  * @param {*} res
- * @returns {Object} discounts
+ * @returns
  */
 const getDiscounts = async (req, res) => {
   try {

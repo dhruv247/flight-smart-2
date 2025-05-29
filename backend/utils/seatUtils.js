@@ -1,10 +1,10 @@
 import { Seat } from '../models/seat.model.js';
 
 /**
- * Create unique seats for a flight
- * @param {object} flight - The flight object
- * @param {object} plane - The plane object
- * @returns {boolean} - True if seats are created successfully, false otherwise
+ * create unique seats for a flight
+ * @param {*} flight 
+ * @param {*} plane 
+ * @returns 
  * @description
  * 1. Check if flight and plane are provided
  * 2. If not, throw an error

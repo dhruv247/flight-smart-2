@@ -1,6 +1,9 @@
 import React from 'react';
 import DashboardNavbar from '../../../components/navbars/DashboardNavbar';
 
+/**
+ * Airline Dashboard Layout - for the base dashboard
+ */
 const AirlineDashboardLayout = ({ children }) => {
 	const airlineNavItems = [
 		{

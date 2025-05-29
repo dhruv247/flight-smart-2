@@ -49,20 +49,39 @@ const ReturnFlights = () => {
 				return `${year}-${month}-${day}`;
 			};
 
-			const response = await flightService.searchFlights(
-				{
-					flightFrom: flightSearchData.flightFrom,
-					flightTo: flightSearchData.flightTo,
-					departureDate: formatDate(flightSearchData.departureDate),
-					returnDate: formatDate(flightSearchData.returnDate),
-					travelClass: flightSearchData.travelClass,
-					passengers: flightSearchData.adultPassengers + flightSearchData.childPassengers + flightSearchData.infantPassengers,
-					departureFlightArrivalTime: selectedDepartureFlightArrivalTime,
-					page: currentPage,
-					size: pageSize,
-				},
-				{ withCredentials: true }
-			);
+			const params = {
+				flightFrom: flightSearchData.flightFrom,
+				flightTo: flightSearchData.flightTo,
+				departureDate: formatDate(flightSearchData.departureDate),
+				travelClass: flightSearchData.travelClass,
+				passengers: flightSearchData.adultPassengers + flightSearchData.childPassengers + flightSearchData.infantPassengers,
+				departureFlightArrivalTime: selectedDepartureFlightArrivalTime,
+				page: currentPage,
+				size: pageSize,
+			};
+						
+			if (flightSearchData.tripType === 'roundTrip' && flightSearchData.returnDate) {
+				params.returnDate = formatDate(flightSearchData.returnDate);
+			}
+						
+			const queryString = new URLSearchParams(params).toString();
+						
+			const response = await flightService.searchFlightsForCustomer(queryString);
+
+			// const response = await flightService.searchFlights(
+			// 	{
+			// 		flightFrom: flightSearchData.flightFrom,
+			// 		flightTo: flightSearchData.flightTo,
+			// 		departureDate: formatDate(flightSearchData.departureDate),
+			// 		returnDate: formatDate(flightSearchData.returnDate),
+			// 		travelClass: flightSearchData.travelClass,
+			// 		passengers: flightSearchData.adultPassengers + flightSearchData.childPassengers + flightSearchData.infantPassengers,
+			// 		departureFlightArrivalTime: selectedDepartureFlightArrivalTime,
+			// 		page: currentPage,
+			// 		size: pageSize,
+			// 	},
+			// 	{ withCredentials: true }
+			// );
 
 			// Ensure we have valid data before setting state
 			if (response.data && Array.isArray(response.data.returnFlights)) {
@@ -78,43 +97,46 @@ const ReturnFlights = () => {
 			setIsLoading(false);
 			setReturnFlightsList([]);
 			setTotalPages(0);
-			console.error('Error searching flights:', error);
 
-			if (error.response) {
-				const { message } = error.response.data;
+			showErrorToast(error.response.data.message);
 
-				// Handle specific error cases
-				if (error.response.status === 400) {
-					if (message === 'All fields are required') {
-						showErrorToast('Please fill in all required fields');
-					} else if (message === 'Cannot search for flights in the past') {
-						showErrorToast(
-							'Please select a future date for your return flight'
-						);
-					} else if (message === 'Passenger count must be between 1 and 5') {
-						showErrorToast('Please select between 1 and 5 passengers');
-					} else if (
-						message === 'Departure airport not found' ||
-						message === 'Arrival airport not found'
-					) {
-						showErrorToast('Please select valid airports from the list');
-					} else if (
-						message === 'Departure and arrival airports must be different'
-					) {
-						showErrorToast(
-							'Please select different airports for departure and arrival'
-						);
-					} else {
-						showErrorToast(message);
-					}
-				} else {
-					showErrorToast(
-						'An error occurred while searching for return flights'
-					);
-				}
-			} else {
-				showErrorToast('Network error. Please try again later');
-			}
+			// console.error('Error searching flights:', error);
+
+			// if (error.response) {
+			// 	const { message } = error.response.data;
+
+			// 	// Handle specific error cases
+			// 	if (error.response.status === 400) {
+			// 		if (message === 'All fields are required') {
+			// 			showErrorToast('Please fill in all required fields');
+			// 		} else if (message === 'Cannot search for flights in the past') {
+			// 			showErrorToast(
+			// 				'Please select a future date for your return flight'
+			// 			);
+			// 		} else if (message === 'Passenger count must be between 1 and 5') {
+			// 			showErrorToast('Please select between 1 and 5 passengers');
+			// 		} else if (
+			// 			message === 'Departure airport not found' ||
+			// 			message === 'Arrival airport not found'
+			// 		) {
+			// 			showErrorToast('Please select valid airports from the list');
+			// 		} else if (
+			// 			message === 'Departure and arrival airports must be different'
+			// 		) {
+			// 			showErrorToast(
+			// 				'Please select different airports for departure and arrival'
+			// 			);
+			// 		} else {
+			// 			showErrorToast(message);
+			// 		}
+			// 	} else {
+			// 		showErrorToast(
+			// 			'An error occurred while searching for return flights'
+			// 		);
+			// 	}
+			// } else {
+			// 	showErrorToast('Network error. Please try again later');
+			// }
 		}
 	};
 
@@ -159,7 +181,7 @@ const ReturnFlights = () => {
 	};
 
 	return (
-		<div className="bg-light vh-100 text-center">
+		<div className="bg-light min-vh-100 text-center">
 			<Navbar />
 			<div className="d-flex justify-content-start container mt-5">
 				<Link to="/customer/departureFlights">

@@ -4,9 +4,6 @@ import UserList from './UserList';
 
 /**
  * ChatDashboard component
- * @param {string} userType - (customer or airline)
- * @param {string} emptyStateText - The text to display when there are no conversations
- * @returns {JSX.Element} - The ChatDashboard component
  */
 const ChatDashboard = ({ userType, emptyStateText }) => {
 

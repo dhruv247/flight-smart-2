@@ -1,6 +1,9 @@
 import React from 'react';
 import DashboardChat from '../../../components/chat/ChatDashboard';
 
+/**
+ * Airline Dashboard Chat
+ */
 const AirlineDashboardChat = () => {
 	return (
 		<DashboardChat

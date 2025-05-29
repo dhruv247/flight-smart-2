@@ -4,6 +4,9 @@ import { showSuccessToast, showErrorToast } from '../../utils/toast';
 import { Link } from 'react-router-dom';
 import { authService } from '../../services/auth.service';
 
+/**
+ * Login Form
+ */
 const LoginForm = () => {
 	const navigate = useNavigate();
 	const [isFormValid, setIsFormValid] = useState(false);
@@ -12,6 +15,7 @@ const LoginForm = () => {
 		password: '',
 	});
 
+	// Validate the form
 	useEffect(() => {
 		const isEmailValid = formData.email.trim() !== '';
 		const isPasswordValid = formData.password.trim() !== '';

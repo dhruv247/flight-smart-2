@@ -7,8 +7,10 @@ import { startConversation, getConversations } from '../controllers/conversation
 
 const router = express.Router();
 
-// Customer / Airline Routes
+// Customer Routes
 router.post('/start-conversation', verifyCustomer, startConversation);
+
+// Common Routes
 router.get('/get-conversations', verifyUser, getConversations);
 
 export { router };

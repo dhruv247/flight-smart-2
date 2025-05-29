@@ -8,6 +8,9 @@ import TopRoutes from './TopRoutes';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
+/**
+ * Admin Dashboard Analytics to display analytics (graphs) for the admin
+ */
 const AdminDashboardAnalytics = () => {
 	const [numFlights, setNumFlights] = useState(5);
 	const [numAirlines, setNumAirlines] = useState(5);

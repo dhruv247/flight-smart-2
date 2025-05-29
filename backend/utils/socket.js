@@ -2,15 +2,15 @@ import { Server } from 'socket.io';
 import { Message } from '../models/message.model.js';
 
 /**
- * Setup socket
- * @param {object} server - The server object
- * @returns {object} - The socket object
+ * setup socket
+ * @param {*} server 
+ * @returns 
  * @description
  * 1. Create a new socket server
- * 2. On connection, join the user's room
- * 3. On send message, create a new message
+ * 2. On connection join the user's room
+ * 3. On send message create a new message
  * 4. Emit the message to the sender and receiver
- * 5. On disconnect, log the user out
+ * 5. On disconnect log the user out
  */
 const setupSocket = (server) => {
 	

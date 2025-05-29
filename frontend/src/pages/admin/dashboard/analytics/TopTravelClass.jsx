@@ -56,7 +56,7 @@ const TopTravelClass = ({ startDate, endDate }) => {
 			},
 			title: {
 				display: true,
-				text: 'Travel Class Distribution',
+				text: 'Travel Class Distribution (By Tickets)',
 				font: {
 					size: 16,
 					weight: 'normal',

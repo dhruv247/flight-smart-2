@@ -2,22 +2,31 @@ import { Conversation } from '../models/conversation.model.js';
 import { Booking } from '../models/booking.model.js';
 import { User } from '../models/user.model.js';
 
+/**
+ * Start a conversation between a customer and an airline
+ * @param {*} req
+ * @param {*} res
+ * @returns
+ */
 const startConversation = async (req, res) => {
 	try {
 		const customerId = req.user._id;
 
 		const { airlineId, pnr } = req.body;
 
+		// validate the request body
 		if (!airlineId || !pnr) {
 			return res.status(400).json({ message: 'Missing required fields' });
 		}
 
 		const booking = await Booking.findOne({ pnr });
 
+		// check if the booking exists
 		if (!booking) {
 			return res.status(404).json({ message: 'Booking not found' });
 		}
 
+		// check if the customer and airline exist
 		const customerObject = await User.findById(customerId);
 		const airlineObject = await User.findById(airlineId);
 
@@ -57,6 +66,7 @@ const startConversation = async (req, res) => {
 			});
 		}
 
+		// check if the customer is the booking owner
 		if (booking.userDetails._id.toString() !== customerId) {
 			return res
 				.status(403)
@@ -85,6 +95,12 @@ const startConversation = async (req, res) => {
 	}
 };
 
+/**
+ * Get all conversations for a customer or airline
+ * @param {*} req
+ * @param {*} res
+ * @returns
+ */
 const getConversations = async (req, res) => {
 	try {
 

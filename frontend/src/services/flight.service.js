@@ -49,14 +49,14 @@ export const flightService = {
 		}
 	},
 
-	searchFlights: async (formData) => {
-		try {
-			const response = await axios.post(`${API_URL}/search-flights`, formData, { withCredentials: true });
-			return response;
-		} catch (error) {
-			throw error;
-		}
-	},
+	// searchFlights: async (formData) => {
+	// 	try {
+	// 		const response = await axios.post(`${API_URL}/search-flights`, formData, { withCredentials: true });
+	// 		return response;
+	// 	} catch (error) {
+	// 		throw error;
+	// 	}
+	// },
 
 	getFlightById: async (flightId) => {
 		try {
@@ -70,6 +70,15 @@ export const flightService = {
 	updateFlightPrice: async (flightId) => {
 		try {
 			const response = await axios.patch(`${API_URL}/update-flight-price/${flightId}`, { withCredentials: true });
+			return response;
+		} catch (error) {
+			throw error;
+		}
+	},
+
+	searchFlightsForCustomer: async (formData) => {
+		try {
+			const response = await axios.get(`${API_URL}/search-flights-for-customer?${formData}`, { withCredentials: true });
 			return response;
 		} catch (error) {
 			throw error;

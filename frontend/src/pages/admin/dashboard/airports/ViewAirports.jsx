@@ -1,11 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { airportsService } from '../../../../services/airport.service';
 
+/**
+ * View Airports
+ */
 const ViewAirports = () => {
 	const [airports, setAirports] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
 
+	/**
+	 * Fetch airports from the database
+	 */
 	useEffect(() => {
 		const getAirports = async () => {
 			try {

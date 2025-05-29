@@ -1,6 +1,9 @@
 import React from 'react';
 import formatDateTime from '../../../../utils/dateTime';
 
+/**
+ * Flight Card
+ */
 const FlightCard = ({ flight }) => {
 	if (!flight) return null;
 
@@ -18,7 +21,7 @@ const FlightCard = ({ flight }) => {
 					<p>{formatDateTime(flight.departureDateTime).time}</p>
 					<p>{formatDateTime(flight.departureDateTime).date}</p>
 				</div>
-				<p>-</p>
+				<i className="bi bi-arrow-right"></i>
 				<div className="align-items-center">
 					<p>{flight.arrivalAirport.city}</p>
 					<p>{formatDateTime(flight.arrivalDateTime).time}</p>

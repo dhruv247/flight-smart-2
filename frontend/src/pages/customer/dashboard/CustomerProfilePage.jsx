@@ -1,6 +1,9 @@
 import useGetUserDetails from '../../../hooks/useGetUserDetails';
 import Loading from '../../../components/Loading';
 
+/**
+ * Customer Profile Page
+ */
 const CustomerProfilePage = () => {
 	const { user, isLoading } = useGetUserDetails();
 

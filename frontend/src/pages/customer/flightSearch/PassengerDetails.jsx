@@ -14,7 +14,11 @@ import { imageService } from '../../../services/image.service';
 import { ticketService } from '../../../services/ticket.service';
 import { bookingService } from '../../../services/booking.service';
 import { flightService } from '../../../services/flight.service';
+import { seatsService } from '../../../services/seat.service';
 
+/**
+ * Passenger Details - used to display the passenger details form
+ */
 const PassengerDetails = () => {
 	const navigate = useNavigate();
 	const { currentBooking, clearFlightData, flightSearchData } =
@@ -141,7 +145,7 @@ const PassengerDetails = () => {
 	}, [currentBooking, user, userLoading]);
 
 	/**
-	 * Used to change the departure and return seat and other details for passengers
+	 * Used to change the departure and return seat and other details for passengers (using index)
 	 * @param {*} index
 	 * @param {*} field
 	 * @param {*} value
@@ -181,7 +185,7 @@ const PassengerDetails = () => {
 	};
 
 	/**
-	 * Opens modal for a passenger using index
+	 * Opens modal for a passenger using index and flightTYpe
 	 * @param {*} index
 	 * @param {*} flightType
 	 */
@@ -201,11 +205,49 @@ const PassengerDetails = () => {
 		}
 	};
 
+	/**
+	 * Handles the creation of the ticket and booking
+	 */
 	const handleCreateTicket = async () => {
 		if (!user || !bookingDetails) return;
 
 		setIsCreatingBooking(true);
 
+		// check if the seats are available in the departure flight
+		for (const passenger of passengerDetails) {
+			const seatStatus = await seatsService.getSeatStatus(
+				bookingDetails.departureFlightId,
+				passenger.departureFlightSeatNumber
+			);
+
+			if (seatStatus.data.seat.occupied) {
+				showErrorToast(
+					`Seat ${passenger.departureFlightSeatNumber} on the departure flight is no longer available! Please select new seats`
+				);
+				setIsCreatingBooking(false);
+				return;
+			}
+		}
+
+		if (bookingDetails.returnFlightId) {
+			// check if the seats are available in the return flight
+			for (const passenger of passengerDetails) {
+				const seatStatus = await seatsService.getSeatStatus(
+					bookingDetails.returnFlightId,
+					passenger.returnFlightSeatNumber
+				);
+
+				if (seatStatus.data.seat.occupied) {
+					showErrorToast(
+						`Seat ${passenger.returnFlightSeatNumber} on the return flight is no longer available! Please select new seats`
+					);
+					setIsCreatingBooking(false);
+					return;
+				}
+			}
+		}
+
+		// if all seats are available, create the booking
 		const userDetails = {
 			_id: user._id,
 			email: user.email,
@@ -244,6 +286,7 @@ const PassengerDetails = () => {
 				(passenger) => calculateAge(passenger.dateOfBirth) >= 18
 			);
 
+			// create the tickets for each passenger
 			for (const passenger of passengerDetails) {
 				let documentImageUrl = '';
 
@@ -251,14 +294,11 @@ const PassengerDetails = () => {
 					const formData = new FormData();
 					formData.append('image', passenger.documentImage);
 
-					const imageURLResponse = await imageService.uploadImage(
-						formData,
-						{
-							headers: {
-								'Content-Type': 'multipart/form-data',
-							},
-						}
-					);
+					const imageURLResponse = await imageService.uploadImage(formData, {
+						headers: {
+							'Content-Type': 'multipart/form-data',
+						},
+					});
 
 					if (!imageURLResponse.data.url) {
 						throw new Error(
@@ -292,12 +332,9 @@ const PassengerDetails = () => {
 						// roundTrip: !!bookingDetails.returnFlightId,
 					};
 
-					const response = await ticketService.createTicket(
-						ticket,
-						{
-							withCredentials: true,
-						}
-					);
+					const response = await ticketService.createTicket(ticket, {
+						withCredentials: true,
+					});
 
 					createdTickets.push(response.data.ticketId);
 				} catch (error) {
@@ -308,17 +345,15 @@ const PassengerDetails = () => {
 				}
 			}
 
+			// create the booking using the tickets
 			try {
 				const booking = {
 					tickets: createdTickets,
 				};
 
-				await bookingService.createBooking(
-					booking,
-					{
-						withCredentials: true,
-					}
-				);
+				await bookingService.createBooking(booking, {
+					withCredentials: true,
+				});
 
 				showSuccessToast('Booking created successfully!');
 
@@ -364,6 +399,12 @@ const PassengerDetails = () => {
 		return hasRequiredFields && hasReturnSeat;
 	});
 
+	/**
+	 * Get the blocked seats for a flight
+	 * @param {*} flightType
+	 * @param {*} currentIndex
+	 * @returns
+	 */
 	const getBlockedSeats = (flightType, currentIndex) => {
 		// Collect seats selected by other passengers
 		return passengerDetails

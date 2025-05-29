@@ -3,8 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 /**
- * Create admin user
- * @returns {Promise<void>} - A promise that resolves when the admin user is created
+ * create admin user
  * @description
  * 1. Check if an admin exists in db
  * 2. If it does throw an error

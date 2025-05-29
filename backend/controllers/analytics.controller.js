@@ -11,7 +11,7 @@ import { getCache, setCache } from '../utils/redisUtils.js';
  * Get's the top departure times (for flights)
  * @param {*} req
  * @param {*} res
- * @returns {Object} topDepartureTimes
+ * @returns
  */
 const topDepartureTimes = async (req, res) => {
 	try {
@@ -97,7 +97,7 @@ const topDepartureTimes = async (req, res) => {
  * Get's the top airlines by number of flights
  * @param {*} req
  * @param {*} res
- * @returns {Object} topAirlines
+ * @returns
  */
 const topAirlinesByNumberOfFlights = async (req, res) => {
 	try {
@@ -159,7 +159,7 @@ const topAirlinesByNumberOfFlights = async (req, res) => {
  * Get's the top cities (destinations) by number of flights
  * @param {*} req
  * @param {*} res
- * @returns {Object} topCities
+ * @returns
  */
 const topCitiesByNumberOfFlights = async (req, res) => {
 	try {
@@ -218,7 +218,7 @@ const topCitiesByNumberOfFlights = async (req, res) => {
  * Get's the top planes by number of flights
  * @param {*} req
  * @param {*} res
- * @returns {Object} topPlanes
+ * @returns
  */
 const topPlanesByNumberOfFlights = async (req, res) => {
 	try {
@@ -281,7 +281,7 @@ const topPlanesByNumberOfFlights = async (req, res) => {
  * Get's the top routes by number of flights
  * @param {*} req
  * @param {*} res
- * @returns {Object} topRoutes
+ * @returns
  */
 const topRoutesByNumberOfFlights = async (req, res) => {
 	try {
@@ -339,7 +339,7 @@ const topRoutesByNumberOfFlights = async (req, res) => {
  * Get's the top travel class by number of tickets sold in a given date range
  * @param {*} req
  * @param {*} res
- * @returns {Object} topTravelClass
+ * @returns
  */
 const topTravelClass = async (req, res) => {
 	try {
@@ -388,7 +388,7 @@ const topTravelClass = async (req, res) => {
  * Get's the top profitable economy flights for an airline
  * @param {*} req
  * @param {*} res
- * @returns {Object} profitableFlights
+ * @returns
  */
 const profitableEconomyFlights = async (req, res) => {
 	try {
@@ -448,7 +448,7 @@ const profitableEconomyFlights = async (req, res) => {
  * Get's the top profitable business flights
  * @param {*} req
  * @param {*} res
- * @returns {Object} profitableFlights
+ * @returns
  */
 const profitableBusinessFlights = async (req, res) => {
 	try {
@@ -508,7 +508,7 @@ const profitableBusinessFlights = async (req, res) => {
  * Get's the busiest dates for an airline
  * @param {*} req
  * @param {*} res
- * @returns {Object} busyDates
+ * @returns
  */
 const topDatesByNumberOfFlights = async (req, res) => {
 	try {
@@ -568,7 +568,7 @@ const topDatesByNumberOfFlights = async (req, res) => {
  * Get's the number of flights by duration for an airline
  * @param {*} req
  * @param {*} res
- * @returns {Object} tripTypes
+ * @returns
  */
 const flightByDuration = async (req, res) => {
 	try {
@@ -630,7 +630,7 @@ const flightByDuration = async (req, res) => {
  * Get's the top economy occupancy flights for an airline
  * @param {*} req
  * @param {*} res
- * @returns {Object} topEconomyOccupancyFlights
+ * @returns
  */
 const topEconomyOccupancyFlights = async (req, res) => {
 	try {
@@ -688,7 +688,7 @@ const topEconomyOccupancyFlights = async (req, res) => {
  * Get's the top business occupancy flights for an airline
  * @param {*} req
  * @param {*} res
- * @returns {Object} topBusinessOccupancyFlights
+ * @returns
  */
 const topBusinessOccupancyFlights = async (req, res) => {
 	try {
@@ -742,6 +742,12 @@ const topBusinessOccupancyFlights = async (req, res) => {
 	}
 };
 
+/**
+ * Get's the cheapest economy class flights for an airline
+ * @param {*} req
+ * @param {*} res
+ * @returns
+ */
 const cheapestEconomyClassFlights = async (req, res) => {
 	try {
 		// get airline id
@@ -788,6 +794,12 @@ const cheapestEconomyClassFlights = async (req, res) => {
 	}
 }
 
+/**
+ * Get's the most expensive business class flights for an airline
+ * @param {*} req
+ * @param {*} res
+ * @returns
+ */
 const mostExpensiveBusinessClassFlights = async (req, res) => {
 	try {
 		// get airline id
@@ -842,7 +854,7 @@ const mostExpensiveBusinessClassFlights = async (req, res) => {
  * Get's the popular destinations for a customer
  * @param {*} req
  * @param {*} res
- * @returns {Object} popularDestinations
+ * @returns
  */
 const topDestinations = async (req, res) => {
 	try {

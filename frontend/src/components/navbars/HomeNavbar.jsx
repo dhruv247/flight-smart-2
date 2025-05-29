@@ -2,6 +2,9 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import useGetUserDetails from '../../hooks/useGetUserDetails';
 
+/**
+ * Home Navbar
+ */
 const Navbar = () => {
 	const { user, isLoading } = useGetUserDetails();
 

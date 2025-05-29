@@ -5,6 +5,9 @@ import formatDateTime from '../../../utils/dateTime';
 import { flightService } from '../../../services/flight.service';
 import { discountService } from '../../../services/discount.service';
 
+/**
+ * Flight Details - used to display the selected flight details in the current booking (including price information)
+ */
 const FlightDetails = () => {
 	const { currentBooking, flightSearchData } = useFlightContext();
 	const [departureFlight, setDepartureFlight] = useState(null);
@@ -19,6 +22,7 @@ const FlightDetails = () => {
 	const departureFlightId = currentBooking?.departureFlightId;
 	const returnFlightId = currentBooking?.returnFlightId;
 
+	// fetch the flight details
 	useEffect(() => {
 		const fetchFlight = async (flightId, setter) => {
 			if (!flightId) return;
@@ -36,6 +40,7 @@ const FlightDetails = () => {
 		if (returnFlightId) fetchFlight(returnFlightId, setReturnFlight);
 	}, [departureFlightId, returnFlightId]);
 
+	// fetch the discounts
 	useEffect(() => {
 		const fetchDiscounts = async () => {
 			const res = await discountService.getDiscounts();
@@ -52,6 +57,7 @@ const FlightDetails = () => {
 		fetchDiscounts();
 	}, []);
 
+	// calculate the total price
 	useEffect(() => {
 		if (!departureFlight || !currentBooking) return;
 
@@ -183,13 +189,15 @@ const FlightDetails = () => {
 									: 'Economy'}
 							</div>
 						</div>
+
+						{/* Departure Flight Price Table */}
 						<table className="table table-bordered mt-3">
 							<thead>
 								<tr>
 									<th>Passenger Type</th>
 									<th>Original Price</th>
 									<th>Discount Applicable</th>
-									<th>Discounted Price</th>
+									<th>New Price</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -323,13 +331,15 @@ const FlightDetails = () => {
 								{returnFlight.seatType === 'business' ? 'Business' : 'Economy'}
 							</div>
 						</div>
+
+						{/* Return Flight Price Table */}
 						<table className="table table-bordered mt-3">
 							<thead>
 								<tr>
 									<th>Passenger Type</th>
 									<th>Original Price</th>
 									<th>Discount Applicable</th>
-									<th>Discounted Price</th>
+									<th>New Price</th>
 								</tr>
 							</thead>
 							<tbody>

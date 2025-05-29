@@ -1,8 +1,6 @@
 /**
-	 * Format date and time from a Date object
-	 * @param {Date} dateTime - The date and time to format
-	 * @returns {Object} - Object containing formatted date and time
-	 */
+ * Format date and time from a Date object
+ */
 const formatDateTime = (dateTime) => {
   const date = new Date(dateTime);
   return {
@@ -17,8 +15,8 @@ const formatDateTime = (dateTime) => {
         month: '2-digit',
         day: '2-digit',
       })
-			.replace(/(\d+)\/(\d+)\/(\d+)/, '$3-$1-$2'),
-	};
+      .replace(/(\d+)\/(\d+)\/(\d+)/, '$3-$1-$2'),
+  };
 };
 
 export default formatDateTime;

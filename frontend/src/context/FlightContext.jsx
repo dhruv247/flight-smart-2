@@ -12,16 +12,19 @@ export const FlightProvider = ({ children }) => {
 		return saved ? JSON.parse(saved) : null;
 	});
 
+	// Selected departure flight
 	const [selectedDepartureFlight, setSelectedDepartureFlight] = useState(() => {
 		const saved = localStorage.getItem('selectedDepartureFlight');
 		return saved ? JSON.parse(saved) : null;
 	});
 
+	// Selected departure flight arrival time
 	const [selectedDepartureFlightArrivalTime, setSelectedDepartureFlightArrivalTime] = useState(() => {
 		const saved = localStorage.getItem('selectedDepartureFlightArrivalTime');
 		return saved ? JSON.parse(saved) : null;
 	});
 	
+	// Current booking
 	const [currentBooking, setCurrentBooking] = useState(() => {
 		const saved = localStorage.getItem('currentBooking');
 		return saved ? JSON.parse(saved) : null;
@@ -37,6 +40,7 @@ export const FlightProvider = ({ children }) => {
 		}
 	}, [flightSearchData]);
 
+	// Update localStorage when flight search data changes
 	useEffect(() => {
 		if (selectedDepartureFlight) {
 			localStorage.setItem(
@@ -46,6 +50,7 @@ export const FlightProvider = ({ children }) => {
 		}
 	}, [selectedDepartureFlight]);
 
+	// Update localStorage when selected departure flight arrival time changes
 	useEffect(() => {
 		if (selectedDepartureFlightArrivalTime) {
 			localStorage.setItem(
@@ -55,6 +60,7 @@ export const FlightProvider = ({ children }) => {
 		}
 	}, [selectedDepartureFlightArrivalTime]);
 
+	// Update localStorage when current booking changes
 	useEffect(() => {
 		if (currentBooking) {
 			localStorage.setItem('currentBooking', JSON.stringify(currentBooking));

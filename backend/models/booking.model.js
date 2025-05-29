@@ -7,8 +7,6 @@ import {
 
 /**
  * Utility function to calculate age from date of birth
- * @param {*} dateOfBirth
- * @returns {Number} age
  */
 const calculateAge = (dateOfBirth) => {
 	const today = new Date();

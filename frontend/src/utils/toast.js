@@ -2,8 +2,6 @@ import { toast } from 'react-toastify';
 
 /**
  * Show a toast notification with the specified type and message
- * @param {string} type - The type of toast ('success', 'error')
- * @param {string} message - The message to display in the toast
  */
 export const showToast = (type, message) => {
 	const options = {

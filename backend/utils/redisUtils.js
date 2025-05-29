@@ -36,7 +36,7 @@ const connectRedis = async () => {
 
 /**
  * Get data from Redis cache
- * @param {string} key - The cache key
+ * @param {*} key
  */
 const getCache = async (key) => {
 	if (!redisClient) return null;
@@ -52,9 +52,10 @@ const getCache = async (key) => {
 
 /**
  * Set data in Redis cache with TTL
- * @param {string} key - The cache key
- * @param {any} data - The data to cache
- * @param {number} ttl - Time to live in seconds (default: 2 minutes)
+ * @param {*} key 
+ * @param {*} data 
+ * @param {*} ttl 
+ * @returns 
  */
 const setCache = async (key, data, ttl = 120) => {
 	if (!redisClient) return false;

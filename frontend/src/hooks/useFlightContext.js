@@ -1,6 +1,10 @@
 import { useContext } from 'react';
 import { FlightContext } from '../context/FlightContext';
 
+/**
+ * Custom hook to use the flight context
+ * @returns - The flight context
+ */
 export const useFlightContext = () => {
 	const context = useContext(FlightContext);
 	if (!context) {
